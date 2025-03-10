@@ -29,7 +29,7 @@ Then I would want an object that looks like this to be returned from the `get_di
     },
     "Arcane": {
         "Season 01": [/*...*/],
-        "Season 02": [/*...*/], 
+        "Season 02": [/*...*/]
     }
 }
 ```
