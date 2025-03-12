@@ -1,6 +1,6 @@
 import paramiko
 from util.directory_parser import directory_parser
-from util.handle_file_transfer import handle_file_transfer
+from service.handle_file_transfer import FileTransferService
 from appConfig.AppConfig import AppConfig
 import json
 import copy
@@ -33,7 +33,6 @@ def transfer_and_execute_script(sshClient, scpClient, path: str):
 
 
 def compare_arrays(local_episodes, remote_episodes):
-    print("Comparing Arrays: ", local_episodes)
     result = {
         "local": [],
         "remote": []
@@ -74,13 +73,16 @@ def compare_directory_structures(local, remote):
                     local_episodes = copy.deepcopy(local[show][season])
                     remote_episodes = copy.deepcopy(remote[show][season])
                     comparison = compare_arrays(local_episodes, remote_episodes)
-                    if show not in result["local"]:
-                        result["local"][show] = {}
-                    if show not in result["remote"]:
-                        result["remote"][show] = {}
+                    if len(local_episodes):
+                        print(f'populating lopcal with {local_episodes}')
+                        if show not in result["local"]:
+                            result["local"][show] = {}
+                        result["local"][show] = {**result["local"][show], season: comparison["local"]}
+                    if len(remote_episodes):
+                        if show not in result["remote"]:
+                            result["remote"][show] = {}
+                        result["remote"][show] = {**result["remote"][show], season: comparison["remote"]}
 
-                    result["local"][show] = {**result["local"][show], season: comparison["local"]}
-                    result["remote"][show] = {**result["remote"][show], season: comparison["remote"]}
 
     return result
 
@@ -110,13 +112,9 @@ def main():
         from_local_to_remote = False
         tvshow_results = comparison_result["remote"]
 
-    handle_file_transfer(
-        config.get_local_path(),
-        config.get_remote_path(),
+    FileTransferService(config).handle_diff_file_transfer(
         tvshow_results,
-        from_local_to_remote,
-        config.get_ssh_client(),
-        config.get_server()["ip"]
+        from_local_to_remote
     )
 
 
