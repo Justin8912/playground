@@ -1,7 +1,7 @@
 import paramiko
-import scp
 from util.directory_parser import directory_parser
 from util.handle_file_transfer import handle_file_transfer
+from appConfig.AppConfig import AppConfig
 import json
 import copy
 
@@ -30,6 +30,7 @@ def transfer_and_execute_script(sshClient, scpClient, path: str):
         print("Could not successfully remove the remote_script, this may cause issues for future runs: " + error)
 
     return json.loads(result)
+
 
 def compare_arrays(local_episodes, remote_episodes):
     print("Comparing Arrays: ", local_episodes)
@@ -84,43 +85,39 @@ def compare_directory_structures(local, remote):
     return result
 
 
-def appConfig():
-    server = {
-        "ip": "100.82.133.11",
-        "username": "jnste"
-    }
-
-    sshClient = get_server_client(**server)
-    scpClient = scp.SCPClient(sshClient.get_transport())
-
-    return {
-        "server": server,
-        "sshClient": sshClient,
-        "scpClient": scpClient,
-        "local_path": "./tv",
-        "remote_path": "/home/jnste/test/plex-source-data/tv"
-    }
-
 def main():
-    server, sshClient, scpClient, local_path, remote_path = appConfig().values()
+    config = AppConfig()
 
-    local = directory_parser(local_path)
-    remote = transfer_and_execute_script(sshClient, scpClient, remote_path)
+    local = directory_parser(config.get_local_path())
+    remote = transfer_and_execute_script(
+        config.get_ssh_client(),
+        config.get_scp_client(),
+        config.get_remote_path()
+    )
 
     comparison_result = compare_directory_structures(local, remote)
     print(json.dumps(comparison_result, indent=2))
 
-    localToRemote = int(input("Would you like to transfer from local to remote (1) or remote to local (2)?"))
-    while ((not localToRemote == 1 and not localToRemote == 2)):
-        localToRemote = int(input("Please choose a valid option: local to remote (1) or remote to local (2).\nPress ctrl+C to exit. "))
+    local_to_remote = int(input("Would you like to transfer from local to remote (1) or remote to local (2)?"))
+    while not local_to_remote == 1 and not local_to_remote == 2:
+        local_to_remote = int(input("Please choose a valid option: local to remote (1) or remote to local (2).\nPress "
+                                    "ctrl+C to exit. "))
 
-    if localToRemote == 1:
-        fromLocalToRemote = True
+    if local_to_remote == 1:
+        from_local_to_remote = True
         tvshow_results = comparison_result["local"]
-        handle_file_transfer(local_path, remote_path, comparison_result["local"], True, sshClient, server["ip"])
-    elif localToRemote == 2:
-        fromLocalToRemote = False
+    elif local_to_remote == 2:
+        from_local_to_remote = False
         tvshow_results = comparison_result["remote"]
 
-    handle_file_transfer(local_path, remote_path, tvshow_results, fromLocalToRemote, sshClient, server["ip"])
+    handle_file_transfer(
+        config.get_local_path(),
+        config.get_remote_path(),
+        tvshow_results,
+        from_local_to_remote,
+        config.get_ssh_client(),
+        config.get_server()["ip"]
+    )
+
+
 main()
