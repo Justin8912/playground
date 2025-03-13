@@ -17,7 +17,6 @@ class FileTransferService:
         self.local = appConfig.get_local_path()
         self.remote = appConfig.get_remote_path()
         self.sshClient = appConfig.get_ssh_client()
-        self.scpClient = appConfig.get_scp_client()
 
         ip, username = appConfig.get_server().values()
         self.ip = ip

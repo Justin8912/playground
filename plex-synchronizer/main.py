@@ -5,8 +5,8 @@ import json
 import copy
 
 
-def transfer_and_execute_script(sshClient, scpClient, path: str):
-    scpClient.put("util/directory_parser.py", remote_path=f'{path}/../directory_parser.py')
+def transfer_and_execute_script(sshClient, transfer_file_to_remote, path: str):
+    transfer_file_to_remote("util/directory_parser.py", f'{path}/../directory_parser.py')
     command = f'python3 {path}/../directory_parser.py {path}'
     stdin, stdout, stderr = sshClient.exec_command(command)
 
@@ -80,11 +80,11 @@ def compare_directory_structures(local, remote):
 
 def main():
     config = AppConfig()
-
+    file_transfer_service = FileTransferService(config)
     local = directory_parser(config.get_local_path())
     remote = transfer_and_execute_script(
         config.get_ssh_client(),
-        config.get_scp_client(),
+        file_transfer_service.transfer_file_to_remote,
         config.get_remote_path()
     )
 

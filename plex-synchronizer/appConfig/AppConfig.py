@@ -18,12 +18,10 @@ class AppConfig:
         self.local_path = "./tv"
         self.remote_path = "/home/jnste/test/plex-source-data/tv"
         self.sshClient = None
-        self.scpClient = None
         self.initialize()
 
     def initialize(self):
         self.sshClient = get_server_client(**self.server)
-        self.scpClient = scp.SCPClient(self.sshClient.get_transport())
 
     def set_local_path(self, path):
         self.local_path = path
@@ -36,9 +34,6 @@ class AppConfig:
 
     def get_ssh_client(self):
         return self.sshClient
-
-    def get_scp_client(self):
-        return self.scpClient
 
     def get_server(self):
         return self.server
