@@ -1,5 +1,6 @@
 import paramiko
-import scp
+from service.FileTransferService import FileTransferService
+from service.DirectoryComparisonService import DirectoryComparisonService
 
 
 def get_server_client(ip, username="jnste"):
@@ -17,11 +18,9 @@ class AppConfig:
         }
         self.local_path = "./tv"
         self.remote_path = "/home/jnste/test/plex-source-data/tv"
-        self.sshClient = None
-        self.initialize()
-
-    def initialize(self):
         self.sshClient = get_server_client(**self.server)
+        self.fileTransferService = FileTransferService(self)
+        self.directoryComparisonService = DirectoryComparisonService()
 
     def set_local_path(self, path):
         self.local_path = path
@@ -37,3 +36,9 @@ class AppConfig:
 
     def get_server(self):
         return self.server
+
+    def get_file_transfer_service(self):
+        return self.fileTransferService
+
+    def get_directory_comparison_service(self):
+        return self.directoryComparisonService
