@@ -2,6 +2,13 @@ import paramiko
 import scp
 
 
+def get_server_client(ip, username="jnste"):
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.connect(ip, username=username)
+    return client
+
+
 class AppConfig:
     def __init__(self):
         self.server = {
@@ -15,14 +22,8 @@ class AppConfig:
         self.initialize()
 
     def initialize(self):
-        self.sshClient = self.get_server_client(**self.server)
+        self.sshClient = get_server_client(**self.server)
         self.scpClient = scp.SCPClient(self.sshClient.get_transport())
-
-    def get_server_client(self, ip, username="jnste"):
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.connect(ip, username=username)
-        return client
 
     def set_local_path(self, path):
         self.local_path = path
