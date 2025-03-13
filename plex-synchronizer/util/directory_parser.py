@@ -3,13 +3,13 @@ import json
 import argparse
 
 def directory_parser(path:str):
-    shows = os.listdir(f'{path}/tv')
+    shows = os.listdir(f'{path}')
     result = {}
     for show in shows:
         seasons_obj = {}
-        seasons = os.listdir(f'{path}/tv/{show}')
+        seasons = os.listdir(f'{path}/{show}')
         for season in seasons:
-            episodes = os.listdir(f'{path}/tv/{show}/{season}')
+            episodes = os.listdir(f'{path}/{show}/{season}')
             seasons_obj[season] = episodes
         result[show] = seasons_obj
 
