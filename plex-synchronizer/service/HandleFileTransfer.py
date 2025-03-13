@@ -17,6 +17,7 @@ class FileTransferService:
         self.local = appConfig.get_local_path()
         self.remote = appConfig.get_remote_path()
         self.sshClient = appConfig.get_ssh_client()
+        self.scpClient = appConfig.get_scp_client()
 
         ip, username = appConfig.get_server().values()
         self.ip = ip
@@ -30,7 +31,13 @@ class FileTransferService:
                 for episode in tvshows[show][season]:
                     if fromLocalToRemote:
                         create_directory_if_not_exists_remote(self.sshClient, f'{remote_path}/')
-                        subprocess.run(['scp', f'{local_path}/{episode}', f'{self.username}@{self.ip}:{remote_path}'])
+                        self.transfer_file_to_remote(f'{local_path}/{episode}', f'{remote_path}/')
                     else:
                         create_directory_if_not_exists_local(local_path)
-                        subprocess.run(['scp', f'{self.username}@{self.ip}:{remote_path}/{episode}', f'{local_path}/{episode}'])
+                        self.transfer_file_to_local(f'{local_path}/{episode}', f'{remote_path}/{episode}')
+
+    def transfer_file_to_remote(self, local_source_path, remote_dest_path):
+        subprocess.run(['scp', f'{local_source_path}', f'{self.username}@{self.ip}:{remote_dest_path}'])
+
+    def transfer_file_to_local(self, local_dest_path, remote_source_path):
+        subprocess.run(['scp', f'{self.username}@{self.ip}:{remote_source_path}', f'{local_dest_path}'])

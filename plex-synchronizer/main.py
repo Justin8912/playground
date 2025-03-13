@@ -1,16 +1,8 @@
-import paramiko
 from util.directory_parser import directory_parser
-from service.handle_file_transfer import FileTransferService
+from service.HandleFileTransfer import FileTransferService
 from appConfig.AppConfig import AppConfig
 import json
 import copy
-
-
-def get_server_client(ip, username="jnste"):
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.connect(ip, username=username)
-    return client
 
 
 def transfer_and_execute_script(sshClient, scpClient, path: str):
@@ -83,7 +75,6 @@ def compare_directory_structures(local, remote):
                             result["remote"][show] = {}
                         result["remote"][show] = {**result["remote"][show], season: comparison["remote"]}
 
-
     return result
 
 
@@ -108,7 +99,7 @@ def main():
     if local_to_remote == 1:
         from_local_to_remote = True
         tvshow_results = comparison_result["local"]
-    elif local_to_remote == 2:
+    else:
         from_local_to_remote = False
         tvshow_results = comparison_result["remote"]
 
