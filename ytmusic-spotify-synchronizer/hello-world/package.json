@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "esbuild": "^0.14.14",
-    "@middy/core": "^5.2.3"
+    "@middy/core": "^5.2.3",
+    "@aws-lambda-powertools/logger": "^2.14.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",
