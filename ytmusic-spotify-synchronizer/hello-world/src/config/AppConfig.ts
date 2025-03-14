@@ -27,4 +27,10 @@ export class AppConfig {
     public getYtMusicService = () => {
         return this.ytMusicService;
     }
+
+    public getEnvironmentConfig = () => {
+        return this.environmentConfig;
+    }
+
+
 }

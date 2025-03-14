@@ -16,9 +16,10 @@
     "start": "cd ../ && sam build && sam local start-api"
   },
   "dependencies": {
-    "esbuild": "^0.14.14",
+    "@aws-lambda-powertools/logger": "^2.14.0",
+    "@aws-sdk/client-ssm": "^3.759.0",
     "@middy/core": "^5.2.3",
-    "@aws-lambda-powertools/logger": "^2.14.0"
+    "esbuild": "^0.14.14"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",
