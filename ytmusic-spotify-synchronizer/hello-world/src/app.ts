@@ -1,4 +1,4 @@
-import {handler} from "./Handlers/handler.js";
+import {handler} from "./Handlers/HandleDispatcher.js";
 import middy from "@middy/core";
 
 export const lambdaHandler = middy()
