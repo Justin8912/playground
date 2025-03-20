@@ -24,28 +24,18 @@ let appConfig;
 
 const router = async (event: APIGatewayProxyEvent, appConfig: AppConfig) => {
     const {route, method} = getRouteAndMethod(event);
-    console.log(route, method)
     const handler = getHandler(route, method, appConfig);
-    console.log("Handler: ", handler)
-    await handler(event);
-
+    return await handler(event);
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     logger.info("Here is the event", {data: event});
-    logger.info("Here is the important info: ", {data: getRouteAndMethod(event)});
     let user = "justin"; // TODO: We need to get the name of the user from whatever request is made somehow.
     let appConfig = new AppConfig(new EnvironmentConfig(user));
     try {
-        await router(event, appConfig);
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: 'hello world',
-            }),
-        };
+        return await router(event, appConfig);
     } catch (err) {
-        console.log(err);
+        console.log(err)
         return {
             statusCode: 500,
             body: JSON.stringify({
