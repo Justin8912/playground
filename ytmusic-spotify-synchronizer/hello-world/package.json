@@ -19,7 +19,8 @@
     "@aws-lambda-powertools/logger": "^2.14.0",
     "@litehex/node-vault": "^1.0.2",
     "@middy/core": "^5.2.3",
-    "esbuild": "^0.14.14"
+    "esbuild": "^0.14.14",
+    "googleapis": "^146.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",

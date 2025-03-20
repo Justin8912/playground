@@ -2,18 +2,20 @@ import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {GetPlaylists} from "./GetPlaylists.js";
 import {GetPlaylistContent} from "./GetPlaylistContent.js";
 import {DifferenceBetweenDiscographies} from "./DifferenceBetweenDiscographies.js";
-import {GetAuthorizationUriGoogle} from "./Authorization/GetAuthorizationUriGoogle.js";
-import {GetAuthorizationUriSpotify} from "./Authorization/GetAuthorizationUriSpotify.js";
+import {GetAuthorizationUriGoogle} from "./Authorization/Google/GetAuthorizationUri.js";
+import {GetAuthorizationUriSpotify} from "./Authorization/Spotify/GetAuthorizationUri.js";
+import {AppConfig} from "../config/AppConfig.js";
 
-export const getHandler = (path: string, method: string): (event: APIGatewayProxyEvent, opt?:any)=>Promise<APIGatewayProxyResult> => {
+export const getHandler = (path: string, method: string, appConfig: AppConfig): ((event: APIGatewayProxyEvent, opt?:any)=>Promise<APIGatewayProxyResult>) => {
     const router = {
-        "GET /playlist": GetPlaylists,
-        "GET /playlist/content": GetPlaylistContent,
-        "GET /playlist/synchronize": DifferenceBetweenDiscographies(false),
-        "POST /playlist/synchronize": DifferenceBetweenDiscographies(true),
-        "GET /authorization/google/authorization-uri": GetAuthorizationUriGoogle,
-        "GET /authorization/spotify/authorization-uri": GetAuthorizationUriSpotify
+        "GET /playlist": ((event:APIGatewayProxyEvent) => GetPlaylists(appConfig)(event)),
+        "GET /playlist/content": ((event:APIGatewayProxyEvent)=>(GetPlaylistContent(appConfig)(event))),
+        "GET /playlist/synchronize": ((event:APIGatewayProxyEvent)=>DifferenceBetweenDiscographies(appConfig, false)(event)),
+        "POST /playlist/synchronize": ((event:APIGatewayProxyEvent)=>DifferenceBetweenDiscographies(appConfig, true)(event)),
+        "GET /authorization/google/authorization-uri": ((event:APIGatewayProxyEvent)=>GetAuthorizationUriGoogle(appConfig)(event)),
+        "GET /authorization/spotify/authorization-uri": ((event:APIGatewayProxyEvent)=>GetAuthorizationUriSpotify(appConfig)(event))
     }
+
     // @ts-ignore
     return router[`${method} ${path}`];
 }

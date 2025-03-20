@@ -1,7 +1,9 @@
 {
     "compilerOptions": {
       "lib": [
-        "es2023", "dom"
+        "es2023",
+        "dom",
+        "es2022.error"
       ],
       "target": "es2022",
       "strict": true,

@@ -48,3 +48,11 @@ Ideally songs could look like this:
 }
 ```
 
+### Calling the API
+There are a couple methods I would like to implement:
+1. Get all the playlists for x user in y application 
+2. Get all the songs in x playlist in y application
+3. Find the difference between x discography and y discography in a and b applications
+4. Apply additive difference between x discography and y discography in a and b applications 
+5. Get the authorization uri for x application 
+6. Get the authorization uri for y application
