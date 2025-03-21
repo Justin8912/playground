@@ -8,7 +8,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 10
+    Timeout: 20
 
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
@@ -22,11 +22,10 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
       - x86_64
+      MemorySize: 1024
       Environment:
         Variables:
-          clientId: 637720248631-450nms4gpm6467oqbi936j4nafud2er5.apps.googleusercontent.com
-          clientSecret: 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
-          redirectUri: https://9s4ffvlvd1.execute-api.us-east-1.amazonaws.com/authorization-uri/redirect-uri
+          VAULT_TOKEN: xxx
       Events:
         HelloWorld:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -37,6 +36,21 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /authorization/google/authorization-uri
+            Method: get
+        GoogleRedirectUri:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /authorization/google/redirect-uri
+            Method: get
+        SpotifyAuthorizationUri:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /authorization/spotify/authorization-uri
+            Method: get
+        SpotifyRedirectUri:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /authorization/spotify/redirect-uri
             Method: get
         PlaylistContent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
