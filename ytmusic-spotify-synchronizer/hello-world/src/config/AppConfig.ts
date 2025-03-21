@@ -25,16 +25,19 @@ export class AppConfig {
         if (!this.vaultService) {
             throw new IntializationError("The service failed to connect to vault service");
         }
-
+        await this.initializeGoogleOauth2Client();
         const {
-            googleAccessToken,
             googleRefreshToken,
             spotifyClientId,
             spotifyClientSecret
         } = await this.vaultService.getParameter(this.getEnvironmentConfig().getUser()) as any;
 
+        this.getGoogleOauth2Client().setCredentials({
+            refresh_token: googleRefreshToken
+        });
+
+        this.ytMusicService = new YtMusicService(this.getGoogleOauth2Client());
         this.spotifyService = new SpotifyService(spotifyClientId, spotifyClientSecret);
-        this.ytMusicService = new YtMusicService(googleAccessToken, googleRefreshToken);
     }
 
     public getAccessToken = async () => {
@@ -45,7 +48,7 @@ export class AppConfig {
         return this.spotifyService;
     }
 
-    public getYtMusicService = async (user?: string) => {
+    public getYtMusicService = (user?: string) => {
         return this.ytMusicService;
     }
 
@@ -64,10 +67,7 @@ export class AppConfig {
         );
     }
 
-    public getGoogleOauth2Client = async () => {
-        if (!this.googleOauth2Client) {
-            await this.initializeGoogleOauth2Client();
-        }
+    public getGoogleOauth2Client = () => {
         return this.googleOauth2Client;
     }
 
