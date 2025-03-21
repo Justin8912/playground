@@ -1,10 +1,17 @@
 export class YtMusicService {
-    constructor() {
+    private accessToken: string;
+    private refreshToken: string;
 
+    constructor(accessToken: string, refreshToken: string) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
-    retrievePlaylists = () => {}
-    retrieveSongs = (playlist) => {}
+    getPlaylists = () => {
+        // Get all playlists from YouTube Music
+
+    }
+    getSongs = (playlist) => {}
 
     // For communicating between different applications
     formatMetadata = (song) => {}

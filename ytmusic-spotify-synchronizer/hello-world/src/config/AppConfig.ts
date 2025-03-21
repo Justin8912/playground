@@ -3,6 +3,7 @@ import {YtMusicService} from "../services/YtMusicService.js";
 import {EnvironmentConfig} from "./EnvironmentConfig.js";
 import {HCPVaultService} from "../services/VaultService.js";
 import {google} from "googleapis";
+import {IntializationError} from "../Errors/InitializationError.js";
 
 
 export class AppConfig {
@@ -14,15 +15,26 @@ export class AppConfig {
 
     constructor(envConfig: EnvironmentConfig) {
         this.environmentConfig = envConfig;
-        this.initialize();
     }
 
-    public initialize = () => {
-        this.spotifyService = new SpotifyService();
-        this.ytMusicService = new YtMusicService();
+    public initialize = async () => {
         this.vaultService = new HCPVaultService(
             this.getEnvironmentConfig().getVaultToken()
         );
+
+        if (!this.vaultService) {
+            throw new IntializationError("The service failed to connect to vault service");
+        }
+
+        const {
+            googleAccessToken,
+            googleRefreshToken,
+            spotifyClientId,
+            spotifyClientSecret
+        } = await this.vaultService.getParameter(this.getEnvironmentConfig().getUser()) as any;
+
+        this.spotifyService = new SpotifyService(spotifyClientId, spotifyClientSecret);
+        this.ytMusicService = new YtMusicService(googleAccessToken, googleRefreshToken);
     }
 
     public getAccessToken = async () => {
@@ -33,7 +45,7 @@ export class AppConfig {
         return this.spotifyService;
     }
 
-    public getYtMusicService = () => {
+    public getYtMusicService = async (user?: string) => {
         return this.ytMusicService;
     }
 

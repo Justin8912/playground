@@ -17,7 +17,11 @@ export class HCPVaultService {
         });
     }
 
-    public getParameter = async (name: string): Promise<Record<string, string> | undefined> => {
+    public getParameter = async (name: string): Promise<Record<string, string>> => {
+        if (!name) {
+            throw new HCPVaultError("Parameter name is required");
+        }
+
         try {
             console.log(`Getting the parameter: /music-synchronizer/${name}`)
             let res = await fetch(`http://100.82.133.11:8200/v1/kv/data/music-synchronizer/${name}`, {
