@@ -16,29 +16,7 @@ export class EnvironmentConfig {
         return this.user;
     }
 
-    public getGoogleClientId = (): string => {
-        // Get client id based on the user
-        return this.getEnvironmentVariable("GOOGLE_CLIENT_ID");
-    }
-
-    public getGoogleClientSecret = (): string => {
-        // Get client refresh token based on the user
-        return this.getEnvironmentVariable("GOOGLE_CLIENT_SECRET");
-    }
-
-    public getGoogleClientRedirectUri = (): string => {
-        return this.getEnvironmentVariable("GOOGLE_CLIENT_REDIRECT_URI");
-    }
-
     public getVaultToken = (): string => {
         return this.getEnvironmentVariable("VAULT_TOKEN");
-    }
-
-    public getSpotifyClientId = (): string => {
-        return "";
-    }
-
-    public getSpotifyClientSecret = (): string => {
-        return "";
     }
 }

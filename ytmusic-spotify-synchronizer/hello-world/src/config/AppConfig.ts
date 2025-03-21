@@ -14,19 +14,14 @@ export class AppConfig {
 
     constructor(envConfig: EnvironmentConfig) {
         this.environmentConfig = envConfig;
-        this.initializer();
+        this.initialize();
     }
 
-    public initializer = () => {
+    public initialize = () => {
         this.spotifyService = new SpotifyService();
         this.ytMusicService = new YtMusicService();
         this.vaultService = new HCPVaultService(
             this.getEnvironmentConfig().getVaultToken()
-        );
-        this.googleOauth2Client = new google.auth.OAuth2(
-            this.getEnvironmentConfig().getGoogleClientId(),
-            this.getEnvironmentConfig().getGoogleClientSecret(),
-            this.getEnvironmentConfig().getGoogleClientRedirectUri()
         );
     }
 
@@ -46,7 +41,21 @@ export class AppConfig {
         return this.vaultService;
     }
 
-    public getGoogleOauth2Client = () => {
+    public initializeGoogleOauth2Client = async () => {
+        let {GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI} =
+            await this.vaultService.getParameter("util") as any;
+
+        this.googleOauth2Client = new google.auth.OAuth2(
+            GOOGLE_CLIENT_ID,
+            GOOGLE_CLIENT_SECRET,
+            GOOGLE_REDIRECT_URI
+        );
+    }
+
+    public getGoogleOauth2Client = async () => {
+        if (!this.googleOauth2Client) {
+            await this.initializeGoogleOauth2Client();
+        }
         return this.googleOauth2Client;
     }
 
