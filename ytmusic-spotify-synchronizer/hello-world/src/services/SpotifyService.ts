@@ -1,13 +1,31 @@
-export class SpotifyService{
-    private clientId: string;
-    private clientSecret: string;
+import {SpotifyApi} from "@spotify/web-api-ts-sdk";
 
-    constructor(clientId: string, clientSecret: string) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+export class SpotifyService{
+    private spotifyClient: SpotifyApi;
+    private userId: string;
+
+    constructor(spotifyClient: SpotifyApi) {
+        this.spotifyClient = spotifyClient;
     }
 
-    retrievePlaylists = () => {}
+    initialize = async () => {
+        try {
+            await this.getUserId();
+        } catch (error) {
+            console.error("Failed to initialize SpotifyService: ", error);
+            throw error;
+        }
+    }
+
+    getUserId = async (): Promise<string> => {
+        const user = await this.spotifyClient.currentUser.profile();
+        console.log("Here is the spotify user: ", user)
+        return user.id;
+    }
+
+    getPlaylists = async () => {
+        return await this.spotifyClient.currentUser.playlists.playlists(50);
+    }
     retrieveSongs = (playlist) => {}
 
     // For communicating between different applications

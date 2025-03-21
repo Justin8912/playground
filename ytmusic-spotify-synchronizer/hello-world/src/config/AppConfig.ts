@@ -4,6 +4,7 @@ import {EnvironmentConfig} from "./EnvironmentConfig.js";
 import {HCPVaultService} from "../services/VaultService.js";
 import {google} from "googleapis";
 import {IntializationError} from "../Errors/InitializationError.js";
+import {SpotifyApi} from "@spotify/web-api-ts-sdk";
 
 
 export class AppConfig {
@@ -37,11 +38,16 @@ export class AppConfig {
         });
 
         this.ytMusicService = new YtMusicService(this.getGoogleOauth2Client());
-        this.spotifyService = new SpotifyService(spotifyClientId, spotifyClientSecret);
-    }
 
-    public getAccessToken = async () => {
+        const spotifyClient: SpotifyApi = SpotifyApi.withClientCredentials(
+            spotifyClientId,
+            spotifyClientSecret,
+            this.getEnvironmentConfig().getSpotifyScopes()
+        )
 
+        const spotifyService = new SpotifyService(spotifyClient);
+        await spotifyService.initialize();
+        this.spotifyService = spotifyService;
     }
 
     public getSpotifyService = () => {

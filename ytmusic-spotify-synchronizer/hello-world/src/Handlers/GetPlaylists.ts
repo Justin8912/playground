@@ -8,7 +8,9 @@ export const GetPlaylists = (appConfig: AppConfig): (event:APIGatewayProxyEvent)
         let user = event.queryStringParameters?.user as string;
 
         // First we will try to get the playlists from youtube
-        let playlists = await appConfig.getYtMusicService().getPlaylists()
+        // let playlists = await appConfig.getYtMusicService().getPlaylists()
+        let playlists = await appConfig.getSpotifyService().getPlaylists();
+        console.log(playlists);
         return getAPIGatewayResponse(200, JSON.stringify(playlists));
 
         // console.log("playlists")

@@ -19,6 +19,7 @@
     "@aws-lambda-powertools/logger": "^2.14.0",
     "@litehex/node-vault": "^1.0.2",
     "@middy/core": "^5.2.3",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "esbuild": "^0.14.14",
     "googleapis": "^146.0.0"
   },
