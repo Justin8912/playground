@@ -5,7 +5,6 @@ import {HCPVaultService} from "../services/VaultService.js";
 import {google} from "googleapis";
 import {IntializationError} from "../Errors/InitializationError.js";
 import {AccessToken, SpotifyApi} from "@spotify/web-api-ts-sdk";
-import {request} from "node:https";
 import logger from "../util/logger.js";
 
 export class AppConfig {
