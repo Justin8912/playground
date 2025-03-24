@@ -1,9 +1,7 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
-import crypto from "crypto";
-import {google} from "googleapis"
 import {AppConfig} from "../../../config/AppConfig.js";
-import {genericErrorResponse} from "../../../Response/GenericErrorResponse.js";
 import {getAPIGatewayResponse} from "../../../model/apiGatewayResponse.js";
+import {storeStateToken} from "../util/storeStateToken.js";
 
 export const GetAuthorizationUriGoogle = (appConfig: AppConfig)  => {
     return async (event:APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -15,17 +13,10 @@ export const GetAuthorizationUriGoogle = (appConfig: AppConfig)  => {
             }
         }
 
-        const state = crypto.randomBytes(32).toString('hex');
-
-        try {
-            console.log("Beginning to set the parameter: ", state)
-            await appConfig.getVaultService().setParameter(`temp-auth/${state}`, {
-                user: appConfig.getEnvironmentConfig().getUser(),
-                timestamp: Date.now()
-            });
-        } catch(err) {
-            return genericErrorResponse("Failed to write document to vault in google authorization uri.");
-        }
+        const state = await storeStateToken(
+            appConfig.getEnvironmentConfig().getUser,
+            appConfig.getVaultService().setParameter
+        );
 
         const authorizationUri = appConfig.getGoogleOauth2Client().generateAuthUrl({
             access_type: "offline",
