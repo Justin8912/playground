@@ -9,9 +9,18 @@ export const GetPlaylists = (appConfig: AppConfig): (event:APIGatewayProxyEvent)
 
         // First we will try to get the playlists from youtube
         // let playlists = await appConfig.getYtMusicService().getPlaylists()
-        let playlists = await appConfig.getSpotifyService().getPlaylists();
-        console.log(playlists);
-        return getAPIGatewayResponse(200, JSON.stringify(playlists));
+        // let playlists = await appConfig.getSpotifyService().getPlaylists();
+        // let playlists = await appConfig.getSpotifyService().searchForSong("maniac - carpenter brut")
+        const playlistId = await appConfig.getSpotifyService().getPlaylistIdByName("Test app")
+        if (playlistId) {
+            let playlists = await appConfig.getSpotifyService().addSongToPlaylist(playlistId, "spotify:track:1EBF0EhB21QZxXPFovj54G");
+            console.log(playlists);
+            return getAPIGatewayResponse(200, JSON.stringify(playlists));
+
+        } else {
+            return getAPIGatewayResponse(200, JSON.stringify({}));
+
+        }
 
         // console.log("playlists")
         // return {} as APIGatewayProxyResult;

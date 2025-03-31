@@ -12,7 +12,7 @@ export const SpotifyRedirectHandler = (appConfig: AppConfig) => {
         const stateToken = event.queryStringParameters?.state;
         const authCode = event.queryStringParameters?.code
         if (stateToken === undefined || authCode === undefined ) {
-            logger.debug("The statetoken or the authCode are not present in the request.")
+            logger.info("The statetoken or the authCode are not present in the request.")
             return getResponse();
         }
 

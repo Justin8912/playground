@@ -18,6 +18,8 @@ export class AppConfig {
     private spotifyClientSecret: string;
     private spotifyRedirectUri: string;
 
+    private spotifyUserCreds;
+
     constructor(envConfig: EnvironmentConfig) {
         this.environmentConfig = envConfig;
     }
@@ -36,7 +38,12 @@ export class AppConfig {
         await this.initializeGoogleOauth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
         const userCreds = await this.vaultService.getParameter(this.getEnvironmentConfig().getUser()) as any;
-
+        this.spotifyUserCreds = {
+            spotifyAccessToken: userCreds.spotifyAccessToken,
+            spotifyRefreshToken: userCreds.spotifyRefreshToken,
+            spotifyTokenType: userCreds.spotifyTokenType,
+            spotifyTokenExpiresIn: userCreds.spotifyTokenExpiresIn
+        }
         // configure google oauth2 client with user credentials if they are present
         if (userCreds?.googleRefreshToken) {
             this.getGoogleOauth2Client().setCredentials({
@@ -49,8 +56,16 @@ export class AppConfig {
         this.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
         this.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
 
-        this.spotifyService = new SpotifyService(await this.setupSpotifyService());
-        await this.spotifyService.initialize();
+        if (userCreds.refresh_token) {
+            this.spotifyService = new SpotifyService(
+                this.setupSpotifyService(),
+                SPOTIFY_CLIENT_ID,
+                SPOTIFY_CLIENT_SECRET,
+                userCreds.refresh_token,
+                this.getEnvironmentConfig().getUser,
+                this.vaultService.setParameter
+            );
+        }
     }
 
     private initializeGoogleOauth2Client = async (GOOGLE_CLIENT_ID: string, GOOGLE_CLIENT_SECRET: string, GOOGLE_REDIRECT_URI: string) => {
@@ -75,46 +90,22 @@ export class AppConfig {
         }
     }
 
-    private setupSpotifyService = async (): Promise<SpotifyApi> => {
-        let userCreds = await this.getVaultService().getParameter(this.getEnvironmentConfig().getUser());
-        if (userCreds.spotifyAccessToken && userCreds.spotifyRefreshToken) {
-            logger.info("Information found for user, setting up spotify service with user credentials.");
-            let accessToken: AccessToken = {
-                access_token: userCreds.spotifyAccessToken,
-                refresh_token: userCreds.spotifyRefreshToken,
-                token_type: userCreds.spotifyTokenType,
-                expires_in: parseInt(userCreds.spotifyTokenExpiresIn)
-            }
-            return SpotifyApi.withAccessToken(this.getSpotifyClientId(), accessToken);
-        } else {
-            logger.info("Information not found for user, setting up spotify service with client credentials.");
-            return SpotifyApi.withClientCredentials(
-                this.getSpotifyClientId(),
-                this.getSpotifyClientSecret(),
-                []
-            );
+    private setupSpotifyService = (): SpotifyApi => {
+        logger.info("Information found for user, setting up spotify service with user credentials.");
+        let accessToken: AccessToken = {
+            access_token: this.spotifyUserCreds.spotifyAccessToken,
+            refresh_token: this.spotifyUserCreds.spotifyRefreshToken,
+            token_type: this.spotifyUserCreds.spotifyTokenType,
+            expires_in: parseInt(this.spotifyUserCreds.spotifyTokenExpiresIn)
         }
-    }
-
-    public getSpotifyAuthorizationUri = (state: string): string => {
-        const baseUrl = "https://accounts.spotify.com/authorize";
-        const queryParams = [
-            ["response_type", "code"],
-            ["scopes", this.getEnvironmentConfig().getSpotifyScopes().join(",")],
-            ["client_id", this.spotifyClientId],
-            ["redirect_uri", this.spotifyRedirectUri],
-            ["state", state]
-        ]
-        const searchParams = new URLSearchParams(queryParams);
-
-        return baseUrl + "?" + searchParams.toString();
+        return SpotifyApi.withAccessToken(this.getSpotifyClientId(), accessToken);
     }
 
     public getSpotifyService = () => {
         return this.spotifyService;
     }
 
-    public getYtMusicService = (user?: string) => {
+    public getYtMusicService = () => {
         return this.ytMusicService;
     }
 

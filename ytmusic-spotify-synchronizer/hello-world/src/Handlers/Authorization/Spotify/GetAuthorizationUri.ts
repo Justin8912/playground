@@ -4,6 +4,19 @@ import {storeStateToken} from "../util/storeStateToken.js";
 import {getAPIGatewayResponse} from "../../../model/apiGatewayResponse.js";
 import logger from "../../../util/logger.js";
 
+const generateUrl = (appConfig: AppConfig, state: string) => {
+    const baseUrl = "https://accounts.spotify.com/authorize";
+    const queryParams = [
+        ["response_type", "code"],
+        ["scopes", appConfig.getEnvironmentConfig().getSpotifyScopes().join(",")],
+        ["client_id", appConfig.getSpotifyClientId()],
+        ["redirect_uri", appConfig.getSpotifyRedirectUri()],
+        ["state", state]
+    ]
+    const searchParams = new URLSearchParams(queryParams);
+    return baseUrl + "?" + searchParams.toString()
+}
+
 export const GetAuthorizationUriSpotify = (appConfig: AppConfig): (event:APIGatewayProxyEvent)=>Promise<APIGatewayProxyResult> => {
     return async (event:APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
         logger.info("GetAuthorizationUriSpotify called.");
@@ -21,6 +34,7 @@ export const GetAuthorizationUriSpotify = (appConfig: AppConfig): (event:APIGate
             appConfig.getVaultService().setParameter
         );
 
-        return getAPIGatewayResponse(200, appConfig.getSpotifyAuthorizationUri(state));
+
+        return getAPIGatewayResponse(200, generateUrl(appConfig, state));
     }
 }
