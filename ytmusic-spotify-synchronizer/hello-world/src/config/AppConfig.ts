@@ -38,12 +38,7 @@ export class AppConfig {
         await this.initializeGoogleOauth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
         const userCreds = await this.vaultService.getParameter(this.getEnvironmentConfig().getUser()) as any;
-        this.spotifyUserCreds = {
-            spotifyAccessToken: userCreds.spotifyAccessToken,
-            spotifyRefreshToken: userCreds.spotifyRefreshToken,
-            spotifyTokenType: userCreds.spotifyTokenType,
-            spotifyTokenExpiresIn: userCreds.spotifyTokenExpiresIn
-        }
+        const spotifyUserCreds = await this.vaultService.getSpotifyCredentials();
         // configure google oauth2 client with user credentials if they are present
         if (userCreds?.googleRefreshToken) {
             this.getGoogleOauth2Client().setCredentials({
@@ -56,14 +51,13 @@ export class AppConfig {
         this.spotifyClientSecret = SPOTIFY_CLIENT_SECRET;
         this.spotifyRedirectUri = SPOTIFY_REDIRECT_URI;
 
-        if (userCreds.refresh_token) {
+        if (spotifyUserCreds.refresh_token) {
             this.spotifyService = new SpotifyService(
                 this.setupSpotifyService(),
                 SPOTIFY_CLIENT_ID,
                 SPOTIFY_CLIENT_SECRET,
-                userCreds.refresh_token,
-                this.getEnvironmentConfig().getUser,
-                this.vaultService.setParameter
+                spotifyUserCreds.refresh_token,
+                this.vaultService.setSpotifyCredentials
             );
         }
     }
@@ -82,7 +76,8 @@ export class AppConfig {
 
     private initializeVaultService = async () => {
         this.vaultService = new HCPVaultService(
-            this.getEnvironmentConfig().getVaultToken()
+            this.getEnvironmentConfig().getVaultToken(),
+            this.getEnvironmentConfig().getUser()
         );
 
         if (!this.vaultService) {

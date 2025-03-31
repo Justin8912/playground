@@ -10,23 +10,19 @@ export class SpotifyService{
     private readonly clientId: string;
     private readonly clientSecret: string;
     private readonly userRefreshToken: string;
-    private readonly getUser: ()=>string;
-    private readonly setVaultParameter: (name: string, data:Record<string, any>)=>Promise<void>;
+    private readonly setSpotifyCredentials: (accessToken: AccessToken)=>Promise<void>;
 
     constructor(
         spotifyClient: SpotifyApi,
         clientId: string,
         clientSecret: string,
         userRefreshToken: string,
-        getUser: () => string,
-        setVaultParameter: (name: string, data:Record<string, any>)=>Promise<void>
+        setSpotifyCredentials: (accessToken: AccessToken)=>Promise<void>
     ) {
         this.spotifyClient = spotifyClient;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.userRefreshToken = userRefreshToken;
-        this.getUser = getUser;
-        this.setVaultParameter = setVaultParameter;
+        this.setSpotifyCredentials = setSpotifyCredentials;
     }
 
     initialize = async () => {
@@ -54,14 +50,7 @@ export class SpotifyService{
         }
         const body = await fetch(url, payload);
         const response = await body.json();
-        const vaultStorage = {
-            spotifyAccessToken: response.access_token,
-            spotifyRefreshToken: response.refreshToken,
-            spotifyTokenType: response.token_type,
-            spotifyTokenExpiresIn: response.expires
-        }
 
-        await this.setVaultParameter(this.getUser(), vaultStorage);
         const accessToken = {
             access_token: response.access_token,
             refresh_token: response.refreshToken,
@@ -69,6 +58,7 @@ export class SpotifyService{
             expires_in: response.expires
         }
 
+        await this.setSpotifyCredentials(accessToken);
         this.spotifyClient = SpotifyApi.withAccessToken(this.clientId, accessToken);
     }
 

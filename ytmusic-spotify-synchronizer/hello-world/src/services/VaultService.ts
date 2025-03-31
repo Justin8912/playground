@@ -1,12 +1,15 @@
 import {Client} from "@litehex/node-vault";
 import {HCPVaultError} from "../Errors/HCPVaultError.js";
 import logger from "../util/logger.js";
+import {AccessToken} from "@spotify/web-api-ts-sdk";
 
 export class HCPVaultService {
     private vaultClient: Client;
+    private user: string;
 
-    constructor(vaultToken: string) {
+    constructor(vaultToken: string, user: string) {
         this.initializeClient(vaultToken);
+        this.user = user;
     }
 
     public initializeClient = (vaultToken: string) => {
@@ -72,5 +75,13 @@ export class HCPVaultService {
         } catch (err) {
             throw new HCPVaultError("Failed to remove document from vault", {cause: err});
         }
+    }
+
+    public getSpotifyCredentials = async(): Promise<AccessToken> => {
+        return await this.getParameter(`spotify/${this.user}`) as unknown as AccessToken;
+    }
+
+    public setSpotifyCredentials = async (accessToken: AccessToken): Promise<void> => {
+        await this.setParameter(`spotify/${this.user}`, accessToken);
     }
 }
