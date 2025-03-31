@@ -22,12 +22,14 @@ export class SpotifyService{
         this.spotifyClient = spotifyClient;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.userRefreshToken = userRefreshToken;
         this.setSpotifyCredentials = setSpotifyCredentials;
     }
 
     initialize = async () => {
         if (this.userRefreshToken) {
             await this.refreshAccessToken();
+            await this.getPlaylists();
         } else {
             logger.info("Spotify API Initialized as client only. User will need to be authenticated.");
         }
@@ -53,9 +55,9 @@ export class SpotifyService{
 
         const accessToken = {
             access_token: response.access_token,
-            refresh_token: response.refreshToken,
             token_type: response.token_type,
-            expires_in: response.expires
+            expires_in: response.expires_in,
+            refresh_token: this.userRefreshToken
         }
 
         await this.setSpotifyCredentials(accessToken);
@@ -68,6 +70,7 @@ export class SpotifyService{
     }
 
     getPlaylists = async (): Promise<Awaited<GetPlaylistsResponse>[]> => {
+        logger.info("Retrieving playlists from Spotify");
         const playlistIds = await this.getPlaylistIds();
         const response = await Promise.all(playlistIds.map(async (playlist) => ({
             ...playlist,

@@ -60,11 +60,12 @@ export const SpotifyRedirectHandler = (appConfig: AppConfig) => {
         } = await result.json() as { access_token: string, refresh_token: string, token_type: string, expires_in: string };
 
         logger.debug("Setting the access and refresh tokens in vault.");
-        await appConfig.getVaultService().setParameter(`${user}`, {
-            spotifyRefreshToken: refresh_token,
-            spotifyAccessToken: access_token,
-            spotifyTokenType: token_type,
-            spotifyTokenExpiresIn: expires_in
+        console.log("Here is the data that is being set: ", access_token, refresh_token, token_type, expires_in)
+        await appConfig.getVaultService().setUserSpotifyCredentials({
+            access_token: access_token,
+            refresh_token: refresh_token,
+            token_type: token_type,
+            expires_in: parseInt(expires_in)
         })
 
         // Remove the state token from the vault

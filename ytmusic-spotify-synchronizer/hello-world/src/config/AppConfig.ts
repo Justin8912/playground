@@ -21,6 +21,7 @@ export class AppConfig {
     }
 
     public initialize = async () => {
+        logger.debug("Initializing AppConfig");
         await this.initializeVaultService();
         await this.initializeGoogleOauth2Client(
             await this.vaultService.getServerGoogleCredentials()
@@ -36,7 +37,8 @@ export class AppConfig {
             });
         }
         this.ytMusicService = new YtMusicService(this.getGoogleOauth2Client());
-
+        logger.info("User: ")
+        logger.info(`User credentials for spotify: ${JSON.stringify(spotifyUserCreds)}`);
         // configure spotify service with user credentials if they are present
         if (spotifyUserCreds.refresh_token) {
             this.spotifyService = new SpotifyService(
@@ -46,6 +48,9 @@ export class AppConfig {
                 spotifyUserCreds.refresh_token,
                 this.vaultService.setUserSpotifyCredentials
             );
+
+            // refresh the accessToken before interacting with the api.
+            await this.spotifyService.initialize();
         }
     }
 
@@ -59,6 +64,7 @@ export class AppConfig {
         if (!this.googleOauth2Client) {
             throw new IntializationError("The service failed to connect to google");
         }
+        logger.debug("Google service initialized successfully");
     }
 
     private initializeVaultService = async () => {
@@ -70,9 +76,11 @@ export class AppConfig {
         if (!this.vaultService) {
             throw new IntializationError("The service failed to connect to vault service");
         }
+        logger.debug("Vault initialized successfully");
     }
 
     private setupSpotifyService = (spotifyUserCreds: AccessToken): SpotifyApi => {
+        logger.info("Information found for user, setting up spotify service with user credentials.");
         return SpotifyApi.withAccessToken(this.getSpotifyClientId(), spotifyUserCreds);
     }
 
