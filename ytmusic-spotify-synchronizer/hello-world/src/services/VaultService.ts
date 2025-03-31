@@ -2,6 +2,7 @@ import {Client} from "@litehex/node-vault";
 import {HCPVaultError} from "../Errors/HCPVaultError.js";
 import logger from "../util/logger.js";
 import {AccessToken} from "@spotify/web-api-ts-sdk";
+import {GoogleCredentials, ServerCredentials} from "../model/VaultService.js";
 
 export class HCPVaultService {
     private vaultClient: Client;
@@ -77,11 +78,27 @@ export class HCPVaultService {
         }
     }
 
-    public getSpotifyCredentials = async(): Promise<AccessToken> => {
+    public getUserSpotifyCredentials = async(): Promise<AccessToken> => {
         return await this.getParameter(`spotify/${this.user}`) as unknown as AccessToken;
     }
 
-    public setSpotifyCredentials = async (accessToken: AccessToken): Promise<void> => {
+    public setUserSpotifyCredentials = async (accessToken: AccessToken): Promise<void> => {
         await this.setParameter(`spotify/${this.user}`, accessToken);
+    }
+
+    public getUserGoogleCredentials = async (): Promise<GoogleCredentials> => {
+        return await this.getParameter(`google/${this.user}`) as unknown as GoogleCredentials;
+    }
+
+    public setUserGoogleCredentials = async (accessToken: GoogleCredentials): Promise<void> => {
+        await this.setParameter(`google/${this.user}`, accessToken);
+    }
+
+    public getServerSpotifyCredentials = async(): Promise<ServerCredentials> => {
+        return await this.getParameter("util/spotify") as unknown as ServerCredentials
+    }
+
+    public getServerGoogleCredentials = async (): Promise<ServerCredentials> => {
+        return await this.getParameter("util/google") as unknown as ServerCredentials
     }
 }
