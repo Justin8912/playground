@@ -105,25 +105,28 @@ export class SpotifyService{
     // For communicating between different applications
     formatMetadata = (song) => {}
 
-    searchForSong = async (query: string) => {
-        console.log("Beginning search for song: ", query);
-        return await this.spotifyClient.search(query, ["track"]);
+    // This will return the songId of the first result
+    searchForSong = async (query: string): Promise<string> => {
+        // Maybe I can come back and filter by the artists
+        //   use res.tracks.items[x].artists[0].name
+        logger.info(`Beginning search for song: ${query}`);
+        const res = await this.spotifyClient.search<Track>(query, ["track"]);
+        return (await this.spotifyClient.search<Track>(query, ["track"])).tracks.items[0].uri;
     }
 
     createPlaylist = () => {}
 
     addSongToPlaylist = async (playlistId: string, songUri: string): Promise<void> => {
-        await this.spotifyClient.playlists.updatePlaylistItems(playlistId, {uris:[songUri]});
+        logger.info(`Adding song ${songUri} to playlist ${playlistId}`);
+        await this.spotifyClient.playlists.addItemsToPlaylist(playlistId, [songUri]);
     }
 
     getPlaylistIdByName = async (name: string): Promise<string | undefined> => {
         logger.info(`Spotify Service: Getting playlist id by name: ${name}`);
-        await this.refreshAccessToken();
         if (this.playlists.length === 0 ) {
             this.playlists = await this.getPlaylists();
         }
         const res = this.playlists.find(playlist => playlist.title === name);
-        logger.info(JSON.stringify(res));
         return res?.id;
     }
 

@@ -84,7 +84,7 @@ export class HCPVaultService {
     }
 
     public setUserSpotifyCredentials = async (accessToken: AccessToken): Promise<void> => {
-        logger.info(`Setting spotify user credentials for ${this.user}: ${JSON.stringify(accessToken)}`);
+        logger.info(`Setting spotify user credentials for ${this.user}`);
         await this.setParameter(`spotify/${this.user}`, accessToken);
     }
 
@@ -104,7 +104,7 @@ export class HCPVaultService {
     }
 
     public getServerGoogleCredentials = async (): Promise<ServerCredentials> => {
-        logger.debug(`Getting server credentials for google`);
+        logger.info(`Getting server credentials for google`);
         return await this.getParameter("util/google") as unknown as ServerCredentials
     }
 }

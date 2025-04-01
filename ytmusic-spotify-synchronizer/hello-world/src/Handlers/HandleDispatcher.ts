@@ -29,7 +29,6 @@ const router = async (event: APIGatewayProxyEvent, appConfig: AppConfig) => {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    logger.info("Here is the event", {data: event});
     let user = "justin"; // TODO: We need to get the name of the user from whatever request is made somehow.
     let appConfig = new AppConfig(new EnvironmentConfig(user));
     await appConfig.initialize();
