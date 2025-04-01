@@ -1,25 +1,23 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {AppConfig} from "../config/AppConfig.js";
 import {getAPIGatewayResponse} from "../model/apiGatewayResponse.js";
+import {GetPlaylistsResponse, Song} from "../model/YtMusic.js";
 
 export const GetPlaylists = (appConfig: AppConfig): (event:APIGatewayProxyEvent)=>Promise<APIGatewayProxyResult> => {
     return async (event:APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-        // First we will try to get the playlists from youtube
-        // let playlists = await appConfig.getYtMusicService().getPlaylists()
-        // let playlists = await appConfig.getSpotifyService().getPlaylists();
-        let playlists = await appConfig.getSpotifyService().searchForSong("maniac - carpenter brut")
-        console.log("Maniac by carpenter: ", playlists);
-        const playlistId = await appConfig.getSpotifyService().getPlaylistIdByName("Test app")
-        if (playlistId) {
-            let playlists = await appConfig.getSpotifyService().addSongToPlaylist(playlistId, "spotify:track:2IxhiriDpu4iBnXZb3ytXN");
-            console.log(playlists);
-            return getAPIGatewayResponse(200, JSON.stringify(playlists));
+        let spotifyService = appConfig.getSpotifyService();
+        let sourcePlaylist: GetPlaylistsResponse | undefined = await spotifyService.getPlaylistByName("Drum and bass");
+        let targetPlaylist: GetPlaylistsResponse | undefined = await spotifyService.getPlaylistByName("Test app");
+        if (sourcePlaylist && targetPlaylist) {
+            let songUrisPromise: Promise<string>[] = sourcePlaylist.songs.map((song: Song) => {
+                const query = `${song.title} - ${song.artists.join(", ")}`
+                return spotifyService.getSongUriByQuery(query);
+            });
+            let songUris: string[] = await Promise.all(songUrisPromise);
+            await spotifyService.addSongToPlaylist(targetPlaylist.id, songUris);
+            return getAPIGatewayResponse(200, JSON.stringify({}));
         } else {
             return getAPIGatewayResponse(200, JSON.stringify({}));
-
         }
-
-        // console.log("playlists")
-        // return {} as APIGatewayProxyResult;
     }
 }

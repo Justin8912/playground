@@ -106,7 +106,7 @@ export class SpotifyService{
     formatMetadata = (song) => {}
 
     // This will return the songId of the first result
-    searchForSong = async (query: string): Promise<string> => {
+    getSongUriByQuery = async (query: string): Promise<string> => {
         // Maybe I can come back and filter by the artists
         //   use res.tracks.items[x].artists[0].name
         logger.info(`Beginning search for song: ${query}`);
@@ -116,18 +116,17 @@ export class SpotifyService{
 
     createPlaylist = () => {}
 
-    addSongToPlaylist = async (playlistId: string, songUri: string): Promise<void> => {
-        logger.info(`Adding song ${songUri} to playlist ${playlistId}`);
-        await this.spotifyClient.playlists.addItemsToPlaylist(playlistId, [songUri]);
+    addSongToPlaylist = async (playlistId: string, songUris: string[]): Promise<void> => {
+        logger.info(`Adding songs [${songUris.join(', ')}] to playlist ${playlistId}`);
+        await this.spotifyClient.playlists.addItemsToPlaylist(playlistId, songUris);
     }
 
-    getPlaylistIdByName = async (name: string): Promise<string | undefined> => {
+    getPlaylistByName = async (name: string): Promise<GetPlaylistsResponse | undefined> => {
         logger.info(`Spotify Service: Getting playlist id by name: ${name}`);
         if (this.playlists.length === 0 ) {
             this.playlists = await this.getPlaylists();
         }
-        const res = this.playlists.find(playlist => playlist.title === name);
-        return res?.id;
+        return this.playlists.find(playlist => playlist.title === name);
     }
 
     // This should be a later implementation, first pass should only be additive changes
