@@ -29,6 +29,10 @@ export class TvService {
     }
 
     async getTvSeasonEpisodes(seasonNumber) {
+        if (!this.tvShowId) {
+            console.log("You must set the tvshow before trying to find episodes.");
+            return;
+        }
         const url = `https://api.themoviedb.org/3/tv/${this.tvShowId}/season/${seasonNumber}?language=en-US`;
         const options = {
         method: 'GET',
