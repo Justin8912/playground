@@ -1,11 +1,12 @@
 export class TvService {
     accessToken;
+    tvShowId;
 
     constructor(accessToken) {
-     this.accessToken = accessToken;
+        this.accessToken = accessToken;
     }
 
-    async getTvSeriesId(tvshowName, year) {
+    async setTvSeries(tvshowName, year) {
         const baseUrl = 'https://api.themoviedb.org/3/search/tv';
         const params = new URLSearchParams({
             query: tvshowName,
@@ -24,11 +25,11 @@ export class TvService {
 
         let res = await fetch(`${baseUrl}?${params.toString()}`, options);
         res = await res.json();
-        return res.results[0].id;
+        this.tvShowId = res.results[0].id
     }
 
-    async getTvSeasonEpisodes(seriesId, seasonNumber) {
-        const url = `https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}?language=en-US`;
+    async getTvSeasonEpisodes(seasonNumber) {
+        const url = `https://api.themoviedb.org/3/tv/${this.tvShowId}/season/${seasonNumber}?language=en-US`;
         const options = {
         method: 'GET',
         headers: {

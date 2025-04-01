@@ -5,16 +5,22 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const tvDirectoryPath = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv\\"
+const tvDirectoryPath = process.env.base_tvshow_path
+
+const sanitizeFilename = (newTitle) => {
+    return newTitle.replace(/[:\/\\]/g, '-');
+} 
+
 const main = async (tvShow, year, dryRun) => {
     const baseTvShowPath = tvDirectoryPath + tvShow
-    const seasons = fs.readdirSync(tvDirectoryPath+tvShow);
-    const tvService = new TvService(process.env.tvService_apiKey);
-    const tvShowId = await tvService.getTvSeriesId(tvShow, year);
+    const seasons = fs.readdirSync(baseTvShowPath);
+    const tvService = new TvService(process.env.tvService_accessKey);
+    await tvService.setTvSeries(tvShow, year);
+
     for (const season of seasons) {
         const seasonPath = `${baseTvShowPath}\\${season}`
         const episodes = fs.readdirSync(seasonPath);
-        const episodeNames = await tvService.getTvSeasonEpisodes(tvShowId, season.split(" ")[1])
+        const episodeNames = await tvService.getTvSeasonEpisodes(season.split(" ")[1])
         for (const episode of episodes) {
             const seFormatPattern = /s\d{2}e\d{2}/;
             const seFormat = (episode.toLowerCase().match(seFormatPattern)).toString();
@@ -26,7 +32,6 @@ const main = async (tvShow, year, dryRun) => {
             const fileExtension = (episode.match(fileExtensionPattern)).toString();
 
             const newTitle = `${tvShow} - ${seFormat} - ${episodeNames[episodeNumber-1]}.${fileExtension}`
-            const sanitizeFilename = (newTitle) => newTitle.replace(/[:\/\\]/g, '-'); // Replace problematic characters
             const sanitizedNewTitle = sanitizeFilename(newTitle);
 
             if (episode !== sanitizedNewTitle) {
@@ -40,12 +45,11 @@ const main = async (tvShow, year, dryRun) => {
     }
 }
 
-// Define the menu options
 const questions = [
     {
-        type: 'list', // Creates a selector menu
+        type: 'list',
         name: 'tvShow',
-        message: 'Choose a tv show whose names you\d like to format:',
+        message: 'Choose a tv show whose names you\'d like to format:',
         choices: fs.readdirSync(tvDirectoryPath),
     },
     {
@@ -61,10 +65,7 @@ const questions = [
     }
 ];
 
-// Prompt the user
 inquirer.prompt(questions).then((answers) => {
     console.log('You selected: ', answers);
     main(answers.tvShow, answers.year, answers.dryRun)
 });
-
-// main("Shogun", 2024)
