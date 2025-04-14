@@ -20,7 +20,11 @@ export const GetAuthorizationUriGoogle = (appConfig: AppConfig)  => {
 
         const authorizationUri = appConfig.getGoogleOauth2Client().generateAuthUrl({
             access_type: "offline",
-            scope: ["https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/youtube.upload"],
+            scope: [
+                "https://www.googleapis.com/auth/youtube.readonly",
+                "https://www.googleapis.com/auth/youtube.upload",
+                "https://www.googleapis.com/auth/youtube.force-ssl"
+            ],
             include_granted_scopes: true,
             state
         })
