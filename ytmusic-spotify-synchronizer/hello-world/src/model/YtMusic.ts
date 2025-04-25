@@ -1,8 +1,8 @@
 export type GetPlaylistIdsResponse = {
     id: string
     title: string
-    description: string,
-    images: {url: string}[]
+    description?: string,
+    images?: {url: string}[]
 }
 
 export type Song = {

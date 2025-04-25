@@ -2,6 +2,7 @@ import {AccessToken, PlaylistedTrack, SimplifiedPlaylist, SpotifyApi, Track} fro
 import logger from "../util/logger.js";
 import {GetPlaylistIdsResponse, GetPlaylistsResponse, Song} from "../model/YtMusic.js";
 import {HCPVaultService} from "./VaultService.js";
+import {formatSearchQuery} from "../Handlers/Authorization/util/formatSearchQuery.js";
 
 export class SpotifyService{
     private spotifyClient: SpotifyApi;
@@ -83,6 +84,7 @@ export class SpotifyService{
     getPlaylistIds = async (): Promise<GetPlaylistIdsResponse[]> => {
         return (await this.spotifyClient.currentUser.playlists.playlists(50))?.items
             .map((playlist: SimplifiedPlaylist) => {
+                console.log("Here is the playlist: ", playlist);
                 return {
                     id: playlist.id,
                     description: playlist.description,
@@ -96,8 +98,8 @@ export class SpotifyService{
         return (await this.spotifyClient.playlists.getPlaylistItems(playlistId))?.items
             .map((song: PlaylistedTrack<Track>) => {
                 return {
-                    title: song.track.name,
-                    artists: song.track.artists.map(artist=>artist.name)
+                    title: song?.track?.name,
+                    artists: song?.track?.artists?.map(artist=>artist.name)
                 }
             })
     }
@@ -106,17 +108,30 @@ export class SpotifyService{
     formatMetadata = (song) => {}
 
     // This will return the songId of the first result
-    getSongUriByQuery = async (query: string): Promise<string> => {
+    getSongUriByQuery = async (song: Song): Promise<string | undefined> => {
         // Maybe I can come back and filter by the artists
         //   use res.tracks.items[x].artists[0].name
-        logger.info(`Beginning search for song: ${query}`);
-        const res = await this.spotifyClient.search<Track>(query, ["track"]);
-        return (await this.spotifyClient.search<Track>(query, ["track"])).tracks.items[0].uri;
+        let query = formatSearchQuery(song);
+        logger.info(`Beginning search for song (in spotify API): ${query}`);
+        let res = await this.spotifyClient.search<Track>(query, ["track"]);
+        if (res?.tracks?.items[0]?.uri){
+            return (res)?.tracks?.items[0]?.uri;
+        }
+
+        // Alternative logic, this is done in case the youtube title include the artist name already and the query
+        //   string gets too long to effectively search spotify.
+        res = await this.spotifyClient.search<Track>(song.title, ["track"]);
+        if (res?.tracks?.items[0]?.uri) {
+            return (res)?.tracks?.items[0]?.uri;
+        }
+        logger.info(`Song ${query} was not found.`)
+        return undefined;
+
     }
 
     createPlaylist = () => {}
 
-    addSongToPlaylist = async (playlistId: string, songUris: string[]): Promise<void> => {
+    addSongsToPlaylist = async (playlistId: string, songUris: string[]): Promise<void> => {
         logger.info(`Adding songs [${songUris.join(', ')}] to playlist ${playlistId}`);
         await this.spotifyClient.playlists.addItemsToPlaylist(playlistId, songUris);
     }
@@ -126,7 +141,7 @@ export class SpotifyService{
         if (this.playlists.length === 0 ) {
             this.playlists = await this.getPlaylists();
         }
-        return this.playlists.find(playlist => playlist.title === name);
+        return this.playlists.find(playlist => playlist.title.toLowerCase() === name.toLowerCase());
     }
 
     // This should be a later implementation, first pass should only be additive changes

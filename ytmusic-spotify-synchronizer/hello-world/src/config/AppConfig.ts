@@ -37,6 +37,7 @@ export class AppConfig {
             });
         }
         this.ytMusicService = new YtMusicService(this.getGoogleOauth2Client());
+        await this.ytMusicService.initialize();
         // configure spotify service with user credentials if they are present
         if (spotifyUserCreds.refresh_token) {
             this.spotifyService = new SpotifyService(
