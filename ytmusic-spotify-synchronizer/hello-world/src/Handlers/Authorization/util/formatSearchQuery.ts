@@ -1,4 +1,4 @@
-import {Song} from "../../../model/YtMusic.js";
+import {Song} from "../../../model/MusicTypes.js";
 
 export function formatSearchQuery(song: Song): string {
     return `${cleanTitle(song.title)} - ${song.artists.join(", ")}`

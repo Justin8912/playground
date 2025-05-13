@@ -3,7 +3,9 @@ import logger from "../util/logger.js";
 import {getHandler} from "./Router.js";
 import {AppConfig} from "../config/AppConfig.js";
 import {EnvironmentConfig} from "../config/EnvironmentConfig.js";
+import {configMapper} from "../util/configMapper.js";
 
+// TODO: Figure out how to handle source and sink user configurations and how to pass those to methods.
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -20,8 +22,6 @@ const getRouteAndMethod = (event: APIGatewayProxyEvent): {route:string, method:s
     }
 }
 
-let appConfig;
-
 const router = async (event: APIGatewayProxyEvent, appConfig: AppConfig) => {
     const {route, method} = getRouteAndMethod(event);
     const handler = getHandler(route, method, appConfig);
@@ -30,16 +30,20 @@ const router = async (event: APIGatewayProxyEvent, appConfig: AppConfig) => {
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let user = "justin"; // TODO: We need to get the name of the user from whatever request is made somehow.
-    let appConfig = new AppConfig(new EnvironmentConfig(user));
-    await appConfig.initialize();
+    let justinConfig = new AppConfig(new EnvironmentConfig(user));
+    configMapper["justin"] = justinConfig;
+
+    // I think I need to think more broadly about the appConfig. The appConfig should not be specific to a user.
+    //   Instead, maybe the appConfig should hold references to more specific user configurations.
+    await justinConfig.initialize();
     try {
-        return await router(event, appConfig);
+        return await router(event, justinConfig);
     } catch (err) {
         console.log(err)
         return {
             statusCode: 500,
             body: JSON.stringify({
-                message: 'some error happened',
+                message: err,
             }),
         };
     }

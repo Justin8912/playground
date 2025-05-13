@@ -1,7 +1,7 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {AppConfig} from "../config/AppConfig.js";
 import {getAPIGatewayResponse} from "../model/apiGatewayResponse.js";
-import {GetPlaylistsResponse, Song} from "../model/YtMusic.js";
+import {GetPlaylistsResponse, Song} from "../model/MusicTypes.js";
 import {youtube} from "googleapis/build/src/apis/youtube/index.js";
 import logger from "../util/logger.js";
 import {transferMusic} from "./Authorization/util/TransferMusic.js";
@@ -31,24 +31,25 @@ export const GetPlaylists = (appConfig: AppConfig): (event:APIGatewayProxyEvent)
 
         let youtubeService = appConfig.getYtMusicService();
         let spotifyService = appConfig.getSpotifyService();
-        await youtubeService.videoScrapper("DJoPdsGMbH8")
-        // // let sourcePlaylist = (await spotifyService.getPlaylistByName('drum and bass'));
-        // // let sinkPlaylist = (await youtubeService.getPlaylistByName('Test'));
+
+        // await youtubeService.videoScrapper("DJoPdsGMbH8")
+        let sourcePlaylist = (await youtubeService.getPlaylistByName('drum and bass'));
+        let sinkPlaylist = (await spotifyService.getPlaylistByName('Test'));
         // let sourcePlaylist = (await youtubeService.getPlaylistByName('Test'))
         // let sinkPlaylist = (await spotifyService.getPlaylistByName('Test'));
-        // // logger.info("YoutubePlaylists: ", JSON.stringify(youtubeService.playlists));
-        // // logger.info("sourcePlaylist: " + JSON.stringify(sourcePlaylist));
-        // // logger.info("sinkPlaylist: " + JSON.stringify(sinkPlaylist));
-        // if (!sourcePlaylist || !sinkPlaylist) {
-        //     return getAPIGatewayResponse(200, JSON.stringify({}));
-        // }
-        //
-        // await transferMusic(
-        //     sourcePlaylist,
-        //     sinkPlaylist,
-        //     spotifyService.getSongUriByQuery,
-        //     spotifyService.addSongsToPlaylist
-        // )
+        logger.info("YoutubePlaylists: ", JSON.stringify(youtubeService.playlists));
+        logger.info("sourcePlaylist: " + JSON.stringify(sourcePlaylist));
+        logger.info("sinkPlaylist: " + JSON.stringify(sinkPlaylist));
+        if (!sourcePlaylist || !sinkPlaylist) {
+            return getAPIGatewayResponse(200, JSON.stringify({}));
+        }
+
+        await transferMusic(
+            sourcePlaylist,
+            sinkPlaylist,
+            spotifyService.getSongUriByQuery,
+            spotifyService.addSongsToPlaylist
+        )
 
         return getAPIGatewayResponse(200, JSON.stringify({status: "done!"}));
     }

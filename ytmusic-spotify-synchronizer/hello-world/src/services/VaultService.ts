@@ -78,33 +78,36 @@ export class HCPVaultService {
         }
     }
 
-    public getUserSpotifyCredentials = async(): Promise<AccessToken> => {
-        logger.debug(`Getting spotify user credentials for ${this.user}`);
-        return await this.getParameter(`spotify/${this.user}`) as unknown as AccessToken;
+    public getUserSpotifyCredentials = async(user: string): Promise<AccessToken> => {
+        logger.debug(`Getting spotify user credentials for ${user}`);
+        return await this.getParameter(`spotify/${user}`) as unknown as AccessToken;
     }
 
-    public setUserSpotifyCredentials = async (accessToken: AccessToken): Promise<void> => {
-        logger.info(`Setting spotify user credentials for ${this.user}`);
-        await this.setParameter(`spotify/${this.user}`, accessToken);
+    public setUserSpotifyCredentials = (user: string) => {
+        return async (accessToken: AccessToken): Promise<void> => {
+            logger.debug(`Setting spotify user credentials for ${user}`);
+            await this.setParameter(`spotify/${this.user}`, accessToken);
+        }
     }
 
-    public getUserGoogleCredentials = async (): Promise<GoogleCredentials> => {
-        logger.debug(`Getting google user credentials for ${this.user}`);
-        return await this.getParameter(`google/${this.user}`) as unknown as GoogleCredentials;
+
+    public getUserGoogleCredentials = async (user: string): Promise<GoogleCredentials> => {
+        logger.debug(`Getting google user credentials for ${user}`);
+        return await this.getParameter(`google/${user}`) as unknown as GoogleCredentials;
     }
 
-    public setUserGoogleCredentials = async (accessToken: GoogleCredentials): Promise<void> => {
-        logger.info(`Setting google user credentials for ${this.user}`);
-        await this.setParameter(`google/${this.user}`, accessToken);
+    public setUserGoogleCredentials = async (accessToken: GoogleCredentials, user: string): Promise<void> => {
+        logger.debug(`Setting google user credentials for ${user}`);
+        await this.setParameter(`google/${user}`, accessToken);
     }
 
     public getServerSpotifyCredentials = async(): Promise<ServerCredentials> => {
-        logger.info(`Getting server credentials for spotify`);
+        logger.debug(`Getting server credentials for spotify`);
         return await this.getParameter("util/spotify") as unknown as ServerCredentials
     }
 
     public getServerGoogleCredentials = async (): Promise<ServerCredentials> => {
-        logger.info(`Getting server credentials for google`);
+        logger.debug(`Getting server credentials for google`);
         return await this.getParameter("util/google") as unknown as ServerCredentials
     }
 }

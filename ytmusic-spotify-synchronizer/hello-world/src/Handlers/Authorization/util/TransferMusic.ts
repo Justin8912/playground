@@ -1,18 +1,18 @@
-import {GetPlaylistsResponse, Song} from "../../../model/YtMusic.js";
+import {GetPlaylistsResponse, Song} from "../../../model/MusicTypes.js";
 import {formatSearchQuery} from "./formatSearchQuery.js";
 import logger from "../../../util/logger.js";
 
 export async function transferMusic(
     source: GetPlaylistsResponse,
     sink: GetPlaylistsResponse,
-    getSongIdSink: (song: Song) => Promise<string>,
+    getSongIdSink: (song: Song) => Promise<string | undefined>,
     addSongsToPlaylistSink: (playlistId: string, uris: string[]) => Promise<void>,
 ): Promise<void> {
     logger.info("sourceSongs: " + JSON.stringify(source.songs));
     logger.info("sinkSongs: " + JSON.stringify(sink.songs));
     let songDifference = findDifferencesBetweenPlaylists(source.songs, sink.songs);
     logger.info("Difference between playlists: " + JSON.stringify(songDifference));
-    let songUrisPromises: Promise<string>[] = songDifference.map((song: Song) => {
+    let songUrisPromises: Promise<string | undefined>[] = songDifference.map((song: Song) => {
         return getSongIdSink(song);
     })
     let songIds = await Promise.all(songUrisPromises);
