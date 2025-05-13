@@ -1,11 +1,12 @@
 import {AccessToken, PlaylistedTrack, SimplifiedPlaylist, SpotifyApi, Track} from "@spotify/web-api-ts-sdk";
 import logger from "../util/logger.js";
-import {GetPlaylistIdsResponse, GetPlaylistsResponse, Song} from "../model/MusicTypes.js";
+import {GetPlaylistIdsResponse, GetPlaylistsResponse, Song} from "../model/YtMusic.js";
 import {HCPVaultService} from "./VaultService.js";
 import {formatSearchQuery} from "../Handlers/Authorization/util/formatSearchQuery.js";
 
 export class SpotifyService{
     private spotifyClient: SpotifyApi;
+    private userId: string;
     private playlists: GetPlaylistsResponse[] = [];
     private readonly clientId: string;
     private readonly clientSecret: string;
@@ -64,7 +65,12 @@ export class SpotifyService{
         this.spotifyClient = SpotifyApi.withAccessToken(this.clientId, accessToken);
     }
 
-    getPlaylists = async (): Promise<GetPlaylistsResponse[]> => {
+    getUserId = async (): Promise<string> => {
+        const user = await this.spotifyClient.currentUser.profile();
+        return user.id;
+    }
+
+    getPlaylists = async (): Promise<Awaited<GetPlaylistsResponse>[]> => {
         logger.info("Retrieving playlists from Spotify");
         const playlistIds = await this.getPlaylistIds();
         const response = await Promise.all(playlistIds.map(async (playlist) => ({
@@ -72,13 +78,13 @@ export class SpotifyService{
             songs: await this.getSongs(playlist.id)
         })));
         this.playlists = response;
-        logger.info(`Here are the playlists that were retrieve from spotify: ${JSON.stringify(response.map(playlist => (playlist.title)))}`);
         return response;
     }
 
     getPlaylistIds = async (): Promise<GetPlaylistIdsResponse[]> => {
         return (await this.spotifyClient.currentUser.playlists.playlists(50))?.items
             .map((playlist: SimplifiedPlaylist) => {
+                console.log("Here is the playlist: ", playlist);
                 return {
                     id: playlist.id,
                     description: playlist.description,
@@ -98,6 +104,10 @@ export class SpotifyService{
             })
     }
 
+    // For communicating between different applications
+    formatMetadata = (song) => {}
+
+    // This will return the songId of the first result
     getSongUriByQuery = async (song: Song): Promise<string | undefined> => {
         // Maybe I can come back and filter by the artists
         //   use res.tracks.items[x].artists[0].name
@@ -110,13 +120,13 @@ export class SpotifyService{
 
         // Alternative logic, this is done in case the youtube title include the artist name already and the query
         //   string gets too long to effectively search spotify.
-        // TODO: REMOVE this is probably not needed assuming I can get the song and artist from spotift
         res = await this.spotifyClient.search<Track>(song.title, ["track"]);
         if (res?.tracks?.items[0]?.uri) {
             return (res)?.tracks?.items[0]?.uri;
         }
         logger.info(`Song ${query} was not found.`)
         return undefined;
+
     }
 
     createPlaylist = () => {}
@@ -133,4 +143,7 @@ export class SpotifyService{
         }
         return this.playlists.find(playlist => playlist.title.toLowerCase() === name.toLowerCase());
     }
+
+    // This should be a later implementation, first pass should only be additive changes
+    removeSongFromPlaylist = () => {}
 }

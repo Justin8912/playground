@@ -21,19 +21,15 @@ export class AppConfig {
     }
 
     public initialize = async () => {
-        logger.info("Initializing AppConfig");
-        const user = this.getEnvironmentConfig().getUser();
-        this.initializeVaultService(
-            this.getEnvironmentConfig().getVaultToken(),
-            this.getEnvironmentConfig().getUser()
-        );
-        this.initializeGoogleOauth2Client(
+        logger.debug("Initializing AppConfig");
+        await this.initializeVaultService();
+        await this.initializeGoogleOauth2Client(
             await this.vaultService.getServerGoogleCredentials()
         );
         this.spotifyServerCreds = await this.vaultService.getServerSpotifyCredentials();
 
-        const googleUserCreds: GoogleCredentials = await this.vaultService.getUserGoogleCredentials(user);
-        const spotifyUserCreds: AccessToken = await this.vaultService.getUserSpotifyCredentials(user);
+        const googleUserCreds: GoogleCredentials = await this.vaultService.getUserGoogleCredentials();
+        const spotifyUserCreds: AccessToken = await this.vaultService.getUserSpotifyCredentials();
         // configure google oauth2 client with user credentials if they are present
         if (googleUserCreds?.refresh_token) {
             this.getGoogleOauth2Client().setCredentials({
@@ -49,7 +45,7 @@ export class AppConfig {
                 this.spotifyServerCreds.client_id,
                 this.spotifyServerCreds.client_secret,
                 spotifyUserCreds.refresh_token,
-                this.vaultService.setUserSpotifyCredentials(user)
+                this.vaultService.setUserSpotifyCredentials
             );
 
             // refresh the accessToken before interacting with the api.
@@ -57,8 +53,7 @@ export class AppConfig {
         }
     }
 
-    private initializeGoogleOauth2Client = ({client_id, client_secret, redirect_uri}: ServerCredentials): void => {
-        logger.info("Initializing google oauth client");
+    private initializeGoogleOauth2Client = async ({client_id, client_secret, redirect_uri}: ServerCredentials): Promise<void> => {
         this.googleOauth2Client = new google.auth.OAuth2(
             client_id,
             client_secret,
@@ -68,27 +63,24 @@ export class AppConfig {
         if (!this.googleOauth2Client) {
             throw new IntializationError("The service failed to connect to google");
         }
-        logger.info("Google service initialized successfully");
+        logger.debug("Google service initialized successfully");
     }
 
-    private initializeVaultService = (vaultToken: string, user: string) => {
-        logger.info("Initializing vault");
+    private initializeVaultService = async () => {
         this.vaultService = new HCPVaultService(
-            vaultToken,
-            user
+            this.getEnvironmentConfig().getVaultToken(),
+            this.getEnvironmentConfig().getUser()
         );
 
         if (!this.vaultService) {
             throw new IntializationError("The service failed to connect to vault service");
         }
-        logger.info("Vault initialized successfully");
+        logger.debug("Vault initialized successfully");
     }
 
     private setupSpotifyService = (spotifyUserCreds: AccessToken): SpotifyApi => {
-        logger.info("Initializing spotify api with user credentials.");
-        let spotifyApi = SpotifyApi.withAccessToken(this.getSpotifyClientId(), spotifyUserCreds);
-        logger.info("Spotify service initialized successfully")
-        return spotifyApi;
+        logger.info("Information found for user, setting up spotify service with user credentials.");
+        return SpotifyApi.withAccessToken(this.getSpotifyClientId(), spotifyUserCreds);
     }
 
     public getSpotifyService = () => {
