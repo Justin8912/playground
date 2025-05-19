@@ -7,15 +7,17 @@ dotenv.config();
 
 const tvDirectoryPath = process.env.base_tvshow_path
 
-const sanitizeFilename = (newTitle) => {
-    return newTitle.replace(/[:\/\\]/g, '-');
+const sanitizeFilename = (title) => {
+    let newStr = title.replace(/[:\/\\]/g, '-');
+    newStr = newStr.replace(/\?/g, '')
+    return newStr;
 } 
 
 const main = async (tvShow, year, dryRun) => {
     const baseTvShowPath = tvDirectoryPath + tvShow
     const seasons = fs.readdirSync(baseTvShowPath);
     const tvService = new TvService(process.env.tvService_accessKey);
-    await tvService.setTvSeries(tvShow, year);
+    await tvService.setTvSeries(tvShow.split("(")[0].trim(), year);
 
     for (const season of seasons) {
         const seasonPath = `${baseTvShowPath}\\${season}`

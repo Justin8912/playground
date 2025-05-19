@@ -22,7 +22,7 @@ export class TvService {
                 Authorization: `Bearer ${this.accessToken}`
             }
         };
-
+        
         let res = await fetch(`${baseUrl}?${params.toString()}`, options);
         res = await res.json();
         this.tvShowId = res.results[0].id
