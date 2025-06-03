@@ -8,8 +8,8 @@ dotenv.config();
 const tvDirectoryPath = process.env.base_tvshow_path
 
 const sanitizeFilename = (title) => {
-    let newStr = title.replace(/[:\/\\]/g, '-');
-    newStr = newStr.replace(/\?/g, '')
+    let newStr = title.replace(/[:\/\\*]/g, '-');
+    newStr = newStr.replace(/\?/g, '');
     return newStr;
 } 
 
