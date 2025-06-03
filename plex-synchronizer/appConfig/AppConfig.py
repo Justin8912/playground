@@ -17,7 +17,7 @@ class AppConfig:
             "username": "jnste"
         }
         self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
-        self.remote_path = "/home/jnste/test/plex-source-data/tv"
+        self.remote_path = "/home/jnste/storage/media/tv"
         self.sshClient = get_server_client(**self.server)
         self.fileTransferService = FileTransferService(self)
         self.directoryComparisonService = DirectoryComparisonService()

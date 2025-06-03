@@ -17,7 +17,8 @@ const main = async (tvShow, year, dryRun) => {
     const baseTvShowPath = tvDirectoryPath + tvShow
     const seasons = fs.readdirSync(baseTvShowPath);
     const tvService = new TvService(process.env.tvService_accessKey);
-    await tvService.setTvSeries(tvShow.split("(")[0].trim(), year);
+    const tvShowName = tvShow.split("(")[0].trim()
+    await tvService.setTvSeries(tvShowName, year);
 
     for (const season of seasons) {
         const seasonPath = `${baseTvShowPath}\\${season}`
@@ -33,7 +34,7 @@ const main = async (tvShow, year, dryRun) => {
             const fileExtensionPattern = /(?<=\.)[^.]+$/
             const fileExtension = (episode.match(fileExtensionPattern)).toString();
 
-            const newTitle = `${tvShow} - ${seFormat} - ${episodeNames[episodeNumber-1]}.${fileExtension}`
+            const newTitle = `${tvShowName} - ${seFormat} - ${episodeNames[episodeNumber-1]}.${fileExtension}`
             const sanitizedNewTitle = sanitizeFilename(newTitle);
 
             if (episode !== sanitizedNewTitle) {
