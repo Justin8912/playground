@@ -17,6 +17,7 @@ The Review Notes feature automatically generates review notes from existing note
 2. It checks if a "Reviews" notebook exists at the top level, and creates it if needed
 3. It replicates the original note's notebook hierarchy within the "Reviews" notebook
 4. It creates a review note containing the same content as the original note
+5. It shows a brief notification and automatically navigates to the newly created review note
 
 ## Future Enhancements
 

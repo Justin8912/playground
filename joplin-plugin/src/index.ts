@@ -2,7 +2,7 @@ import joplin from 'api';
 import { generateReviewNote } from './reviewNotes/reviewService';
 
 /**
- * Generates a review note in the background
+ * Generates a review note in the background and navigates to it
  */
 const generateReviewNoteInBackground = () => {
 	console.log('Starting review note generation...');
@@ -12,6 +12,14 @@ const generateReviewNoteInBackground = () => {
 		.then(reviewNote => {
 			if (reviewNote) {
 				console.log(`Review note created successfully: ${reviewNote.title}`);
+				
+				// Show notification that the review note was created
+				joplin.views.dialogs.showMessageBox(`Review note "${reviewNote.title}" created! Opening it now...`)
+					.then(() => {
+						// Navigate to the newly created note
+						return joplin.commands.execute('openNote', reviewNote.id);
+					})
+					.catch(error => console.error('Error navigating to note:', error));
 			} else {
 				console.log('No review note was created');
 			}
@@ -26,32 +34,17 @@ const generateReviewNoteInBackground = () => {
 
 joplin.plugins.register({
 	onStart: async function() {
-		// eslint-disable-next-line no-console
 		console.info('Review Notes Plugin started!');
 
-		// Generate review note when the application opens (after a short delay)
 		setTimeout(() => {
 			generateReviewNoteInBackground();
-		}, 2000); // Wait 2 seconds to ensure app is fully loaded
+		}, 2000);
 		
 		// Add a command that can be triggered from Tools menu to manually generate a review note
 		await joplin.commands.register({
 			name: 'generateReviewNote',
 			label: 'Generate Review Note',
-			execute: async () => {
-				console.log('Generating review note...');
-				try {
-					const reviewNote = await generateReviewNote();
-					if (reviewNote) {
-						await joplin.views.dialogs.showMessageBox(`Review note created: ${reviewNote.title}`);
-					} else {
-						await joplin.views.dialogs.showMessageBox('Failed to create review note. See console for details.');
-					}
-				} catch (error) {
-					console.error('Error generating review note:', error);
-					await joplin.views.dialogs.showMessageBox('An error occurred while generating the review note.');
-				}
-			}
+			execute: async () => { generateReviewNoteInBackground();}
 		});
 		
 		// Add the command to the Tools menu
