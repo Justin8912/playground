@@ -20,8 +20,11 @@
     "@litehex/node-vault": "^1.0.2",
     "@middy/core": "^5.2.3",
     "@spotify/web-api-ts-sdk": "^1.2.0",
+    "axios": "^1.9.0",
+    "cheerio": "^1.0.0",
     "esbuild": "^0.14.14",
-    "googleapis": "^146.0.0"
+    "googleapis": "^146.0.0",
+    "music-metadata": "^11.2.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",

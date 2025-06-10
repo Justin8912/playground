@@ -36,7 +36,7 @@ export class YtMusicService {
 
     getPlaylists = async (): Promise<GetPlaylistsResponse[]> => {
         await this.ensureValidToken();
-        let playlists = await Promise.all((await this.getPlaylistIds()).map(async (playlist: GetPlaylistIdsResponse) => {
+        return await Promise.all((await this.getPlaylistIds()).map(async (playlist: GetPlaylistIdsResponse) => {
             return {
                 id: playlist.id,
                 title: playlist.title,
@@ -44,11 +44,8 @@ export class YtMusicService {
                 image: playlist.image,
                 songs: await this.getSongs(playlist.id)
             }
-        }));
+        }).filter(res => Object.keys(res).length > 0))
 
-        return playlists.filter(playlist => {
-            return playlist?.description?.toLowerCase() === "music";
-        })
     }
 
     getPlaylistIds = async (): Promise<GetPlaylistIdsResponse[]> => {
