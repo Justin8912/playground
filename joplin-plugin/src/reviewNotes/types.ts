@@ -1,7 +1,3 @@
-/**
- * Types for the Review Notes feature.
- */
-
 export interface NoteInfo {
   id: string;
   title: string;

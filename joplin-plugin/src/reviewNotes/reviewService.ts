@@ -1,37 +1,24 @@
-/**
- * Service for handling the review notes generation functionality
- */
-
 import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 
-/**
- * Ensures that the Reviews notebook exists, creating it if necessary.
- * @returns The ID of the Reviews notebook
- */
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'
 ): Promise<string | null> => {
-  // Check if Reviews notebook already exists
   const existingNotebook = await DataApi.getNotebookByTitle(reviewsNotebookName);
   
   if (existingNotebook) {
     return existingNotebook.id;
   }
   
-  // Create it if it doesn't exist
   const createdNotebook = await DataApi.createNotebook(reviewsNotebookName);
   return createdNotebook?.id || null;
 };
 
-/**
- * Gets the notebook structure/path for a note
- */
+
 export const getNotebookPathForNote = async (
   noteParentId: string,
   allNotebooks?: NotebookInfo[]
 ): Promise<NotebookInfo[]> => {
-  // Get all notebooks if not provided
   if (!allNotebooks) {
     allNotebooks = await DataApi.getAllNotebooks();
   }
@@ -39,22 +26,17 @@ export const getNotebookPathForNote = async (
   const path: NotebookInfo[] = [];
   let currentNotebookId = noteParentId;
   
-  // Loop until we reach the root (notebook with no parent)
   while (currentNotebookId) {
     const notebook = allNotebooks.find(n => n.id === currentNotebookId);
     if (!notebook) break;
     
-    path.unshift(notebook); // Add to beginning of array
+    path.unshift(notebook); 
     currentNotebookId = notebook.parent_id;
   }
   
   return path;
 };
 
-/**
- * Creates the necessary notebook structure in the Reviews notebook
- * to mirror the original note's notebook hierarchy
- */
 export const createReviewsNotebookStructure = async (
   reviewsNotebookId: string,
   originalNotePath: NotebookInfo[]
@@ -74,7 +56,6 @@ export const createReviewsNotebookStructure = async (
     if (matchingNotebook) {
       parentId = matchingNotebook.id;
     } else {
-      // Create the notebook if it doesn't exist
       const newNotebook = await DataApi.createNotebook(notebook.title, parentId);
       if (newNotebook) {
         parentId = newNotebook.id;
@@ -87,15 +68,9 @@ export const createReviewsNotebookStructure = async (
   return parentId;
 };
 
-/**
- * Selects a random note from all available notes.
- * In the future, this will apply filtering based on user preferences.
- */
 export const selectRandomNote = async (
   filterCriteria?: FilterCriteria
 ): Promise<NoteInfo | null> => {
-  // Currently, we just select a random note from all notes
-  // In the future, this will apply filtering based on the criteria
   const allNotes = await DataApi.getAllNotes();
   
   if (!allNotes || allNotes.length === 0) {
@@ -106,15 +81,11 @@ export const selectRandomNote = async (
   return allNotes[randomIndex];
 };
 
-/**
- * Creates a review note based on the provided note
- */
 export const createReviewNote = async (
   originalNote: NoteInfo,
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
-    // Use the same title for the review note
     const reviewNote = await DataApi.createNote(
       originalNote.title, 
       originalNote.body, 
@@ -128,9 +99,6 @@ export const createReviewNote = async (
   }
 };
 
-/**
- * Generates a review note from a randomly selected note
- */
 export const generateReviewNote = async (
   reviewsNotebookName = 'Reviews',
   filterCriteria?: FilterCriteria

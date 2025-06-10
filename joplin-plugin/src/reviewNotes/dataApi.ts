@@ -1,14 +1,6 @@
-/**
- * Utility functions for interacting with the Joplin Data API.
- * These are pure functional utilities that don't maintain state.
- */
-
 import joplin from 'api';
 import { NoteInfo, NotebookInfo } from './types';
 
-/**
- * Gets a notebook by ID
- */
 export const getNotebook = async (notebookId: string): Promise<NotebookInfo | null> => {
   try {
     const notebook = await joplin.data.get(['folders', notebookId]);
@@ -23,9 +15,6 @@ export const getNotebook = async (notebookId: string): Promise<NotebookInfo | nu
   }
 };
 
-/**
- * Gets all notebooks
- */
 export const getAllNotebooks = async (): Promise<NotebookInfo[]> => {
   try {
     const response = await joplin.data.get(['folders']);
@@ -40,9 +29,6 @@ export const getAllNotebooks = async (): Promise<NotebookInfo[]> => {
   }
 };
 
-/**
- * Gets a notebook by its title
- */
 export const getNotebookByTitle = async (title: string): Promise<NotebookInfo | null> => {
   try {
     const response = await joplin.data.get(['folders'], { query: title });
@@ -61,9 +47,6 @@ export const getNotebookByTitle = async (title: string): Promise<NotebookInfo | 
   }
 };
 
-/**
- * Creates a new notebook
- */
 export const createNotebook = async (title: string, parentId?: string): Promise<NotebookInfo | null> => {
   try {
     const data: { title: string; parent_id?: string } = { title };
@@ -85,9 +68,6 @@ export const createNotebook = async (title: string, parentId?: string): Promise<
   }
 };
 
-/**
- * Gets all notes
- */
 export const getAllNotes = async (): Promise<NoteInfo[]> => {
   try {
     const response = await joplin.data.get(['notes'], { fields: 'id,title,body,parent_id' });
@@ -104,9 +84,6 @@ export const getAllNotes = async (): Promise<NoteInfo[]> => {
   }
 };
 
-/**
- * Gets a specific note by ID
- */
 export const getNoteById = async (noteId: string): Promise<NoteInfo | null> => {
   try {
     const note = await joplin.data.get(['notes', noteId], { fields: 'id,title,body,parent_id' });
@@ -123,9 +100,6 @@ export const getNoteById = async (noteId: string): Promise<NoteInfo | null> => {
   }
 };
 
-/**
- * Creates a new note
- */
 export const createNote = async (
   title: string, 
   body: string, 
