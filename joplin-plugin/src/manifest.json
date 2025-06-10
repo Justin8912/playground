@@ -1,0 +1,16 @@
+{
+	"manifest_version": 1,
+	"id": "com.justin.llm.study.guide",
+	"app_min_version": "3.3",
+	"version": "1.0.0",
+	"name": "LLM Study Guide",
+	"description": "This plugin will randomly take notes, send them to an llm of your choosing, summarize the notes (+ resources included in the document) and send you an email with the summarized notes.",
+	"author": "Justin8912",
+	"homepage_url": "",
+	"repository_url": "",
+	"keywords": [],
+	"categories": [],
+	"screenshots": [],
+	"icons": {},
+	"promo_tile": {}
+}
