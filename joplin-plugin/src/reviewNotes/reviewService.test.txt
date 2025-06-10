@@ -1,0 +1,68 @@
+/**
+ * Tests for the Review Notes service
+ * 
+ * Note: To run these tests, you'll need to mock the Joplin API
+ * or run them in a test environment where the Joplin API is available.
+ */
+
+describe('Review Notes Service', () => {
+  describe('ensureReviewsNotebookExists', () => {
+    it('should return existing notebook ID if found', async () => {
+      // Test implementation
+    });
+    
+    it('should create a new notebook if not found', async () => {
+      // Test implementation
+    });
+  });
+  
+  describe('getNotebookPathForNote', () => {
+    it('should return the correct notebook path for a note', async () => {
+      // Test implementation
+    });
+    
+    it('should handle notes in the root notebook', async () => {
+      // Test implementation
+    });
+  });
+  
+  describe('createReviewsNotebookStructure', () => {
+    it('should create the correct notebook structure', async () => {
+      // Test implementation
+    });
+    
+    it('should reuse existing notebooks', async () => {
+      // Test implementation
+    });
+  });
+  
+  describe('selectRandomNote', () => {
+    it('should select a random note from all notes', async () => {
+      // Test implementation
+    });
+    
+    it('should return null if no notes are available', async () => {
+      // Test implementation
+    });
+  });
+  
+  describe('createReviewNote', () => {
+    it('should create a review note with the same content as the original', async () => {
+      // Test implementation
+    });
+    
+    it('should handle errors gracefully', async () => {
+      // Test implementation
+    });
+  });
+  
+  describe('generateReviewNote', () => {
+    it('should generate a review note from a randomly selected note', async () => {
+      // Test implementation
+    });
+    
+    it('should handle errors gracefully', async () => {
+      // Test implementation
+    });
+  });
+});
