@@ -45,9 +45,9 @@ export const createReviewsNotebookStructure = async (
   
   // Skip the root notebook in the original path and recreate the hierarchy
   // under the Reviews notebook
+  const existingNotebooks = await DataApi.getAllNotebooks();
   for (const notebook of originalNotePath) {
     // Check if this notebook already exists under the current parent
-    const existingNotebooks = await DataApi.getAllNotebooks();
     const matchingNotebook = existingNotebooks.find(n => 
       n.parent_id === parentId && 
       n.title === notebook.title

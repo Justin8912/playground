@@ -1,4 +1,5 @@
 import joplin from 'api';
+import { initConfig } from './reviewNotes/configService';
 import { generateReviewNote } from './reviewNotes/reviewService';
 
 const generateReviewNoteInBackground = () => {
@@ -10,9 +11,14 @@ const generateReviewNoteInBackground = () => {
 			if (reviewNote) {
 				console.log(`Review note created successfully: ${reviewNote.title}`);
 				
-				joplin.views.dialogs.showMessageBox(`Review note "${reviewNote.title}" created! Opening it now...`)
-					.then(() => {
-						return joplin.commands.execute('openNote', reviewNote.id);
+				joplin.views.dialogs.showMessageBox(`Review note "${reviewNote.title}" created! Open it now?`)
+					.then((selection) => {
+						if (selection === 0) { // 0 is the index for "OK"
+							console.log('User acknowledged the creation of the review note. Opening the note...');
+							return joplin.commands.execute('openNote', reviewNote.id);
+						} else {
+							console.log('User dismissed the message box. Not opening the note.');
+						}
 					})
 					.catch(error => console.error('Error navigating to note:', error));
 			} else {
@@ -28,6 +34,7 @@ const generateReviewNoteInBackground = () => {
 
 joplin.plugins.register({
 	onStart: async function() {
+		await initConfig();
 		console.info('Review Notes Plugin started!');
 
 		setTimeout(() => {
