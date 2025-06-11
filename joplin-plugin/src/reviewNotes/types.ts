@@ -22,8 +22,8 @@ export interface ReviewsConfig {
 export interface FilterCriteria {
   notebookIds?: string[];
   excludeNotebookIds?: string[];
-  noteIds?: string[];         // Individual note IDs to include
-  excludeNoteIds?: string[];  // Individual note IDs to exclude
+  noteIds?: string[];
+  excludeNoteIds?: string[];
   tags?: string[];
   excludeTags?: string[];
 }

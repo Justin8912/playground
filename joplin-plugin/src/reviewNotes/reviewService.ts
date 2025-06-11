@@ -70,9 +70,6 @@ export const createReviewsNotebookStructure = async (
   return parentId;
 };
 
-// Using function composition for more concise code
-export const selectRandomNote = selectRandomFilteredNote;
-
 export const createReviewNote = async (
   originalNote: NoteInfo,
   targetNotebookId: string
@@ -106,7 +103,7 @@ export const generateReviewNote = async (
     }
     
     // Step 2: Select a random note, using config filter criteria if enabled
-    const selectedNote = await selectRandomNote(
+    const selectedNote = await selectRandomFilteredNote(
       config.filterEnabled ? config.filterCriteria : filterCriteria
     );
     if (!selectedNote) {

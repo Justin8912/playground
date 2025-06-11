@@ -1,7 +1,6 @@
 import joplin from 'api';
 import { initConfig } from './reviewNotes/configService';
 import { generateReviewNote } from './reviewNotes/reviewService';
-import { ReviewsConfig } from './reviewNotes/types';
 
 const generateReviewNoteInBackground = () => {
 	console.log('Starting review note generation...');
