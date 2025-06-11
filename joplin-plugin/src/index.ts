@@ -37,9 +37,7 @@ joplin.plugins.register({
 		await initConfig();
 		console.info('Review Notes Plugin started!');
 
-		setTimeout(() => {
-			generateReviewNoteInBackground();
-		}, 2000);
+		generateReviewNoteInBackground();
 		
 		await joplin.commands.register({
 			name: 'generateReviewNote',
