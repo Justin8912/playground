@@ -1,5 +1,7 @@
 import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
+import { selectRandomFilteredNote } from './filterUtils';
+import { getConfig } from './configService';
 
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'
@@ -68,18 +70,8 @@ export const createReviewsNotebookStructure = async (
   return parentId;
 };
 
-export const selectRandomNote = async (
-  filterCriteria?: FilterCriteria
-): Promise<NoteInfo | null> => {
-  const allNotes = await DataApi.getAllNotes();
-  
-  if (!allNotes || allNotes.length === 0) {
-    return null;
-  }
-  
-  const randomIndex = Math.floor(Math.random() * allNotes.length);
-  return allNotes[randomIndex];
-};
+// Using function composition for more concise code
+export const selectRandomNote = selectRandomFilteredNote;
 
 export const createReviewNote = async (
   originalNote: NoteInfo,
@@ -104,14 +96,19 @@ export const generateReviewNote = async (
   filterCriteria?: FilterCriteria
 ): Promise<NoteInfo | null> => {
   try {
+    // Get config to check if filtering is enabled
+    const config = await getConfig();
+
     // Step 1: Ensure Reviews notebook exists
     const reviewsNotebookId = await ensureReviewsNotebookExists(reviewsNotebookName);
     if (!reviewsNotebookId) {
       throw new Error('Could not find or create Reviews notebook');
     }
     
-    // Step 2: Select a random note
-    const selectedNote = await selectRandomNote(filterCriteria);
+    // Step 2: Select a random note, using config filter criteria if enabled
+    const selectedNote = await selectRandomNote(
+      config.filterEnabled ? config.filterCriteria : filterCriteria
+    );
     if (!selectedNote) {
       throw new Error('No notes available for review');
     }

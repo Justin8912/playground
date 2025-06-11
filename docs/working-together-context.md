@@ -22,7 +22,7 @@ The Copilot Feature Development Pattern is a structured workflow for software en
 
 The Software Engineer acts as the director of the development process, providing guidance and validation. Key responsibilities include:
 
-- **Providing Context**: Writing the initial feature introduction document and providing any necessary domain knowledge
+- **Providing Context**: Writing the initial feature introduction document (in a rally user story) and providing any necessary domain knowledge
 - **Direction and Feedback**: Reviewing Copilot's implementation plans and providing constructive feedback
 - **Quality Assurance**: Validating milestone completion and ensuring the implemented code meets requirements
 - **Project Management**: Making git commits, deciding when to proceed to the next milestone, and tracking overall progress
@@ -36,7 +36,7 @@ The Software Engineer is the ultimate decision-maker in the process, responsible
 Copilot serves as the primary implementer in this pattern, responsible for:
 
 - **Documentation Structure**: Creating the initial documentation framework for new features
-- **Planning**: Drafting implementation plans based on the Software Engineer's feature introduction
+- **Planning**: Drafting implementation plans based on the Software Engineer's feature introduction (which can be found in rally through the MCP)
 - **Implementation**: Writing code according to the approved plan
 - **Verification**: Running builds and tests to verify changes
 - **Documentation Maintenance**: Updating progress documentation as implementation proceeds
@@ -52,7 +52,7 @@ The feature development process follows a structured flow with distinct phases:
 ### 1. Feature Initialization
 
 - **Documentation Setup**: Copilot creates the directory structure and blank documentation files for the new feature
-- **Feature Introduction**: The Software Engineer writes the intro.md file, providing context about the feature, goals, and any relevant constraints
+- **Feature Introduction**: The Software Engineer writes the details of the story in Rally and will provide this story to the agent.
 - **Understanding Check**: Copilot confirms its understanding of the intro with the Software Engineer to ensure alignment
 
 ### 2. Planning Phase
@@ -96,50 +96,9 @@ The pattern uses a standardized documentation structure:
 
 ### Required Documents
 
-Each feature requires three primary documents:
+Each feature requires two primary documents:
 
-#### 1. `intro.md`
-
-**Purpose**: Provides feature introduction and context  
-**Author**: Software Engineer  
-**Content**:
-- Introduction to the feature
-- Goal of the feature
-- Context for implementation
-- Any relevant constraints or considerations
-
-Example:
-```markdown
-# Introduction
-
-We are going to be adding a new search page to the mobile app
-
-# Goal
-
-Users see a new "Search Now" button on the home screen. When they click the button they are taken to
-a search page where they can search for vehicles by VIN
-
-# Context
-
-We are adding a feature to a published, production, application
-
-UI responsiveness is a significant concern
-
-# Implementation guidelines
-
-Use Sonar APIs for vehicle search
-
-Add unit tests for all new code
-
-Add behavior tests for all new functionality
-
-# Acceptance Criteria 
-
-Critera that must be met for the story to be considered complete. 
-
-```
-
-#### 2. `implementation-plan.md`
+#### 1. `implementation-plan.md`
 
 **Purpose**: Outlines detailed implementation milestones  
 **Author**: Copilot (with Software Engineer feedback)  
@@ -168,7 +127,7 @@ Create a basic search screen with a search input field and a search button. The 
 - Add loading state and error handling
 ```
 
-#### 3. `implementation-progress.md`
+#### 2. `implementation-progress.md`
 
 **Purpose**: Tracks progress of implementation  
 **Author**: Copilot (updated throughout development)  
@@ -195,29 +154,3 @@ Example progress format:
 
 - **`docs/feat/lessons-learned.md`**: Captures key lessons learned during implementation
 - **`docs/deps/`**: Contains documentation on dependencies, integrations, and interfaces
-
-## Working with Copilot
-
-### Communication Guidelines
-
-Effective communication with Copilot is crucial for success with this pattern:
-
-1. **Context over Directives**: Provide context and rationale rather than specific implementation instructions. For example, instead of "Add a button here," explain "Users need a way to initiate the search from the home screen."
-
-2. **Complete Information**: Provide all relevant information upfront to avoid hallucinations or incorrect assumptions.
-
-3. **Clear Terminology**: Use consistent terminology throughout your communications to avoid confusion.
-
-4. **Feedback Format**: Structure feedback with clear indications, such as:
-   ```
-   feedback:
-   - I like how you've handled error states in this implementation
-   - The navigation flow doesn't match what we discussed - users should return to the home screen after completing a search
-   - Consider adding accessibility labels to the new UI elements
-   ```
-
-5. **Explain the "Why"**: When requesting changes, explain the reasoning behind them to help Copilot make better decisions in future implementations.
-
-6. **Use the Word "Milestone"**: The term "milestone" is specifically chosen because Copilot responds well to it. Using this term helps Copilot understand when to naturally stop its implementation work.
-
-7. **Start and End Signals**: Be clear when you want Copilot to start implementation ("Let's start the first milestone") and when you're providing feedback versus requesting continuation.

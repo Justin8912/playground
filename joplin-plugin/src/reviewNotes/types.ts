@@ -15,11 +15,26 @@ export interface NotebookInfo {
 
 export interface ReviewsConfig {
   reviewsNotebookName: string;
+  filterEnabled: boolean;
+  filterCriteria: FilterCriteria;
 }
 
 export interface FilterCriteria {
   notebookIds?: string[];
   excludeNotebookIds?: string[];
+  noteIds?: string[];         // Individual note IDs to include
+  excludeNoteIds?: string[];  // Individual note IDs to exclude
   tags?: string[];
   excludeTags?: string[];
+}
+
+export enum FilterMode {
+  INCLUDE = 'include',
+  EXCLUDE = 'exclude',
+}
+
+export interface NotebookFilterEntry {
+  id: string;
+  title: string;
+  mode: FilterMode;
 }
