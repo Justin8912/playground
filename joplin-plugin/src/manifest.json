@@ -1,0 +1,16 @@
+{
+	"manifest_version": 1,
+	"id": "com.justin.llm.study.guide",
+	"app_min_version": "3.3",
+	"version": "1.0.0",
+	"name": "Review Notes Generator",
+	"description": "This plugin automatically generates review notes from your existing notes when Joplin starts. It maintains the original notebook hierarchy structure within a dedicated Reviews notebook.",
+	"author": "Justin8912",
+	"homepage_url": "",
+	"repository_url": "",
+	"keywords": ["review", "notes", "study", "llm"],
+	"categories": ["productivity"],
+	"screenshots": [],
+	"icons": {},
+	"promo_tile": {}
+}
