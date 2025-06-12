@@ -18,27 +18,28 @@ Expand the existing configuration service to handle filtering preferences and im
 - Add validation for filter configuration
 - Update default configuration
 
-## Milestone 2: Create Notebook Selection UI
+## Milestone 2: Create Notebook Exclusion UI
 
-Develop a user interface component that allows users to view and select notebooks to include or exclude from the review process.
+Develop a user interface component that allows users to view and select notebooks to exclude from the review process, utilizing the most appropriate technologies.
 
-**Expected outcome:** A functional UI integrated with the plugin settings that displays all available notebooks in a hierarchical structure with options to include or exclude each notebook.
+**Expected outcome:** A functional UI integrated with the plugin settings that displays available notebooks with checkboxes for excluding specific notebooks from the review process.
 
-- Create a notebook tree view component
-- Implement checkbox selection for inclusion/exclusion
-- Add search/filter functionality for large notebook collections
-- Implement hierarchical selection (parent/child relationships)
-- Add notebook selection state persistence
+- Create a notebook selection component using the most effective approach available
+- Implement checkbox interface for notebook exclusion with clear visual indicators
+- Structure the notebook display in a hierarchical, readable format
+- Ensure proper event handling for checkbox selection state changes
+- Add notebook exclusion state persistence through the configuration service
+- Implement user-friendly loading states when fetching notebook data
 
 ## Milestone 3: Implement Note Selection and Filtering Logic
 
-Create the business logic to apply the user's filtering preferences when selecting notes for review generation.
+Create the business logic to apply the user's exclusion preferences when selecting notes for review generation.
 
-**Expected outcome:** A robust filtering system that selects notes according to user-defined criteria when generating review notes.
+**Expected outcome:** A robust filtering system that selects notes according to user-defined exclusion criteria when generating review notes.
 
-- Enhance the `selectRandomNote` function to use filtering criteria
-- Implement notebook inclusion/exclusion filtering
-- Add support for tag-based filtering
+- Enhance the `selectRandomNote` function to use exclusion criteria
+- Implement notebook exclusion filtering
+- Add support for tag-based exclusion
 - Create utility functions for filter criteria validation
 - Implement filter matching algorithms using functional programming patterns
 

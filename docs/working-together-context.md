@@ -150,7 +150,7 @@ Example progress format:
 **Summary**: Implemented the basic search screen with a text input for VIN entry and a search button. Added proper navigation from the home screen. Included loading indicators and error handling for network failures. The screen is accessible and meets all UI responsiveness requirements.
 ```
 
-### Shared Documentation
+### Shared Documentati
 
 - **`docs/feat/lessons-learned.md`**: Captures key lessons learned during implementation
 - **`docs/deps/`**: Contains documentation on dependencies, integrations, and interfaces

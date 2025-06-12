@@ -11,16 +11,16 @@ const generateReviewNoteInBackground = () => {
 			if (reviewNote) {
 				console.log(`Review note created successfully: ${reviewNote.title}`);
 				
-				joplin.views.dialogs.showMessageBox(`Review note "${reviewNote.title}" created! Open it now?`)
-					.then((selection) => {
-						if (selection === 0) { // 0 is the index for "OK"
-							console.log('User acknowledged the creation of the review note. Opening the note...');
-							return joplin.commands.execute('openNote', reviewNote.id);
-						} else {
-							console.log('User dismissed the message box. Not opening the note.');
-						}
-					})
-					.catch(error => console.error('Error navigating to note:', error));
+				// joplin.views.dialogs.showMessageBox(`Review note "${reviewNote.title}" created! Open it now?`)
+				// 	.then((selection) => {
+				// 		if (selection === 0) { // 0 is the index for "OK"
+				// 			console.log('User acknowledged the creation of the review note. Opening the note...');
+				// 			return joplin.commands.execute('openNote', reviewNote.id);
+				// 		} else {
+				// 			console.log('User dismissed the message box. Not opening the note.');
+				// 		}
+				// 	})
+				// 	.catch(error => console.error('Error navigating to note:', error));
 			} else {
 				console.log('No review note was created');
 			}
@@ -47,10 +47,19 @@ joplin.plugins.register({
 			execute: async () => { generateReviewNoteInBackground();}
 		});
 		
+		await joplin.commands.register({
+			name: 'configureReviewNoteFilters',
+			label: 'Configure Review Note Filters',
+			execute: async () => { await showNotebookSelectionDialog(); }
+		});
+		
 		await joplin.views.menus.create('reviewNotesMenu', 'Review Notes', [
 			{
 				commandName: 'generateReviewNote',
 				accelerator: 'CmdOrCtrl+Shift+R'
+			},
+			{
+				commandName: 'configureReviewNoteFilters'
 			}
 		]);
 	}

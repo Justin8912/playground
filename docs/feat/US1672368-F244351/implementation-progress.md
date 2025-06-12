@@ -14,12 +14,12 @@ This document tracks the progress of implementing note and notebook filtering ca
 
 **Summary**: Enhanced the configuration service to support both notebook and individual note filtering preferences. Implemented a settings schema using Joplin's settings API to store and retrieve filter criteria. Created utility functions for applying filters using functional programming patterns with support for both notebook-level and note-level filtering. Added validation to ensure filter criteria are properly formatted. Updated the review service to use the filter settings when generating review notes.
 
-## Milestone 2: Create Notebook Selection UI
-- [ ] Create a notebook tree view component
-- [ ] Implement checkbox selection for inclusion/exclusion
-- [ ] Add search/filter functionality for large notebook collections
-- [ ] Implement hierarchical selection (parent/child relationships)
-- [ ] Add notebook selection state persistence
+## Milestone 2: Create Notebook Exclusion UI Using Joplin Plugin API
+- [ ] Create a notebook selection component using Joplin Plugin API's native UI capabilities
+- [ ] Implement simple checkbox interface for notebook exclusion
+- [ ] Structure the notebook display in a clear, readable format
+- [ ] Ensure proper event handling for checkbox selection state changes
+- [ ] Add notebook exclusion state persistence through Joplin settings API
 
 **Status**: Not started
 

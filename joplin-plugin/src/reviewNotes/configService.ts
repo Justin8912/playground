@@ -21,7 +21,6 @@ const DEFAULT_CONFIG: ReviewsConfig = {
  * Register plugin settings with Joplin
  */
 export const registerSettings = async (): Promise<void> => {
-  // Register settings section
   await joplin.settings.registerSection(SECTION_NAME, {
     label: 'Review Notes',
     iconName: 'fas fa-book',
@@ -119,3 +118,4 @@ export const initConfig = async (): Promise<ReviewsConfig> => {
   await registerSettings();
   return await getConfig();
 };
+
