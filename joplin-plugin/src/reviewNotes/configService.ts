@@ -1,6 +1,7 @@
 import joplin from 'api';
 import { SettingItemType } from 'api/types';
 import { FilterCriteria, ReviewsConfig } from './types';
+import * as DataApi from './dataApi';
 
 const SECTION_NAME = 'reviewNotesSettings';
 
@@ -28,10 +29,11 @@ export const registerSettings = async (): Promise<void> => {
     description: 'Settings for the Review Notes plugin'
   });
 
+  const config = await getConfig();
   // Register settings
   await joplin.settings.registerSettings({
     'reviewsNotebookName': {
-      value: DEFAULT_CONFIG.reviewsNotebookName,
+      value: config.reviewsNotebookName,
       type: SettingItemType.String,
       section: SECTION_NAME,
       public: true,
@@ -40,7 +42,7 @@ export const registerSettings = async (): Promise<void> => {
     },
 
     'filterEnabled': {
-      value: DEFAULT_CONFIG.filterEnabled,
+      value: config.filterEnabled,
       type: SettingItemType.Bool,
       section: SECTION_NAME,
       public: true,
@@ -48,10 +50,19 @@ export const registerSettings = async (): Promise<void> => {
       description: 'Enable filtering of notes for review generation'
     },
 
+    'excludedNotebooks': {
+      value: config.filterCriteria.excludeNotebookIds?.join(',') || '',
+      type: SettingItemType.String,
+      section: SECTION_NAME,
+      public: true,
+      label: 'Excluded Notebooks',
+      description: 'Comma-separated list of notebook names to exclude from review notes generation'
+    },
+
     // The filter criteria is stored as a JSON string since Joplin
     // settings don't support complex objects directly
     'filterCriteria': {
-      value: JSON.stringify(DEFAULT_CONFIG.filterCriteria),
+      value: JSON.stringify(config.filterCriteria),
       type: SettingItemType.String,
       section: SECTION_NAME,
       public: false,
@@ -63,11 +74,26 @@ export const registerSettings = async (): Promise<void> => {
 
 export const getConfig = async (): Promise<ReviewsConfig> => {
   try {
-    const values = await joplin.settings.values(['reviewsNotebookName', 'filterEnabled', 'filterCriteria']);
+    const values = await joplin.settings.values(['reviewsNotebookName', 'filterEnabled', 'filterCriteria', 'excludedNotebooks']);
     
     let filterCriteria: FilterCriteria;
     try {
       filterCriteria = JSON.parse(values.filterCriteria as string);
+      
+      // Process the excluded notebooks from UI setting
+      const excludedNotebooksStr = values.excludedNotebooks as string;
+      if (excludedNotebooksStr && excludedNotebooksStr.trim()) {
+        const notebookNames = excludedNotebooksStr
+          .split(',')
+          .map(name => name.trim())
+          .filter(name => name.length > 0);
+          
+        // Update the filter criteria with the notebook IDs
+        if (notebookNames.length > 0) {
+          const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
+          filterCriteria.excludeNotebookIds = notebookIds;
+        }
+      }
     } catch (error) {
       console.error('Error parsing filter criteria, using defaults:', error);
       filterCriteria = DEFAULT_CONFIG.filterCriteria;
@@ -90,6 +116,25 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
 export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promise<void> => {
   try {
     await joplin.settings.setValue('filterCriteria', JSON.stringify(filterCriteria));
+    
+    // Also update the excludedNotebooks setting for UI consistency
+    if (filterCriteria.excludeNotebookIds && filterCriteria.excludeNotebookIds.length > 0) {
+      // Get notebook names from IDs
+      const allNotebooks = await DataApi.getAllNotebooks();
+      const notebookMap = new Map<string, string>();
+      
+      allNotebooks.forEach(nb => {
+        notebookMap.set(nb.id, nb.title);
+      });
+      
+      const notebookNames = filterCriteria.excludeNotebookIds
+        .map(id => notebookMap.get(id) || id)
+        .join(',');
+      
+      await joplin.settings.setValue('excludedNotebooks', notebookNames);
+    } else {
+      await joplin.settings.setValue('excludedNotebooks', '');
+    }
   } catch (error) {
     console.error('Error saving filter criteria:', error);
   }

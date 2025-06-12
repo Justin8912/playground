@@ -18,17 +18,18 @@ Expand the existing configuration service to handle filtering preferences and im
 - Add validation for filter configuration
 - Update default configuration
 
-## Milestone 2: Create Notebook Selection UI
+## Milestone 2: Create Simple Notebook Exclusion UI
 
-Develop a user interface component that allows users to view and select notebooks to include or exclude from the review process.
+Implement a simple text input field in the plugin settings menu that allows users to specify notebooks to exclude from the review process using comma-delineated values.
 
-**Expected outcome:** A functional UI integrated with the plugin settings that displays all available notebooks in a hierarchical structure with options to include or exclude each notebook.
+**Expected outcome:** A straightforward settings input that allows users to enter notebook names to be excluded from the review note generation process, with an elegant summary display showing both excluded notebooks and all available notebooks for reference.
 
-- Create a notebook tree view component
-- Implement checkbox selection for inclusion/exclusion
-- Add search/filter functionality for large notebook collections
-- Implement hierarchical selection (parent/child relationships)
-- Add notebook selection state persistence
+- Add a text input field to plugin settings for notebook exclusion list
+- Implement comma-delineation parsing for notebook names
+- Create a visually appealing summary display of excluded notebooks
+- Display a list of all available notebooks for easy reference
+- Add validation for notebook name inputs
+- Implement real-time feedback on notebook exclusion status
 
 ## Milestone 3: Implement Note Selection and Filtering Logic
 

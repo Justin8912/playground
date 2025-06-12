@@ -1,6 +1,24 @@
 import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 
+// Helper function to check if a notebook is a descendant of another notebook
+const isDescendantNotebook = (
+  notebookId: string,
+  potentialAncestorId: string,
+  allNotebooks: NotebookInfo[]
+): boolean => {
+  // Get all child notebooks of the potential ancestor
+  const childNotebooks = allNotebooks.filter(nb => nb.parent_id === potentialAncestorId);
+  
+  // If the notebook is a direct child, return true
+  if (childNotebooks.some(child => child.id === notebookId)) return true;
+  
+  // Otherwise recursively check all children
+  return childNotebooks.some(child => 
+    isDescendantNotebook(notebookId, child.id, allNotebooks)
+  );
+};
+
 // Check if a note should be included based on the filter criteria
 export const noteMatchesFilterCriteria = (
   note: NoteInfo, 
@@ -35,8 +53,9 @@ export const noteMatchesFilterCriteria = (
   
   // Filter by excluded notebook ID
   if (criteria.excludeNotebookIds?.length) {
-    // Check if the note's parent_id is in the excluded notebooks
-    // or is a child of one of the excluded notebooks
+    // Check if the note is in any of the excluded notebooks
+    // or is in any child notebooks of the excluded notebooks
+    // or is in any parent notebooks of the excluded notebooks
     const isInExcludedNotebook = isNoteInNotebooks(note, notebooks, criteria.excludeNotebookIds);
     if (isInExcludedNotebook) return false;
   }
@@ -47,15 +66,16 @@ export const noteMatchesFilterCriteria = (
   return true;
 };
 
-// Check if a note is in any of the specified notebooks or their children
+// Check if a note is in any of the specified notebooks or their descendants
 const isNoteInNotebooks = (
   note: NoteInfo, 
   allNotebooks: NotebookInfo[], 
   notebookIds: string[]
 ): boolean => {
+  // Direct match: The note is directly in one of the specified notebooks
   if (notebookIds.includes(note.parent_id)) return true;
   
-  // Get the full path of the note's notebook
+  // Get the full path of the note's notebook (check upward hierarchy)
   const getNotebookPath = (notebookId: string, path: string[] = []): string[] => {
     const notebook = allNotebooks.find(nb => nb.id === notebookId);
     if (!notebook) return path;
@@ -70,7 +90,17 @@ const isNoteInNotebooks = (
     return getNotebookPath(notebook.parent_id, newPath);
   };
 
-  return notebookIds.some(id => getNotebookPath(note.parent_id).includes(id));
+  // Check if any notebook in the note's ancestry is in the specified list
+  const isInAncestry = notebookIds.some(id => getNotebookPath(note.parent_id).includes(id));
+  if (isInAncestry) return true;
+  
+  // Check downward in the hierarchy (is the note in a child of any excluded notebook?)
+  const isChildOfExcludedNotebook = notebookIds.some(excludedId => {
+    // Check if the note's parent is a descendant of this excluded notebook
+    return isDescendantNotebook(note.parent_id, excludedId, allNotebooks);
+  });
+  
+  return isChildOfExcludedNotebook;
 };
 
 export const applyFilterCriteria = (

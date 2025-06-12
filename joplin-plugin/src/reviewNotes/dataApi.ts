@@ -127,3 +127,28 @@ export const createNote = async (
     return null;
   }
 };
+
+/**
+ * Get notebook IDs by their names
+ * @param notebookNames Array of notebook names to convert to IDs
+ * @returns Array of notebook IDs that were found
+ */
+export const getNotebookIdsByNames = async (notebookNames: string[]): Promise<string[]> => {
+  try {
+    const allNotebooks = await getAllNotebooks();
+    const notebookMap = new Map<string, string>();
+    
+    // Create a map of notebook titles to IDs
+    allNotebooks.forEach(notebook => {
+      notebookMap.set(notebook.title.toLowerCase(), notebook.id);
+    });
+    
+    // Look up each notebook name and get its ID
+    return notebookNames
+      .map(name => notebookMap.get(name.toLowerCase()))
+      .filter((id): id is string => id !== undefined);
+  } catch (error) {
+    console.error('Error getting notebook IDs by names:', error);
+    return [];
+  }
+};

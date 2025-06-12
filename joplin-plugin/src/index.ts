@@ -36,8 +36,6 @@ joplin.plugins.register({
 	onStart: async function() {
 		// Initialize config with enhanced settings
 		const config = await initConfig();
-		// TODO: Remove after this has been tested.
-		console.info('Review Notes Plugin started!', config.filterEnabled ? 'Note filtering enabled' : 'Note filtering disabled');
 
 		generateReviewNoteInBackground();
 		

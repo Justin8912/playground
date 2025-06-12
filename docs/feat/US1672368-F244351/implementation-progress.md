@@ -14,27 +14,28 @@ This document tracks the progress of implementing note and notebook filtering ca
 
 **Summary**: Enhanced the configuration service to support both notebook and individual note filtering preferences. Implemented a settings schema using Joplin's settings API to store and retrieve filter criteria. Created utility functions for applying filters using functional programming patterns with support for both notebook-level and note-level filtering. Added validation to ensure filter criteria are properly formatted. Updated the review service to use the filter settings when generating review notes.
 
-## Milestone 2: Create Notebook Selection UI
-- [ ] Create a notebook tree view component
-- [ ] Implement checkbox selection for inclusion/exclusion
-- [ ] Add search/filter functionality for large notebook collections
-- [ ] Implement hierarchical selection (parent/child relationships)
-- [ ] Add notebook selection state persistence
+## Milestone 2: Create Simple Notebook Exclusion UI
+- [x] Add a text input field to plugin settings for notebook exclusion list
+- [x] Implement comma-delineation parsing for notebook names
+- [ ] Create a visually appealing summary display of excluded notebooks
+- [ ] Display a list of all available notebooks for easy reference
+- [ ] Add validation for notebook name inputs
+- [ ] Implement real-time feedback on notebook exclusion status
 
-**Status**: Not started
+**Status**: In Progress (June 12, 2025)
 
-**Summary**: 
+**Summary**: Implemented the core notebook exclusion functionality with a simple text input field that accepts comma-separated notebook names. Added utility functions to convert between notebook names and IDs, ensuring the filter criteria uses the proper notebook IDs when filtering. Enhanced the filtering logic to exclude all child notebooks when a parent notebook is excluded, providing intuitive hierarchical filtering. Updated the configuration service to handle synchronization between the UI setting and internal filter criteria. Created test utilities to verify the notebook exclusion functionality. 
 
 ## Milestone 3: Implement Note Selection and Filtering Logic
-- [ ] Enhance the `selectRandomNote` function to use filtering criteria
-- [ ] Implement notebook inclusion/exclusion filtering
+- [x] Enhance the `selectRandomNote` function to use filtering criteria
+- [x] Implement notebook inclusion/exclusion filtering
 - [ ] Add support for tag-based filtering
-- [ ] Create utility functions for filter criteria validation
-- [ ] Implement filter matching algorithms using functional programming patterns
+- [x] Create utility functions for filter criteria validation
+- [x] Implement filter matching algorithms using functional programming patterns
 
-**Status**: Not started
+**Status**: Partially Complete (June 12, 2025)
 
-**Summary**: 
+**Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes. Validation utilities ensure the filter criteria is properly formatted before being applied. 
 
 ## Milestone 4: Enhance Plugin Menu and Command System
 - [ ] Add settings command to plugin menu
