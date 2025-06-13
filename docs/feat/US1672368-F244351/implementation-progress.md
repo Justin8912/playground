@@ -24,7 +24,7 @@ This document tracks the progress of implementing note and notebook filtering ca
 
 **Status**: In Progress (June 12, 2025)
 
-**Summary**: Implemented the core notebook exclusion functionality with a simple text input field that accepts comma-separated notebook names. Added utility functions to convert between notebook names and IDs, ensuring the filter criteria uses the proper notebook IDs when filtering. Enhanced the filtering logic to exclude all child notebooks when a parent notebook is excluded, providing intuitive hierarchical filtering. Updated the configuration service to handle synchronization between the UI setting and internal filter criteria. Created test utilities to verify the notebook exclusion functionality. 
+**Summary**: Implemented the core notebook exclusion functionality with a simple text input field that accepts comma-separated notebook names. Added utility functions to convert between notebook names and IDs, ensuring the filter criteria uses the proper notebook IDs when filtering. Enhanced the filtering logic with a sophisticated hierarchy mapping system that correctly handles notebooks with the same name in different parent contexts. The implementation uses a parent-child map and efficiently caches notebook paths to avoid redundant processing. Created comprehensive test utilities to verify the notebook exclusion functionality, including tests for notebook name collisions. 
 
 ## Milestone 3: Implement Note Selection and Filtering Logic
 - [x] Enhance the `selectRandomNote` function to use filtering criteria
@@ -35,7 +35,7 @@ This document tracks the progress of implementing note and notebook filtering ca
 
 **Status**: Partially Complete (June 12, 2025)
 
-**Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes. Validation utilities ensure the filter criteria is properly formatted before being applied. 
+**Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. Created an optimized hierarchy mapping system that properly distinguishes between notebooks with identical names but different parent contexts. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes, with cached hierarchy lookups for improved performance. Validation utilities ensure the filter criteria is properly formatted before being applied. 
 
 ## Milestone 4: Enhance Plugin Menu and Command System
 - [ ] Add settings command to plugin menu

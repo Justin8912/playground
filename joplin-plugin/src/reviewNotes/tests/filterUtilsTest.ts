@@ -9,7 +9,7 @@ import { FilterCriteria, NoteInfo, NotebookInfo } from '../types';
 export const testNotebookHierarchyExclusion = (): void => {
   console.log('Testing notebook hierarchy exclusion...');
   
-  // Mock data setup
+  // Mock data setup with a basic hierarchy
   const notebooks: NotebookInfo[] = [
     { id: 'root1', title: 'Root Notebook 1', parent_id: '' },
     { id: 'root2', title: 'Root Notebook 2', parent_id: '' },
@@ -80,4 +80,53 @@ export const testNotebookHierarchyExclusion = (): void => {
   const onlyChildAndGrandchildExcluded = childExcludedNotes.every(note => 
     note.parent_id === 'child1' || note.parent_id === 'grandchild1');
   console.log(`\nOnly child and grandchild notebooks excluded (parent unaffected): ${onlyChildAndGrandchildExcluded}`);
+  
+  // Add test case for name collision (two notebooks with the same name but different parents)
+  console.log('\nTesting notebook name collision handling:');
+  const notebooksWithNameCollision: NotebookInfo[] = [
+    { id: 'rootA', title: 'Root A', parent_id: '' },
+    { id: 'rootB', title: 'Root B', parent_id: '' },
+    { id: 'childC1', title: 'C', parent_id: 'rootA' }, // Notebook C under Root A
+    { id: 'childC2', title: 'C', parent_id: 'rootB' }, // Notebook C under Root B
+  ];
+  
+  const notesWithNameCollision: NoteInfo[] = [
+    { id: 'noteA', title: 'Note in Root A', body: 'Content A', parent_id: 'rootA' },
+    { id: 'noteB', title: 'Note in Root B', body: 'Content B', parent_id: 'rootB' },
+    { id: 'noteC1', title: 'Note in C under A', body: 'Content C1', parent_id: 'childC1' },
+    { id: 'noteC2', title: 'Note in C under B', body: 'Content C2', parent_id: 'childC2' },
+  ];
+  
+  // Test excluding just one of the "C" notebooks
+  const collisionFilterCriteria: FilterCriteria = {
+    excludeNotebookIds: ['childC1'] // Only exclude C under Root A
+  };
+  
+  console.log('\nTesting with excluded notebook C under Root A:');
+  const collisionFilteredNotes = applyFilterCriteria(notesWithNameCollision, notebooksWithNameCollision, collisionFilterCriteria);
+  
+  console.log('Notes that passed the filter:');
+  collisionFilteredNotes.forEach(note => {
+    const notebook = notebooksWithNameCollision.find(nb => nb.id === note.parent_id);
+    const parentNotebook = notebook?.parent_id ? 
+      notebooksWithNameCollision.find(nb => nb.id === notebook.parent_id) : null;
+    console.log(`- ${note.title} (in notebook: ${notebook?.title}${parentNotebook ? ' under ' + parentNotebook.title : ''})`);
+  });
+  
+  console.log('\nNotes that were excluded:');
+  const collisionExcludedNotes = notesWithNameCollision.filter(note => 
+    !collisionFilteredNotes.some(fn => fn.id === note.id));
+  
+  collisionExcludedNotes.forEach(note => {
+    const notebook = notebooksWithNameCollision.find(nb => nb.id === note.parent_id);
+    const parentNotebook = notebook?.parent_id ? 
+      notebooksWithNameCollision.find(nb => nb.id === notebook.parent_id) : null;
+    console.log(`- ${note.title} (in notebook: ${notebook?.title}${parentNotebook ? ' under ' + parentNotebook.title : ''})`);
+  });
+  
+  // Check if only the notes from C under A were excluded
+  const correctCollisionHandling = collisionExcludedNotes.every(note => note.parent_id === 'childC1') &&
+    collisionFilteredNotes.some(note => note.parent_id === 'childC2');
+  
+  console.log(`\nCorrectly handled notebook name collision (only C under A excluded): ${correctCollisionHandling}`);
 };
