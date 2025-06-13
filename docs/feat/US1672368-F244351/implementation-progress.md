@@ -17,6 +17,7 @@ This document tracks the progress of implementing note and notebook filtering ca
 ## Milestone 2: Create Simple Notebook Exclusion UI
 - [x] Add a text input field to plugin settings for notebook exclusion list
 - [x] Implement comma-delineation parsing for notebook names
+- [x] Automatically exclude the Reviews notebook from review note generation
 - [ ] Create a visually appealing summary display of excluded notebooks
 - [ ] Display a list of all available notebooks for easy reference
 - [ ] Add validation for notebook name inputs
@@ -24,18 +25,18 @@ This document tracks the progress of implementing note and notebook filtering ca
 
 **Status**: In Progress (June 12, 2025)
 
-**Summary**: Implemented the core notebook exclusion functionality with a simple text input field that accepts comma-separated notebook names. Added utility functions to convert between notebook names and IDs, ensuring the filter criteria uses the proper notebook IDs when filtering. Enhanced the filtering logic with a sophisticated hierarchy mapping system that correctly handles notebooks with the same name in different parent contexts. The implementation uses a parent-child map and efficiently caches notebook paths to avoid redundant processing. Created comprehensive test utilities to verify the notebook exclusion functionality, including tests for notebook name collisions. 
+**Summary**: Implemented the core notebook exclusion functionality with a simple text input field that accepts comma-separated notebook names. Added utility functions to convert between notebook names and IDs, ensuring the filter criteria uses the proper notebook IDs when filtering. Enhanced the filtering logic with a sophisticated hierarchy mapping system that correctly handles notebooks with the same name in different parent contexts. The implementation uses a parent-child map and efficiently caches notebook paths to avoid redundant processing. Added functionality to automatically exclude the Reviews notebook from the filtering process, preventing review notes from being included in the selection process for new reviews. Created comprehensive test utilities to verify the notebook exclusion functionality, including tests for notebook name collisions.
 
 ## Milestone 3: Implement Note Selection and Filtering Logic
 - [x] Enhance the `selectRandomNote` function to use filtering criteria
 - [x] Implement notebook inclusion/exclusion filtering
-- [ ] Add support for tag-based filtering
+- [x] Add support for tag-based filtering
 - [x] Create utility functions for filter criteria validation
 - [x] Implement filter matching algorithms using functional programming patterns
 
-**Status**: Partially Complete (June 12, 2025)
+**Status**: Complete (June 13, 2025)
 
-**Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. Created an optimized hierarchy mapping system that properly distinguishes between notebooks with identical names but different parent contexts. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes, with cached hierarchy lookups for improved performance. Validation utilities ensure the filter criteria is properly formatted before being applied. 
+**Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. Created an optimized hierarchy mapping system that properly distinguishes between notebooks with identical names but different parent contexts. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes, with cached hierarchy lookups for improved performance. Validation utilities ensure the filter criteria is properly formatted before being applied. Added tag-based filtering with a dropdown selector in the plugin settings to exclude notes with specific tags from review generation. Implemented case-insensitive tag matching and enhanced the dataApi to retrieve note tags efficiently. 
 
 ## Milestone 4: Enhance Plugin Menu and Command System
 - [ ] Add settings command to plugin menu

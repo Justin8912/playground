@@ -19,6 +19,22 @@ const DEFAULT_CONFIG: ReviewsConfig = {
 };
 
 /**
+ * Get all available tags for the dropdown selection
+ */
+const getTagOptions = async (): Promise<Record<string, string>> => {
+  const tags = await DataApi.getAllTags();
+  const options: Record<string, string> = {
+    '': '-- None --'  // Default empty option
+  };
+  
+  tags.forEach(tag => {
+    options[tag.title] = tag.title;
+  });
+  
+  return options;
+};
+
+/**
  * Register plugin settings with Joplin
  */
 export const registerSettings = async (): Promise<void> => {
@@ -59,6 +75,17 @@ export const registerSettings = async (): Promise<void> => {
       description: 'Comma-separated list of notebook names to exclude from review notes generation'
     },
 
+    'excludedTag': {
+      value: config.filterCriteria.excludeTags?.length ? config.filterCriteria.excludeTags[0] : '',
+      type: SettingItemType.String,
+      section: SECTION_NAME,
+      isEnum: true,
+      public: true,
+      label: 'Exclude Notes with Tag',
+      description: 'Notes with this tag will be excluded from review notes generation',
+      options: await getTagOptions()
+    },
+
     // The filter criteria is stored as a JSON string since Joplin
     // settings don't support complex objects directly
     'filterCriteria': {
@@ -74,25 +101,49 @@ export const registerSettings = async (): Promise<void> => {
 
 export const getConfig = async (): Promise<ReviewsConfig> => {
   try {
-    const values = await joplin.settings.values(['reviewsNotebookName', 'filterEnabled', 'filterCriteria', 'excludedNotebooks']);
+    const values = await joplin.settings.values([
+      'reviewsNotebookName', 
+      'filterEnabled', 
+      'filterCriteria', 
+      'excludedNotebooks',
+      'excludedTag'
+    ]);
     
     let filterCriteria: FilterCriteria;
     try {
       filterCriteria = JSON.parse(values.filterCriteria as string);
       
+      // Get reviews notebook name from config
+      const reviewsNotebookName = values.reviewsNotebookName as string || DEFAULT_CONFIG.reviewsNotebookName;
+      
       // Process the excluded notebooks from UI setting
-      const excludedNotebooksStr = values.excludedNotebooks as string;
-      if (excludedNotebooksStr && excludedNotebooksStr.trim()) {
-        const notebookNames = excludedNotebooksStr
-          .split(',')
-          .map(name => name.trim())
-          .filter(name => name.length > 0);
-          
-        // Update the filter criteria with the notebook IDs
-        if (notebookNames.length > 0) {
-          const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
-          filterCriteria.excludeNotebookIds = notebookIds;
-        }
+      const excludedNotebooksStr = values.excludedNotebooks as string || '';
+      
+      // Process the excluded tag from UI setting
+      const excludedTag = values.excludedTag as string || '';
+      
+      // Combine Reviews notebook with user-specified notebooks
+      const notebookNames = [
+        reviewsNotebookName, // Always include the Reviews notebook
+        ...(excludedNotebooksStr && excludedNotebooksStr.trim() ? 
+          excludedNotebooksStr
+            .split(',')
+            .map(name => name.trim())
+            .filter(name => name.length > 0 && name.toLowerCase() !== reviewsNotebookName.toLowerCase()) // Avoid duplicates
+          : [])
+      ];
+      
+      // Update the filter criteria with the notebook IDs
+      if (notebookNames.length > 0) {
+        const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
+        filterCriteria.excludeNotebookIds = notebookIds;
+      }
+      
+      // Update the filter criteria with the excluded tag
+      if (excludedTag && excludedTag.trim()) {
+        filterCriteria.excludeTags = [excludedTag.trim()];
+      } else {
+        filterCriteria.excludeTags = [];
       }
     } catch (error) {
       console.error('Error parsing filter criteria, using defaults:', error);
@@ -117,7 +168,7 @@ export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promis
   try {
     await joplin.settings.setValue('filterCriteria', JSON.stringify(filterCriteria));
     
-    // Also update the excludedNotebooks setting for UI consistency
+    // Update the excludedNotebooks setting for UI consistency
     if (filterCriteria.excludeNotebookIds && filterCriteria.excludeNotebookIds.length > 0) {
       // Get notebook names from IDs
       const allNotebooks = await DataApi.getAllNotebooks();
@@ -134,6 +185,13 @@ export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promis
       await joplin.settings.setValue('excludedNotebooks', notebookNames);
     } else {
       await joplin.settings.setValue('excludedNotebooks', '');
+    }
+    
+    // Update the excludedTag setting for UI consistency
+    if (filterCriteria.excludeTags && filterCriteria.excludeTags.length > 0) {
+      await joplin.settings.setValue('excludedTag', filterCriteria.excludeTags[0]);
+    } else {
+      await joplin.settings.setValue('excludedTag', '');
     }
   } catch (error) {
     console.error('Error saving filter criteria:', error);

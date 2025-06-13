@@ -164,8 +164,16 @@ export const noteMatchesFilterCriteria = (
     if (isInExcludedNotebook) return false;
   }
   
-  // Future: tag filtering
-  // This is prepared but we'll implement it in a later milestone
+  // Filter by tags - get note tags from the cache or load them
+  if (criteria.excludeTags?.length) {
+    const noteTags = note.tags || [];
+    // Check if the note has any of the excluded tags
+    // Using case-insensitive comparison for tag names
+    const hasExcludedTag = criteria.excludeTags.some(excludedTag => 
+      noteTags.some(noteTag => noteTag.toLowerCase() === excludedTag.toLowerCase())
+    );
+    if (hasExcludedTag) return false;
+  }
   
   return true;
 };

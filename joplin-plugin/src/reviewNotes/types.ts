@@ -4,6 +4,7 @@ export interface NoteInfo {
   body: string;
   parent_id: string;
   notebook_path?: string[];
+  tags?: string[];
 }
 
 export interface NotebookInfo {
