@@ -30,10 +30,6 @@ const createHtmlHierarchy = (notebookHierarchy, excludedNotebookIds) => {
     return createHtmlList(notebookHierarchy);
 }
 export const setDialogHtml = async (viewHandle, notebookHierarchy,  excludedNotebookIds = []) => {
-    await joplin.data.post(['notes'], null, {
-        title: 'Debug Log - createDialog',
-        body: `${createHtmlHierarchy(notebookHierarchy, excludedNotebookIds)}`,
-    });
     const dialogHtml = `
         <div id="scroll-container">
             <h1><strong>Manage Notebooks</strong></h1>

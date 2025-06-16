@@ -54,7 +54,7 @@ joplin.plugins.register({
 			name: 'filterConfigurationView',
 			label: 'Configure Filter Criteria',
 			execute: async () => {
-				await updateDialogHtml(viewHandle, await getNotebookHierarchy(), config.filterCriteria.excludeNotebookIds);
+				await updateDialogHtml(viewHandle, await getNotebookHierarchy(), (await getConfig()).filterCriteria.excludeNotebookIds);
 				const result = await joplin.views.dialogs.open(viewHandle);
 				const inputValue = result?.formData?.notebookExclusionForm;
 				if (inputValue) {
@@ -63,11 +63,6 @@ joplin.plugins.register({
 					}).map(key=>key)
 
 					await joplin.settings.setValue('excludedNotebooks', selectedNotebookIds.join(','));
-
-					await joplin.data.post(['notes'], null, {
-						title: 'Debug Log',
-						body: `Form result: ${JSON.stringify(await getNotebookHierarchy())}`,
-					});
 				}
 			}
 		});
@@ -78,11 +73,9 @@ joplin.plugins.register({
 				accelerator: 'CmdOrCtrl+Shift+R'
 			},
 			{
-				commandName: 'filterConfigurationView'
+				commandName: 'filterConfigurationView',
+				accelerator: "CmdOrCtrl+Shift+A"
 			}
 		], MenuItemLocation.Tools);
-
-
-
 	}
 });
