@@ -11,18 +11,20 @@ export const createDialog = async (notebookHierarchy, excludedNotebookIds) => {
 }
 
 const createHtmlHierarchy = (notebookHierarchy, excludedNotebookIds) => {
-    const createHtmlList = (items, isExcluded) => {
+    const createHtmlList = (items, isParentExcluded) => {
         return `
             <ul>
-                ${items.map(item => `
+                ${items.map(item => {
+                    const isItemExcluded = excludedNotebookIds.includes(item.id) || isParentExcluded;
+                    return `
                     <li>
                         <label>
-                            <input type="checkbox" name="${item.id}" ${excludedNotebookIds.includes(item.id) || isExcluded ? 'checked' : ''}/>
+                            <input type="checkbox" name="${item.id}" ${isItemExcluded? 'checked' : ''}/>
                             ${item.title}
                         </label>
-                        ${item.children ? createHtmlList(item.children, excludedNotebookIds.includes(item.id) || isExcluded) : ''}
+                        ${item.children ? createHtmlList(item.children, isItemExcluded) : ''}
                     </li>
-                `).join('')}
+                `}).join('')}
             </ul>
         `;
     };

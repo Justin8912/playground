@@ -65,7 +65,7 @@ export const registerSettings = async (): Promise<void> => {
       value: config.filterCriteria.excludeNotebookIds?.join(',') || '',
       type: SettingItemType.String,
       section: SECTION_NAME,
-      public: true,
+      public: false,
       label: 'Excluded Notebooks',
       description: 'Comma-separated list of notebook names to exclude from review notes generation'
     },
@@ -118,18 +118,22 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       const excludedTag = values.excludedTag as string || '';
       
       // Combine Reviews notebook with user-specified notebooks
-      const notebookNames = [
-        ...(excludedNotebooksStr && excludedNotebooksStr.trim() ? 
-          excludedNotebooksStr
-            .split(',')
-            .map(name => name.trim())
-            .filter(name => name.length > 0 && name.toLowerCase() !== reviewsNotebookName.toLowerCase()) // Avoid duplicates
-          : [])
-      ];
+      // const notebookNames = [
+      //   ...(excludedNotebooksStr && excludedNotebooksStr.trim() ? 
+      //     excludedNotebooksStr
+      //       .split(',')
+      //       .map(name => name.trim())
+      //       .filter(name => name.length > 0 && name.toLowerCase() !== reviewsNotebookName.toLowerCase()) // Avoid duplicates
+      //     : [])
+      // ];
+
+      const notebookNames = excludedNotebooksStr
+        .split(',')
+        .map(id=>id.trim().toLowerCase())
+        .filter(name => name.length > 0);
       
       // Update the filter criteria with the notebook IDs
       if (notebookNames.length > 0) {
-        // const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
         filterCriteria.excludeNotebookIds = notebookNames;
       }
       
