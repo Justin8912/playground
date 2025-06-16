@@ -18,92 +18,6 @@ const DEFAULT_CONFIG: ReviewsConfig = {
   }
 };
 
-/**
- * Generate a text listing of all available notebooks for reference
- */
-const generateNotebookList = async (): Promise<string> => {
-  try {
-    const notebooks = await DataApi.getAllNotebooks();
-    
-    if (notebooks.length === 0) {
-      return "No notebooks found in your Joplin database";
-    }
-    
-    // Create a simple indented list of notebooks
-    const notebookMap = new Map<string, NotebookInfo[]>();
-    
-    // Group notebooks by parent_id
-    notebooks.forEach(notebook => {
-      const parentId = notebook.parent_id || 'root';
-      if (!notebookMap.has(parentId)) {
-        notebookMap.set(parentId, []);
-      }
-      notebookMap.get(parentId)?.push(notebook);
-    });
-    
-    // Build the text representation
-    const lines: string[] = ['Available notebooks:'];
-    
-    // Add root notebooks first
-    const rootNotebooks = notebookMap.get('root') || [];
-    rootNotebooks.forEach(notebook => {
-      lines.push(`- ${notebook.title}`);
-      addChildNotebooks(notebook.id, 1);
-    });
-    
-    // Helper function to add child notebooks recursively with indentation
-    function addChildNotebooks(parentId: string, depth: number) {
-      const children = notebookMap.get(parentId) || [];
-      children.forEach(child => {
-        lines.push(`${' '.repeat(depth * 2)}- ${child.title}`);
-        addChildNotebooks(child.id, depth + 1);
-      });
-    }
-    
-    return lines.join('\n');
-  } catch (error) {
-    console.error('Error generating notebook list:', error);
-    return "Error retrieving notebooks";
-  }
-};
-
-/**
- * Generate a human-readable summary of what's being excluded from review
- */
-const generateExclusionSummary = async (criteria: FilterCriteria): Promise<string> => {
-  const parts: string[] = [];
-  
-  // Get notebook names for excluded notebook IDs
-  if (criteria.excludeNotebookIds && criteria.excludeNotebookIds.length > 0) {
-    const allNotebooks = await DataApi.getAllNotebooks();
-    const notebookMap = new Map<string, string>();
-    
-    allNotebooks.forEach(nb => {
-      notebookMap.set(nb.id, nb.title);
-    });
-    
-    const notebookNames = criteria.excludeNotebookIds
-      .map(id => notebookMap.get(id) || id);
-      
-    parts.push(`Excluded notebooks: ${notebookNames.join(', ')}`);
-  }
-  
-  // Add excluded tags
-  if (criteria.excludeTags && criteria.excludeTags.length > 0) {
-    parts.push(`Excluded tags: ${criteria.excludeTags.join(', ')}`);
-  }
-  
-  // If nothing is excluded, show a message indicating that
-  if (parts.length === 0) {
-    return "No exclusions configured - all notes are eligible for review";
-  }
-  
-  return parts.join("\n");
-};
-
-/**
- * Get all available tags for the dropdown selection
- */
 const getTagOptions = async (): Promise<Record<string, string>> => {
   const tags = await DataApi.getAllTags();
   const options: Record<string, string> = {
@@ -117,9 +31,7 @@ const getTagOptions = async (): Promise<Record<string, string>> => {
   return options;
 };
 
-/**
- * Register plugin settings with Joplin
- */
+
 export const registerSettings = async (): Promise<void> => {
   // Register settings section
   await joplin.settings.registerSection(SECTION_NAME, {
@@ -167,26 +79,6 @@ export const registerSettings = async (): Promise<void> => {
       label: 'Exclude Notes with Tag',
       description: 'Notes with this tag will be excluded from review notes generation',
       options: await getTagOptions()
-    },
-
-    'exclusionSummary': {
-      value: await generateExclusionSummary(config.filterCriteria),
-      type: SettingItemType.String,
-      section: SECTION_NAME,
-      public: true,
-      label: 'Current Exclusions',
-      description: 'Summary of notebooks and tags currently excluded from review',
-      advanced: false
-    },
-    
-    'availableNotebooks': {
-      value: await generateNotebookList(),
-      type: SettingItemType.String,
-      section: SECTION_NAME,
-      public: true,
-      label: 'Available Notebooks',
-      description: 'List of all available notebooks for reference',
-      advanced: false
     },
 
     // The filter criteria is stored as a JSON string since Joplin
@@ -263,9 +155,6 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
   }
 };
 
-/**
- * Update filter criteria in settings
- */
 export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promise<void> => {
   try {
     await joplin.settings.setValue('filterCriteria', JSON.stringify(filterCriteria));
@@ -295,10 +184,6 @@ export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promis
     } else {
       await joplin.settings.setValue('excludedTag', '');
     }
-    
-    // Update the exclusion summary
-    const summary = await generateExclusionSummary(filterCriteria);
-    await joplin.settings.setValue('exclusionSummary', summary);
   } catch (error) {
     console.error('Error saving filter criteria:', error);
   }
