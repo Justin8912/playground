@@ -20,7 +20,7 @@ const generateReviewNoteInBackground = () => {
 							console.log('User acknowledged the creation of the review note. Opening the note...');
 							return joplin.commands.execute('openNote', reviewNote.id);
 						} else {
-							console.log('User dismissed the message box. Not opening the note.');
+							console.log('User chose not to open the review note.');
 						}
 					})
 					.catch(error => console.error('Error navigating to note:', error));
@@ -37,9 +37,9 @@ const generateReviewNoteInBackground = () => {
 
 joplin.plugins.register({
 	onStart: async function() {
-		// Initialize config with enhanced settings
 		const config = await initConfig();
 
+		// Quick off initial reviewNoteGeneration
 		generateReviewNoteInBackground();
 		
 		const viewHandle = await createDialog(await getNotebookHierarchy(), config.filterCriteria.excludeNotebookIds);
@@ -54,7 +54,7 @@ joplin.plugins.register({
 			name: 'filterConfigurationView',
 			label: 'Configure Filter Criteria',
 			execute: async () => {
-				await updateDialogHtml(viewHandle, await getNotebookHierarchy(), config.filterCriteria.excludeNotebookIds);
+				await updateDialogHtml(viewHandle, await getNotebookHierarchy(), (await getConfig()).filterCriteria.excludeNotebookIds);
 				const result = await joplin.views.dialogs.open(viewHandle);
 				const inputValue = result?.formData?.notebookExclusionForm;
 				if (inputValue) {
@@ -63,11 +63,8 @@ joplin.plugins.register({
 					}).map(key=>key)
 
 					await joplin.settings.setValue('excludedNotebooks', selectedNotebookIds.join(','));
-
-					await joplin.data.post(['notes'], null, {
-						title: 'Debug Log',
-						body: `Form result: ${JSON.stringify(await getNotebookHierarchy())}`,
-					});
+				} else {
+					console.log('Form has not output or was cancelled. No changes made to excluded notebooks.');
 				}
 			}
 		});
@@ -78,11 +75,9 @@ joplin.plugins.register({
 				accelerator: 'CmdOrCtrl+Shift+R'
 			},
 			{
-				commandName: 'filterConfigurationView'
+				commandName: 'filterConfigurationView',
+				accelerator: 'CmdOrCtrl+Shift+A'
 			}
 		], MenuItemLocation.Tools);
-
-
-
 	}
 });
