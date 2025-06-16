@@ -116,16 +116,6 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       
       // Process the excluded tag from UI setting
       const excludedTag = values.excludedTag as string || '';
-      
-      // Combine Reviews notebook with user-specified notebooks
-      // const notebookNames = [
-      //   ...(excludedNotebooksStr && excludedNotebooksStr.trim() ? 
-      //     excludedNotebooksStr
-      //       .split(',')
-      //       .map(name => name.trim())
-      //       .filter(name => name.length > 0 && name.toLowerCase() !== reviewsNotebookName.toLowerCase()) // Avoid duplicates
-      //     : [])
-      // ];
 
       const notebookNames = excludedNotebooksStr
         .split(',')
