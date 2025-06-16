@@ -1,6 +1,9 @@
 import joplin from 'api';
-import { initConfig } from './reviewNotes/configService';
+import { initConfig, getConfig } from './reviewNotes/configService';
 import { generateReviewNote } from './reviewNotes/reviewService';
+import { createDialog, manageNotebooks, updateDialogHtml } from './ui/createDialog';
+import { MenuItemLocation } from 'api/types';
+import { getAllNotebooks } from './reviewNotes/dataApi';
 
 const generateReviewNoteInBackground = () => {
 	console.log('Starting review note generation...');
@@ -39,17 +42,47 @@ joplin.plugins.register({
 
 		generateReviewNoteInBackground();
 		
+		const viewHandle = await createDialog((await getConfig()).filterCriteria.excludeNotebookIds);
+
 		await joplin.commands.register({
 			name: 'generateReviewNote',
 			label: 'Generate Review Note',
 			execute: async () => { generateReviewNoteInBackground();}
+		});
+
+		await joplin.commands.register({
+			name: 'filterConfigurationView',
+			label: 'Configure Filter Criteria',
+			execute: async () => {
+				await updateDialogHtml(viewHandle, (await getConfig()).filterCriteria.excludeNotebookIds);
+				const result = await joplin.views.dialogs.open(viewHandle );
+				const inputValue = result?.formData?.notebookExclusionForm;
+				if (inputValue) {
+					const selectedNotebookIds = Object.keys(inputValue).filter((key) => {
+						if (inputValue[key].toLowerCase() === "on") return true
+					}).map(key=>key)
+
+					await joplin.settings.setValue('excludedNotebooks', selectedNotebookIds.join(','));
+
+					await joplin.data.post(['notes'], null, {
+						title: 'Debug Log',
+						body: `Form result: ${JSON.stringify((await getAllNotebooks()).map(notebook => JSON.stringify(notebook)))}`,
+					});
+				}
+			}
 		});
 		
 		await joplin.views.menus.create('reviewNotesMenu', 'Review Notes', [
 			{
 				commandName: 'generateReviewNote',
 				accelerator: 'CmdOrCtrl+Shift+R'
+			},
+			{
+				commandName: 'filterConfigurationView'
 			}
-		]);
+		], MenuItemLocation.Tools);
+
+
+
 	}
 });

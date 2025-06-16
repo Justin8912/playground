@@ -227,7 +227,6 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       
       // Combine Reviews notebook with user-specified notebooks
       const notebookNames = [
-        reviewsNotebookName, // Always include the Reviews notebook
         ...(excludedNotebooksStr && excludedNotebooksStr.trim() ? 
           excludedNotebooksStr
             .split(',')
@@ -238,8 +237,8 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       
       // Update the filter criteria with the notebook IDs
       if (notebookNames.length > 0) {
-        const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
-        filterCriteria.excludeNotebookIds = notebookIds;
+        // const notebookIds = await DataApi.getNotebookIdsByNames(notebookNames);
+        filterCriteria.excludeNotebookIds = notebookNames;
       }
       
       // Update the filter criteria with the excluded tag
