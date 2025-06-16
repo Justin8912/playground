@@ -1,52 +1,53 @@
 import joplin from 'api';
-import {getNotebook,getAllNotebooks} from '../reviewNotes/dataApi';
-import {getConfig} from '../reviewNotes/configService';
 
-
-export const createDialog = async (excludedNotebookIds) => {
+export const createDialog = async (notebookHierarchy, excludedNotebookIds) => {
     const viewHandle = await joplin.views.dialogs.create('reviewNotesPanel');
-    // await joplin.views.dialogs.setHtml(viewHandle, `
-    //     <div>
-    //         <h1><strong>Review Notes Configuration</strong></h1>
-    //     </div>
-    // ` );
-    await manageNotebooks(viewHandle, excludedNotebookIds);
+    await joplin.views.dialogs.setFitToContent(viewHandle, false);
+    await joplin.views.dialogs.addScript(viewHandle, './ui/helper.css')
+
+    // Generate the HTML for the dialog
+    await setDialogHtml(viewHandle, notebookHierarchy, excludedNotebookIds);
     return viewHandle;
 }
 
-export const manageNotebooks = async (viewHandle, excludedNotebookIds = []) => {
-    const notebooks = await getAllNotebooks();
+const createHtmlHierarchy = (notebookHierarchy, excludedNotebookIds) => {
+    const createHtmlList = (items, isExcluded) => {
+        return `
+            <ul>
+                ${items.map(item => `
+                    <li>
+                        <label>
+                            <input type="checkbox" name="${item.id}" ${excludedNotebookIds.includes(item.id) || isExcluded ? 'checked' : ''}/>
+                            ${item.title}
+                        </label>
+                        ${item.children ? createHtmlList(item.children, excludedNotebookIds.includes(item.id) || isExcluded) : ''}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    };
+
+    return createHtmlList(notebookHierarchy);
+}
+export const setDialogHtml = async (viewHandle, notebookHierarchy,  excludedNotebookIds = []) => {
     await joplin.data.post(['notes'], null, {
         title: 'Debug Log - createDialog',
-        body: `${JSON.stringify(excludedNotebookIds.join(', '))}\n${await joplin.settings.value('excludedNotebooks')}`,
+        body: `${createHtmlHierarchy(notebookHierarchy, excludedNotebookIds)}`,
     });
-    await joplin.views.dialogs.setHtml(viewHandle, `
-        <div>
+    const dialogHtml = `
+        <div id="scroll-container">
             <h1><strong>Manage Notebooks</strong></h1>
-            <p>Here you can manage your notebooks.</p>
+            <p>Here you can manage which notesbooks will be excluded from review summaries.</p>
             <form name="notebookExclusionForm">
-                ${notebooks.map(notebook =>  `
-                    <label for="notebookName">
-                        <input type="checkbox" name="${notebook.id}" ${excludedNotebookIds.includes(notebook.id) ? 'checked' : ''}/>
-                        ${getNotebook(notebook.parent_id).title ? `${getNotebook(notebook.parent_id).title}/` : ''}${notebook.title}
-                    </label>
-                `).join('')}
+                ${createHtmlHierarchy(notebookHierarchy, excludedNotebookIds)}
             </form>            
         </div>
-    ` );
+    `;
 
-    // await joplin.views.dialogs.onClose(viewHandle, () => {
-    //     console.log('Dialog closed');
-    // });
-
-    // await joplin.views.dialogs.onButtonClicked(viewHandle, 'closeButton', async () => {
-    //     await joplin.views.dialogs.close(viewHandle);
-    // });
-
-    await joplin.views.dialogs.addScript(viewHandle, './ui/helper.js')
-    await joplin.views.dialogs.addScript(viewHandle, './ui/helper.css')
+    await joplin.views.dialogs.setHtml(viewHandle, dialogHtml)
 }
 
-export const updateDialogHtml = async (viewHandle, excludedNotebookIds) => {
-    await manageNotebooks(viewHandle, excludedNotebookIds)
+export const updateDialogHtml = async (viewHandle, notebookHierarchy, excludedNotebookIds) => {
+    await setDialogHtml
+(viewHandle, notebookHierarchy, excludedNotebookIds)
 }

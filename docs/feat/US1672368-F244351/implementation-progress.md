@@ -46,36 +46,40 @@ This document tracks the progress of implementing note and notebook filtering ca
 **Summary**: Integrated the notebook filtering functionality with the existing filtering framework. The implementation leverages functional programming patterns to transform strings of notebook names into IDs and filter notes based on their parent notebooks. Created an optimized hierarchy mapping system that properly distinguishes between notebooks with identical names but different parent contexts. The `selectRandomNote` function now correctly applies the filter criteria when generating review notes, with cached hierarchy lookups for improved performance. Validation utilities ensure the filter criteria is properly formatted before being applied. Added tag-based filtering with a dropdown selector in the plugin settings to exclude notes with specific tags from review generation. Implemented case-insensitive tag matching and enhanced the dataApi to retrieve note tags efficiently. 
 
 ## Milestone 4: Enhance Plugin Menu and Command System
-- [ ] Add settings command to plugin menu
-- [ ] Create dialog for quick filter adjustments
-- [ ] Implement keyboard shortcuts for common filtering operations
-- [ ] Add status indicator showing current filter state
-- [ ] Create help/documentation for the filtering system
+- [ ] Add "Configure Filters" command to plugin menu
+- [ ] Create a dialog for quick filter adjustments directly from the main UI
+- [ ] Create a status display command to show current filter configuration
+- [ ] Implement keyboard shortcuts for toggling filter state and viewing filter status
+- [ ] Add visual indicator in the UI showing whether filtering is active
 
 **Status**: Not started
 
 **Summary**: 
 
-## Milestone 5: Testing and Validation
-- [ ] Create a dedicated `/tests` directory for test files
-- [ ] Update webpack configuration to exclude tests from the distribution build
-- [ ] Implement unit tests for filter criteria application using functional patterns
-- [ ] Create test fixtures for notebook/note filtering scenarios
-- [ ] Test with large notebook collections for performance
-- [ ] Validate filter persistence across plugin restarts
-- [ ] Test edge cases (all notebooks excluded, etc.)
-- [ ] Verify filter UI interactions and state management
+## Milestone 5: Performance Testing and Edge Case Validation
+- [ ] Expand existing tests directory structure with performance tests
+- [ ] Create test fixtures for large notebook and note collections
+- [ ] Implement benchmarking for filter operations with 1000+ notes
+- [ ] Test memory usage optimization with cached filtering results
+- [ ] Add specific tests for edge cases:
+  - [ ] All notebooks excluded
+  - [ ] Non-existent notebook names
+  - [ ] Excluded tag applied to all notes
+  - [ ] Notes with multiple tags when one is excluded
+- [ ] Validate correct notebook hierarchy handling with complex nested structures
 
 **Status**: Not started
 
 **Summary**: 
 
-## Milestone 6: Documentation and Final Integration
-- [ ] Update plugin README with filtering documentation
-- [ ] Create user guide for filter settings
-- [ ] Add tooltips and in-app guidance
-- [ ] Update configuration defaults and examples
-- [ ] Final integration testing with the complete plugin workflow
+## Milestone 6: User Documentation and Usability Enhancements
+- [ ] Update plugin README with filtering documentation and examples
+- [ ] Create visual quick-start guide for filtering configuration
+- [ ] Add inline help text and tooltips to explain filtering concepts
+- [ ] Implement filter presets for common exclusion patterns
+- [ ] Add filter statistics to show how many notes/notebooks are affected by current settings
+- [ ] Improve error handling with meaningful feedback for invalid filter configurations
+- [ ] Create interactive tutorial for new users (optional stretch goal)
 
 **Status**: Not started
 

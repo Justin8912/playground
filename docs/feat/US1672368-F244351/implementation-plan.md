@@ -45,39 +45,43 @@ Create the business logic to apply the user's filtering preferences when selecti
 
 ## Milestone 4: Enhance Plugin Menu and Command System
 
-Update the plugin's menu system to provide access to filtering settings and add commands for managing filter configurations.
+Update the plugin's menu system to provide quick access to filtering settings and status through dedicated commands and toolbar integration.
 
-**Expected outcome:** An intuitive menu interface allowing users to access and modify note filtering settings directly from the Joplin application.
+**Expected outcome:** An intuitive command system allowing users to view and modify note filtering settings directly from the Joplin application without navigating to the settings page.
 
-- Add settings command to plugin menu
-- Create dialog for quick filter adjustments
-- Implement keyboard shortcuts for common filtering operations
-- Add status indicator showing current filter state
-- Create help/documentation for the filtering system
+- Add "Configure Filters" command to plugin menu
+- Create a dialog for quick filter adjustments directly from the main UI
+- Create a status display command to show current filter configuration
+- Implement keyboard shortcuts for toggling filter state and viewing filter status
+- Add visual indicator in the UI showing whether filtering is active
 
-## Milestone 5: Testing and Validation
+## Milestone 5: Performance Testing and Edge Case Validation
 
-Implement comprehensive testing to ensure the filtering system works correctly across various user scenarios with a separate test directory structure.
+Implement comprehensive testing focused on performance with large notebook collections and handling of edge cases in the filtering system.
 
-**Expected outcome:** A reliable and user-friendly filtering system that correctly applies user preferences and maintains consistent behavior, with well-organized tests that are excluded from the production build.
+**Expected outcome:** A reliable and performant filtering system that correctly applies user preferences across all scenarios, with well-organized tests that are excluded from the production build.
 
-- Create a dedicated `/tests` directory for test files
-- Update webpack configuration to exclude tests from the distribution build
-- Implement unit tests for filter criteria application using functional patterns
-- Create test fixtures for notebook/note filtering scenarios
-- Test with large notebook collections for performance
-- Validate filter persistence across plugin restarts
-- Test edge cases (all notebooks excluded, etc.)
-- Verify filter UI interactions and state management
+- Expand existing tests directory structure with performance tests
+- Create test fixtures for large notebook and note collections
+- Implement benchmarking for filter operations with 1000+ notes
+- Test memory usage optimization with cached filtering results
+- Add specific tests for edge cases:
+  - All notebooks excluded
+  - Non-existent notebook names
+  - Excluded tag applied to all notes
+  - Notes with multiple tags when one is excluded
+- Validate correct notebook hierarchy handling with complex nested structures
 
-## Milestone 6: Documentation and Final Integration
+## Milestone 6: User Documentation and Usability Enhancements
 
-Complete the implementation by updating documentation and ensuring seamless integration with the existing plugin functionality.
+Complete the implementation by adding comprehensive user documentation and enhancing usability aspects of the filtering system.
 
-**Expected outcome:** A fully documented note filtering feature that integrates smoothly with the existing review note generation system.
+**Expected outcome:** A fully documented and user-friendly note filtering feature with clear guidance and intuitive controls.
 
-- Update plugin README with filtering documentation
-- Create user guide for filter settings
-- Add tooltips and in-app guidance
-- Update configuration defaults and examples
-- Final integration testing with the complete plugin workflow
+- Update plugin README with filtering documentation and examples
+- Create visual quick-start guide for filtering configuration
+- Add inline help text and tooltips to explain filtering concepts
+- Implement filter presets for common exclusion patterns
+- Add filter statistics to show how many notes/notebooks are affected by current settings
+- Improve error handling with meaningful feedback for invalid filter configurations
+- Create interactive tutorial for new users (optional stretch goal)
