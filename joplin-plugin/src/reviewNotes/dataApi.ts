@@ -71,13 +71,18 @@ export const createNotebook = async (title: string, parentId?: string): Promise<
 export const getAllNotes = async (): Promise<NoteInfo[]> => {
   try {
     const response = await joplin.data.get(['notes'], { fields: 'id,title,body,parent_id' });
-    
-    return response.items.map(note => ({
-      id: note.id,
-      title: note.title,
-      body: note.body,
-      parent_id: note.parent_id
+    const notes = await Promise.all(response.items.map(async note => {
+      const tags = await getNoteTags(note.id);
+      return {
+        id: note.id,
+        title: note.title,
+        body: note.body,
+        parent_id: note.parent_id,
+        tags: tags
+      };
     }));
+    
+    return notes;
   } catch (error) {
     console.error('Error getting all notes:', error);
     return [];
@@ -87,12 +92,14 @@ export const getAllNotes = async (): Promise<NoteInfo[]> => {
 export const getNoteById = async (noteId: string): Promise<NoteInfo | null> => {
   try {
     const note = await joplin.data.get(['notes', noteId], { fields: 'id,title,body,parent_id' });
+    const tags = await getNoteTags(note.id);
     
     return {
       id: note.id,
       title: note.title,
       body: note.body,
-      parent_id: note.parent_id
+      parent_id: note.parent_id,
+      tags: tags
     };
   } catch (error) {
     console.error(`Error getting note with ID "${noteId}":`, error);
@@ -126,4 +133,57 @@ export const createNote = async (
     console.error(`Error creating note "${title}":`, error);
     return null;
   }
+};
+
+export const getAllTags = async (): Promise<{ id: string, title: string }[]> => {
+  try {
+    const response = await joplin.data.get(['tags']);
+    return response.items.map(tag => ({
+      id: tag.id,
+      title: tag.title
+    }));
+  } catch (error) {
+    console.error('Error getting all tags:', error);
+    return [];
+  }
+};
+
+export const getNoteTags = async (noteId: string): Promise<string[]> => {
+  try {
+    const response = await joplin.data.get(['notes', noteId, 'tags']);
+    return response.items.map(tag => tag.title);
+  } catch (error) {
+    console.error(`Error getting tags for note ${noteId}:`, error);
+    return [];
+  }
+};
+
+export const getNotebookHierarchy = async (): Promise<NotebookInfo[]> => {
+  const allNotebooks = await getAllNotebooks();
+  const notebookMap = new Map<string, NotebookInfo>();
+
+  // Create a map of notebooks by their IDs
+  allNotebooks.forEach(notebook => {
+    notebookMap.set(notebook.id, {
+      id: notebook.id,
+      title: notebook.title,
+      parent_id: notebook.parent_id,
+      children: []
+    });
+  });
+
+  // Build the hierarchy
+  const hierarchy: NotebookInfo[] = [];
+  notebookMap.forEach(notebook => {
+    if (notebook.parent_id) {
+      const parent = notebookMap.get(notebook.parent_id);
+      if (parent) {
+        parent.children?.push(notebook);
+      }
+    } else {
+      hierarchy.push(notebook);
+    }
+  });
+
+  return hierarchy;
 };

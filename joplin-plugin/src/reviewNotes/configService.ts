@@ -1,6 +1,7 @@
 import joplin from 'api';
 import { SettingItemType } from 'api/types';
-import { FilterCriteria, ReviewsConfig } from './types';
+import { FilterCriteria, ReviewsConfig, NotebookInfo } from './types';
+import * as DataApi from './dataApi';
 
 const SECTION_NAME = 'reviewNotesSettings';
 
@@ -17,9 +18,20 @@ const DEFAULT_CONFIG: ReviewsConfig = {
   }
 };
 
-/**
- * Register plugin settings with Joplin
- */
+const getTagOptions = async (): Promise<Record<string, string>> => {
+  const tags = await DataApi.getAllTags();
+  const options: Record<string, string> = {
+    '': '-- None --'  // Default empty option
+  };
+  
+  tags.forEach(tag => {
+    options[tag.title] = tag.title;
+  });
+  
+  return options;
+};
+
+
 export const registerSettings = async (): Promise<void> => {
   // Register settings section
   await joplin.settings.registerSection(SECTION_NAME, {
@@ -28,10 +40,11 @@ export const registerSettings = async (): Promise<void> => {
     description: 'Settings for the Review Notes plugin'
   });
 
+  const config = await getConfig();
   // Register settings
   await joplin.settings.registerSettings({
     'reviewsNotebookName': {
-      value: DEFAULT_CONFIG.reviewsNotebookName,
+      value: config.reviewsNotebookName,
       type: SettingItemType.String,
       section: SECTION_NAME,
       public: true,
@@ -40,7 +53,7 @@ export const registerSettings = async (): Promise<void> => {
     },
 
     'filterEnabled': {
-      value: DEFAULT_CONFIG.filterEnabled,
+      value: config.filterEnabled,
       type: SettingItemType.Bool,
       section: SECTION_NAME,
       public: true,
@@ -48,10 +61,30 @@ export const registerSettings = async (): Promise<void> => {
       description: 'Enable filtering of notes for review generation'
     },
 
+    'excludedNotebooks': {
+      value: config.filterCriteria.excludeNotebookIds?.join(',') || '',
+      type: SettingItemType.String,
+      section: SECTION_NAME,
+      public: false,
+      label: 'Excluded Notebooks',
+      description: 'Comma-separated list of notebook names to exclude from review notes generation'
+    },
+
+    'excludedTag': {
+      value: config.filterCriteria.excludeTags?.length ? config.filterCriteria.excludeTags[0] : '',
+      type: SettingItemType.String,
+      section: SECTION_NAME,
+      isEnum: true,
+      public: true,
+      label: 'Exclude Notes with Tag',
+      description: 'Notes with this tag will be excluded from review notes generation',
+      options: await getTagOptions()
+    },
+
     // The filter criteria is stored as a JSON string since Joplin
     // settings don't support complex objects directly
     'filterCriteria': {
-      value: JSON.stringify(DEFAULT_CONFIG.filterCriteria),
+      value: JSON.stringify(config.filterCriteria),
       type: SettingItemType.String,
       section: SECTION_NAME,
       public: false,
@@ -63,11 +96,43 @@ export const registerSettings = async (): Promise<void> => {
 
 export const getConfig = async (): Promise<ReviewsConfig> => {
   try {
-    const values = await joplin.settings.values(['reviewsNotebookName', 'filterEnabled', 'filterCriteria']);
+    const values = await joplin.settings.values([
+      'reviewsNotebookName', 
+      'filterEnabled', 
+      'filterCriteria', 
+      'excludedNotebooks',
+      'excludedTag'
+    ]);
     
     let filterCriteria: FilterCriteria;
     try {
       filterCriteria = JSON.parse(values.filterCriteria as string);
+      
+      // Get reviews notebook name from config
+      const reviewsNotebookName = values.reviewsNotebookName as string || DEFAULT_CONFIG.reviewsNotebookName;
+      
+      // Process the excluded notebooks from UI setting
+      const excludedNotebooksStr = values.excludedNotebooks as string || '';
+      
+      // Process the excluded tag from UI setting
+      const excludedTag = values.excludedTag as string || '';
+
+      const notebookNames = excludedNotebooksStr
+        .split(',')
+        .map(id=>id.trim().toLowerCase())
+        .filter(name => name.length > 0);
+      
+      // Update the filter criteria with the notebook IDs
+      if (notebookNames.length > 0) {
+        filterCriteria.excludeNotebookIds = notebookNames;
+      }
+      
+      // Update the filter criteria with the excluded tag
+      if (excludedTag && excludedTag.trim()) {
+        filterCriteria.excludeTags = [excludedTag.trim()];
+      } else {
+        filterCriteria.excludeTags = [];
+      }
     } catch (error) {
       console.error('Error parsing filter criteria, using defaults:', error);
       filterCriteria = DEFAULT_CONFIG.filterCriteria;
@@ -84,12 +149,35 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
   }
 };
 
-/**
- * Update filter criteria in settings
- */
 export const saveFilterCriteria = async (filterCriteria: FilterCriteria): Promise<void> => {
   try {
     await joplin.settings.setValue('filterCriteria', JSON.stringify(filterCriteria));
+    
+    // Update the excludedNotebooks setting for UI consistency
+    if (filterCriteria.excludeNotebookIds && filterCriteria.excludeNotebookIds.length > 0) {
+      // Get notebook names from IDs
+      const allNotebooks = await DataApi.getAllNotebooks();
+      const notebookMap = new Map<string, string>();
+      
+      allNotebooks.forEach(nb => {
+        notebookMap.set(nb.id, nb.title);
+      });
+      
+      const notebookNames = filterCriteria.excludeNotebookIds
+        .map(id => notebookMap.get(id) || id)
+        .join(',');
+      
+      await joplin.settings.setValue('excludedNotebooks', notebookNames);
+    } else {
+      await joplin.settings.setValue('excludedNotebooks', '');
+    }
+    
+    // Update the excludedTag setting for UI consistency
+    if (filterCriteria.excludeTags && filterCriteria.excludeTags.length > 0) {
+      await joplin.settings.setValue('excludedTag', filterCriteria.excludeTags[0]);
+    } else {
+      await joplin.settings.setValue('excludedTag', '');
+    }
   } catch (error) {
     console.error('Error saving filter criteria:', error);
   }
