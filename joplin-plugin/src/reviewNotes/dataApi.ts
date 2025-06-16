@@ -1,5 +1,5 @@
 import joplin from 'api';
-import { NoteInfo, NotebookInfo, NotebookHierarchy } from './types';
+import { NoteInfo, NotebookInfo } from './types';
 
 export const getNotebook = async (notebookId: string): Promise<NotebookInfo | null> => {
   try {
@@ -158,9 +158,9 @@ export const getNoteTags = async (noteId: string): Promise<string[]> => {
   }
 };
 
-export const getNotebookHierarchy = async (): Promise<NotebookHierarchy[]> => {
+export const getNotebookHierarchy = async (): Promise<NotebookInfo[]> => {
   const allNotebooks = await getAllNotebooks();
-  const notebookMap = new Map<string, NotebookHierarchy>();
+  const notebookMap = new Map<string, NotebookInfo>();
 
   // Create a map of notebooks by their IDs
   allNotebooks.forEach(notebook => {
@@ -173,7 +173,7 @@ export const getNotebookHierarchy = async (): Promise<NotebookHierarchy[]> => {
   });
 
   // Build the hierarchy
-  const hierarchy: NotebookHierarchy[] = [];
+  const hierarchy: NotebookInfo[] = [];
   notebookMap.forEach(notebook => {
     if (notebook.parent_id) {
       const parent = notebookMap.get(notebook.parent_id);

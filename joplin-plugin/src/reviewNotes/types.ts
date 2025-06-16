@@ -39,10 +39,3 @@ export interface NotebookFilterEntry {
   title: string;
   mode: FilterMode;
 }
-
-export interface NotebookHierarchy {
-  id: string;
-  title: string;
-  parent_id: string;
-  children?: NotebookHierarchy[];
-}
