@@ -18,6 +18,8 @@ export interface ReviewsConfig {
   reviewsNotebookName: string;
   filterEnabled: boolean;
   filterCriteria: FilterCriteria;
+  llmApiKey: string;
+  llmApiEndpoint: string;
 }
 
 export interface FilterCriteria {

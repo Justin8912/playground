@@ -2,6 +2,7 @@ import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 import { selectRandomFilteredNote } from './filterUtils';
 import { getConfig } from './configService';
+import {prepareNoteForLlm}  from '../aiService/dataExtractionService';
 
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'
@@ -75,9 +76,10 @@ export const createReviewNote = async (
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
+    const noteBody = await prepareNoteForLlm(originalNote);
     const reviewNote = await DataApi.createNote(
       originalNote.title, 
-      originalNote.body, 
+      noteBody,
       targetNotebookId
     );
     
