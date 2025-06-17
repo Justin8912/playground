@@ -2,6 +2,7 @@ import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 import { selectRandomFilteredNote } from './filterUtils';
 import { getConfig } from './configService';
+import { generateSummary, SummaryOptions } from '../aiService/summaryService';
 
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'
@@ -75,13 +76,49 @@ export const createReviewNote = async (
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
-    const reviewNote = await DataApi.createNote(
-      originalNote.title, 
-      originalNote.body,
-      targetNotebookId
-    );
+    // Get the current configuration
+    const config = await getConfig();
     
-    return reviewNote;
+    // Check if LLM API key is configured
+    if (!config.llmApiKey) {
+      console.warn('LLM API key not configured. Creating review with original content instead.');
+      // Fall back to original behavior if no API key is configured
+      const reviewNote = await DataApi.createNote(
+        `Review of: ${originalNote.title}`,
+        originalNote.body,
+        targetNotebookId
+      );
+      return reviewNote;
+    }
+    
+    try {
+      // Generate a summary using the LLM
+      const summaryOptions: SummaryOptions = {
+        includeLinkedContent: true,
+        temperature: 0.5 // Lower temperature for more focused summaries
+      };
+      
+      const summary = await generateSummary(originalNote, summaryOptions);
+      
+      // Create the review note with the generated summary
+      const reviewNote = await DataApi.createNote(
+        `AI Summary of: ${originalNote.title}`,
+        summary,
+        targetNotebookId
+      );
+      
+      return reviewNote;
+    } catch (summaryError) {
+      console.error('Error generating summary:', summaryError);
+      
+      // Fall back to original content if summarization fails
+      const reviewNote = await DataApi.createNote(
+        `Review of: ${originalNote.title}`, 
+        `Failed to generate AI summary: ${summaryError.message}\n\n---\n\n${originalNote.body}`,
+        targetNotebookId
+      );
+      return reviewNote;
+    }
   } catch (error) {
     console.error('Error creating review note:', error);
     return null;
