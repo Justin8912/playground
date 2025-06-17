@@ -1,6 +1,9 @@
 import joplin from 'api';
-import { initConfig } from './reviewNotes/configService';
+import { initConfig, getConfig } from './reviewNotes/configService';
 import { generateReviewNote } from './reviewNotes/reviewService';
+import { createDialog, updateDialogHtml } from './ui/createDialog';
+import { MenuItemLocation } from 'api/types';
+import { getNotebookHierarchy } from './reviewNotes/dataApi';
 
 const generateReviewNoteInBackground = () => {
 	console.log('Starting review note generation...');
@@ -34,22 +37,45 @@ const generateReviewNoteInBackground = () => {
 
 joplin.plugins.register({
 	onStart: async function() {
-		await initConfig();
-		console.info('Review Notes Plugin started!');
+		// Initialize config with enhanced settings
+		const config = await initConfig();
 
 		generateReviewNoteInBackground();
 		
+		const viewHandle = await createDialog(await getNotebookHierarchy(), config.filterCriteria.excludeNotebookIds);
+
 		await joplin.commands.register({
 			name: 'generateReviewNote',
 			label: 'Generate Review Note',
 			execute: async () => { generateReviewNoteInBackground();}
+		});
+
+		await joplin.commands.register({
+			name: 'filterConfigurationView',
+			label: 'Configure Filter Criteria',
+			execute: async () => {
+				await updateDialogHtml(viewHandle, await getNotebookHierarchy(), (await getConfig()).filterCriteria.excludeNotebookIds);
+				const result = await joplin.views.dialogs.open(viewHandle);
+				const inputValue = result?.formData?.notebookExclusionForm;
+				if (inputValue) {
+					const selectedNotebookIds = Object.keys(inputValue).filter((key) => {
+						if (inputValue[key].toLowerCase() === "on") return true
+					}).map(key=>key)
+
+					await joplin.settings.setValue('excludedNotebooks', selectedNotebookIds.join(','));
+				}
+			}
 		});
 		
 		await joplin.views.menus.create('reviewNotesMenu', 'Review Notes', [
 			{
 				commandName: 'generateReviewNote',
 				accelerator: 'CmdOrCtrl+Shift+R'
+			},
+			{
+				commandName: 'filterConfigurationView',
+				accelerator: "CmdOrCtrl+Shift+A"
 			}
-		]);
+		], MenuItemLocation.Tools);
 	}
 });

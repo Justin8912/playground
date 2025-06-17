@@ -4,6 +4,7 @@ export interface NoteInfo {
   body: string;
   parent_id: string;
   notebook_path?: string[];
+  tags?: string[];
 }
 
 export interface NotebookInfo {
@@ -15,11 +16,26 @@ export interface NotebookInfo {
 
 export interface ReviewsConfig {
   reviewsNotebookName: string;
+  filterEnabled: boolean;
+  filterCriteria: FilterCriteria;
 }
 
 export interface FilterCriteria {
   notebookIds?: string[];
   excludeNotebookIds?: string[];
+  noteIds?: string[];
+  excludeNoteIds?: string[];
   tags?: string[];
   excludeTags?: string[];
+}
+
+export enum FilterMode {
+  INCLUDE = 'include',
+  EXCLUDE = 'exclude',
+}
+
+export interface NotebookFilterEntry {
+  id: string;
+  title: string;
+  mode: FilterMode;
 }
