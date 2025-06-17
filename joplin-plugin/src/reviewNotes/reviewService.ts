@@ -2,7 +2,6 @@ import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 import { selectRandomFilteredNote } from './filterUtils';
 import { getConfig } from './configService';
-import {prepareNoteForLlm}  from '../aiService/dataExtractionService';
 
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'

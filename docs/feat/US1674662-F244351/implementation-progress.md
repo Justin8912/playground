@@ -1,4 +1,12 @@
-# Implementation Progress for US1- Crea## Milestone 3: Summary Service Implementation
+# Implementation Progress for US1- Crea## Milestone 3: Summary Service ## Milestone 4: AI Template Implementation
+- [x] Implement the AI template with the required format in TypeScript
+- [x] Create utility functions to use this template
+- [x] Ensure the template includes all required sections
+- [x] Create functions to combine note content with the template
+
+**Status**: Complete (June 17, 2025)
+
+**Summary**: Implemented a flexible AI template system in TypeScript (`aiTemplate.ts`) that supports dynamic content generation. The template now includes placeholders for knowledge control, note title, and additional resources, which are filled in at runtime. Created utility functions to apply variables to the template and generate appropriate prompts. Enhanced the template structure to include more detailed sections: Main Concepts, Key Takeaways, and Detailed Summary, with specific guidance for each section. Added support for different knowledge control modes that will be used in Milestone 6 to toggle external knowledge use based on note tags. Added explicit instructions for the LLM to format its response in Markdown for better readability and structure.ation
 - [x] Implement the `summaryService.ts` file in the AiService directory
 - [x] Create functions for OpenRouter.ai API communication:
   - [x] Implement chat completions endpoint integration

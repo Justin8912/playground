@@ -8,6 +8,7 @@
 import { NoteInfo } from '../reviewNotes/types';
 import { ExtractedContent, prepareNoteForLlm } from './dataExtractionService';
 import * as configService from '../reviewNotes/configService';
+import { getPromptTemplate } from './aiTemplate';
 
 /**
  * Response format from OpenRouter API
@@ -87,8 +88,10 @@ export const generateSummary = async (
     includeLinkedContent: mergedOptions.includeLinkedContent
   });
   
-  // Get the prompt template
-  const promptTemplate = await getPromptTemplate();
+  // Get the prompt template with variables applied
+  // In Milestone 6, we'll add logic to check for the knowledge control tag
+  const allowExternalKnowledge = false; // Default to false until Milestone 6
+  const promptTemplate = getPromptTemplate(note, allowExternalKnowledge);
   
   // Create the API request
   const response = await callOpenRouterApi(
@@ -212,46 +215,3 @@ const extractSummaryFromResponse = (response: OpenRouterResponse): string => {
   
   return response.choices[0].message.content.trim();
 };
-
-/**
- * Retrieve the prompt template from the aiTemplate.md file
- * or use the default template if the file is not available
- * 
- * @returns Promise containing the prompt template text
- */
-export const getPromptTemplate = async (): Promise<string> => {
-  try {
-    // For now, using a default template
-    // In the next milestone, we'll implement reading from aiTemplate.md
-    return DEFAULT_PROMPT_TEMPLATE;
-  } catch (error) {
-    console.error('Failed to load AI template:', error);
-    return DEFAULT_PROMPT_TEMPLATE;
-  }
-};
-
-/**
- * Default prompt template to use when no template file is available
- */
-const DEFAULT_PROMPT_TEMPLATE = `
-I will provide you notes, articles, and potentially references to other content, and I would like you to generate a summary of all the content provided.
-
-IMPORTANT: You should use ONLY the information contained in the note and any links explicitly provided in the note content. DO NOT use any external knowledge or resources beyond what is explicitly provided in the input. Your summary should be based solely on the information contained in the note and its linked references.
-
-In the case that the content is about code, please summarize the code and provide snippets where necessary using code blocks.
-
-Please use the following format for your response:
-
-# Title
-## Main Concepts
-
-Here you will describe the overarching idea that is encompassed between all the shared resources/notes.
-
-## Key details
-
-The important points, things to keep an eye out for.
-
-# Summary
-
-A general summary of all the notes that captures the essential information.
-`;
