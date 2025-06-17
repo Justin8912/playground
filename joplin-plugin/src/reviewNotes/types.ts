@@ -20,6 +20,7 @@ export interface ReviewsConfig {
   filterCriteria: FilterCriteria;
   llmApiKey: string;
   llmApiEndpoint: string;
+  knowledgeControlTag: string;
 }
 
 export interface FilterCriteria {

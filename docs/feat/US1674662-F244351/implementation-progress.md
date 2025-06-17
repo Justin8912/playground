@@ -99,15 +99,15 @@ This document tracks the progress of implementing the LLM-powered summarization 
 **Summary**: Enhanced the Review Service to use LLM-powered summarization instead of simply copying note content. Updated the `createReviewNote` function to call the Summary Service for generating AI summaries. Added robust error handling with graceful fallbacks to ensure users always get a review note, even if the LLM summarization fails. Implemented user notifications to provide feedback throughout the summarization process. Added prefix to review note titles to clearly indicate AI-generated content. The implementation maintains backward compatibility by falling back to the original content if the LLM API key is not configured.
 
 ## Milestone 6: Tag-Based Knowledge Control
-- [ ] Extend the `FilterCriteria` interface in `types.ts` to include a knowledge control tag setting
-- [ ] Add tag detection functions in the DataApi module to identify when a note has this special tag
-- [ ] Create utility to modify LLM prompts based on detected tags, specifically allowing external knowledge when the tag is present
-- [ ] Add a dropdown setting in the existing Joplin settings UI for selecting the tag that enables external knowledge
-- [ ] Implement logic in the Summary Service to check for the tag and adjust prompts accordingly
+- [x] Extend the `ReviewsConfig` interface in `types.ts` to include a knowledge control tag setting
+- [x] Add tag detection functions in the DataApi module to identify when a note has this special tag
+- [x] Create utility to modify LLM prompts based on detected tags, specifically allowing external knowledge when the tag is present
+- [x] Add a dropdown setting in the existing Joplin settings UI for selecting the tag that enables external knowledge
+- [x] Implement logic in the Summary Service to check for the tag and adjust prompts accordingly
 
-**Status**: Not started
+**Status**: Complete (June 18, 2025)
 
-**Summary**: 
+**Summary**: Implemented the tag-based knowledge control feature to provide users with fine-grained control over whether the LLM uses external knowledge when generating summaries. Extended the configuration system to include a new `knowledgeControlTag` setting that allows users to select which tag should enable external knowledge. Added a dropdown in the settings UI that populates with all available tags in the user's Joplin database. Created utility functions in the DataApi module (`hasTag` and `allowsExternalKnowledge`) to detect when a note has the special tag. Modified the Summary Service to check for the presence of this tag and adjust the prompt accordingly, using either the restrictive DEFAULT_KNOWLEDGE_CONTROL prompt or the permissive EXTERNAL_KNOWLEDGE_CONTROL prompt. The implementation maintains the principle of least privilege by defaulting to restricted knowledge use when the tag is not present.
 
 ## Milestone 7: Testing and Refinement
 - [ ] Create unit tests for all new components

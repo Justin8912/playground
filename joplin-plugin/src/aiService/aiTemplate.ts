@@ -19,6 +19,10 @@ Please use the following format for your response:
 
 # ${note.title || 'Untitled Note'}
 
+## Resources used 
+
+Note the resources used to generated this summary. 
+
 ## Main Concepts
 
 Here you will describe the overarching idea that is encompassed between all the shared resources/notes. Focus on the core themes and the primary purpose of the content.

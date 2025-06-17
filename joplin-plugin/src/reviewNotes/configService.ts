@@ -17,7 +17,8 @@ const DEFAULT_CONFIG: ReviewsConfig = {
     excludeTags: []
   },
   llmApiKey: '',
-  llmApiEndpoint: 'https://openrouter.ai/api/v1/chat/completions'
+  llmApiEndpoint: 'https://openrouter.ai/api/v1/chat/completions',
+  knowledgeControlTag: ''
 };
 
 const getTagOptions = async (): Promise<Record<string, string>> => {
@@ -111,6 +112,17 @@ export const registerSettings = async (): Promise<void> => {
       public: true,
       label: 'LLM API Endpoint',
       description: 'API endpoint for the LLM service'
+    },
+
+    'knowledgeControlTag': {
+      value: config.knowledgeControlTag,
+      type: SettingItemType.String,
+      section: SECTION_NAME,
+      isEnum: true,
+      public: true,
+      label: 'External Knowledge Tag',
+      description: 'Notes with this tag will allow the LLM to use external knowledge beyond the note content',
+      options: await getTagOptions()
     }
   });
 };
@@ -124,7 +136,8 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       'excludedNotebooks',
       'excludedTag',
       'llmApiKey',
-      'llmApiEndpoint'
+      'llmApiEndpoint',
+      'knowledgeControlTag'
     ]);
     
     let filterCriteria: FilterCriteria;
@@ -166,7 +179,8 @@ export const getConfig = async (): Promise<ReviewsConfig> => {
       filterEnabled: !!values.filterEnabled,
       filterCriteria,
       llmApiKey: values.llmApiKey as string || DEFAULT_CONFIG.llmApiKey,
-      llmApiEndpoint: values.llmApiEndpoint as string || DEFAULT_CONFIG.llmApiEndpoint
+      llmApiEndpoint: values.llmApiEndpoint as string || DEFAULT_CONFIG.llmApiEndpoint,
+      knowledgeControlTag: values.knowledgeControlTag as string || DEFAULT_CONFIG.knowledgeControlTag
     };
   } catch (error) {
     console.error('Error getting review notes config:', error);

@@ -7,8 +7,9 @@
 
 import { NoteInfo } from '../reviewNotes/types';
 import { ExtractedContent, prepareNoteForLlm } from './dataExtractionService';
-import * as configService from '../reviewNotes/configService';
+import { getConfig } from '../reviewNotes/configService';
 import { getPromptTemplate } from './aiTemplate';
+import { allowsExternalKnowledge } from '../reviewNotes/dataApi';
 
 /**
  * Response format from OpenRouter API
@@ -78,7 +79,7 @@ export const generateSummary = async (
   const mergedOptions = { ...DEFAULT_SUMMARY_OPTIONS, ...options };
   
   // Get the API configuration
-  const config = await configService.getConfig();
+  const config = await getConfig();
   if (!config.llmApiKey) {
     throw new Error('LLM API key not configured. Please add your API key in the Review Notes settings.');
   }
@@ -89,8 +90,14 @@ export const generateSummary = async (
   });
   
   // Get the prompt template with variables applied
-  // In Milestone 6, we'll add logic to check for the knowledge control tag
-  const allowExternalKnowledge = false; // Default to false until Milestone 6
+  // Check if this note allows external knowledge based on its tags
+  const { knowledgeControlTag } = config;
+
+
+  // Check if external knowledge is allowed for this note based on its tags
+  const allowExternalKnowledge = await allowsExternalKnowledge(note, knowledgeControlTag);
+  
+  // Get the appropriate prompt template
   const promptTemplate = getPromptTemplate(note, allowExternalKnowledge);
   
   // Create the API request
