@@ -1,4 +1,20 @@
-# Implementation Progress for US1- Create functions for OpenRouter.ai API communication:
+# Implementation Progress for US1- Crea## Milestone 3: Summary Service Implementation
+- [x] Implement the `summaryService.ts` file in the AiService directory
+- [x] Create functions for OpenRouter.ai API communication:
+  - [x] Implement chat completions endpoint integration
+  - [x] Set up proper authentication headers
+  - [x] Format messages with role and content fields
+  - [x] Use the `deepseek/deepseek-r1-0528:free` model as specified in the POC
+- [x] Process OpenRouter.ai specific response formats
+- [x] Add error handling for platform-specific errors
+- [x] Implement retry logic for temporary failures
+- [x] Include logging for API interactions
+
+**Status**: Complete (June 17, 2025)
+
+**Summary**: Implemented a robust Summary Service that handles communication with the OpenRouter.ai API for generating LLM-powered summaries. The implementation includes proper error handling with exponential backoff for retries on transient errors and rate limiting. The service is configured to use the `deepseek/deepseek-r1-0528:free` model as specified in the POC, and leverages the Data Extraction Service to prepare note content for optimal LLM processing. The implementation follows functional programming principles with clear separation of concerns, and includes configurable options for customizing summary generation, such as temperature and token limits.
+
+**Update** (June 17, 2025): Enhanced the prompt template with explicit instructions for the LLM to use only information contained in the note and its linked references, without leveraging external knowledge. This ensures summaries are based solely on the provided content and links, maintaining information boundary integrity while still utilizing the internal links extracted from notes.r OpenRouter.ai API communication:
   - [ ] Implement chat completions endpoint integration
   - [ ] Set up proper authentication headers
   - [ ] Format messages with role and content fields
@@ -75,10 +91,11 @@ This document tracks the progress of implementing the LLM-powered summarization 
 **Summary**: 
 
 ## Milestone 6: Tag-Based Knowledge Control
-- [ ] Extend the `FilterCriteria` interface in `types.ts`
-- [ ] Add tag detection functions in the DataApi module
-- [ ] Create utility to modify LLM prompts based on detected tags
-- [ ] Add a dropdown setting in the existing Joplin settings UI for tag selection
+- [ ] Extend the `FilterCriteria` interface in `types.ts` to include a knowledge control tag setting
+- [ ] Add tag detection functions in the DataApi module to identify when a note has this special tag
+- [ ] Create utility to modify LLM prompts based on detected tags, specifically allowing external knowledge when the tag is present
+- [ ] Add a dropdown setting in the existing Joplin settings UI for selecting the tag that enables external knowledge
+- [ ] Implement logic in the Summary Service to check for the tag and adjust prompts accordingly
 
 **Status**: Not started
 

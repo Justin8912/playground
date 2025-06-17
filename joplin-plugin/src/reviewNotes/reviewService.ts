@@ -76,10 +76,9 @@ export const createReviewNote = async (
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
-    const noteBody = await prepareNoteForLlm(originalNote);
     const reviewNote = await DataApi.createNote(
       originalNote.title, 
-      noteBody,
+      originalNote.body,
       targetNotebookId
     );
     

@@ -75,14 +75,15 @@ Enhance the existing `reviewService.ts` to incorporate LLM summarization instead
 
 ## Milestone 6: Tag-Based Knowledge Control
 
-Enhance the existing filtering capabilities to support tags that control LLM knowledge boundaries.
+Enhance the existing filtering capabilities to support tags that control LLM knowledge boundaries. When specific tags are present on a note, the LLM will be allowed to use its external knowledge base to augment the summary.
 
-**Expected outcome:** A system that allows users to control whether the LLM uses external knowledge via note tagging.
+**Expected outcome:** A system that allows users to control whether the LLM uses external knowledge via note tagging. By default, the LLM will only use information from the note and its linked references. When the designated tag is present, the LLM will be instructed to also leverage its external knowledge to provide additional context and insights.
 
-- Extend the `FilterCriteria` interface in `types.ts` to include knowledge control tags
-- Add tag detection functions in the DataApi module
-- Create utility to modify LLM prompts based on detected tags
-- Add a dropdown setting in the existing Joplin settings UI for tag selection
+- Extend the `FilterCriteria` interface in `types.ts` to include a knowledge control tag setting
+- Add tag detection functions in the DataApi module to identify when a note has this special tag
+- Create utility to modify LLM prompts based on detected tags, specifically including or removing the restriction on external knowledge
+- Add a dropdown setting in the existing Joplin settings UI for selecting the tag that enables external knowledge
+- Implement logic in the Summary Service to check for the tag and adjust prompts accordingly
 
 ## Milestone 7: Testing and Refinement
 
