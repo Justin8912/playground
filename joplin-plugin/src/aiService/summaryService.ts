@@ -6,11 +6,10 @@
  */
 
 import { NoteInfo } from '../reviewNotes/types';
-import { ExtractedContent, prepareNoteForLlm } from './dataExtractionService';
+import { prepareNoteForLlm } from './dataExtractionService';
 import { getConfig } from '../reviewNotes/configService';
 import { getPromptTemplate } from './aiTemplate';
 import { allowsExternalKnowledge } from '../reviewNotes/dataApi';
-import joplin from 'api';
 
 /**
  * Response format from OpenRouter API
@@ -51,7 +50,7 @@ export interface SummaryOptions {
 const DEFAULT_SUMMARY_OPTIONS: SummaryOptions = {
   includeLinkedContent: true,
   temperature: 0.5,
-  maxTokens: 2048,
+  maxTokens: 20000,
   model: 'deepseek/deepseek-r1-0528:free'
 };
 
@@ -78,15 +77,6 @@ export const generateSummary = async (
 ): Promise<string> => {
   // Merge default options with provided options
   const mergedOptions = { ...DEFAULT_SUMMARY_OPTIONS, ...options };
-  await joplin.data.post(
-      ['notes'], 
-      null, 
-      {
-      title: "Pre - generate summary",
-      body: "Summarizing the note content",
-      parent_id: "68d77cb56a5740d2acd797304c944319"
-      }
-  );
   // Get the API configuration
   const config = await getConfig();
   if (!config.llmApiKey) {
@@ -116,16 +106,6 @@ export const generateSummary = async (
     config.llmApiKey,
     config.llmApiEndpoint,
     mergedOptions
-  );
-
-    await joplin.data.post(
-      ['notes'], 
-      null, 
-      {
-      title: "Post - generate summary",
-      body: `API Call summarized. ${JSON.stringify(response)}`,
-      parent_id: "68d77cb56a5740d2acd797304c944319"
-      }
   );
   
   return extractSummaryFromResponse(response);
