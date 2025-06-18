@@ -1,6 +1,6 @@
 import { NoteInfo } from '../reviewNotes/types';
 
-export const DEFAULT_KNOWLEDGE_CONTROL = `IMPORTANT: You should use ONLY the information contained in the note and any links explicitly provided in the note content. DO NOT use any external knowledge or resources beyond what is explicitly provided in the input. Your summary should be based solely on the information contained in the note and its linked references.`;
+export const DEFAULT_KNOWLEDGE_CONTROL = `IMPORTANT: You should use ONLY the information contained in the note and any links explicitly provided in the note content. DO NOT use any external knowledge or resources beyond what is explicitly provided in the input. Your summary should be based solely on the information contained in the note and its linked references (you may use the external links provided).`;
 export const EXTERNAL_KNOWLEDGE_CONTROL = `You may use your own knowledge to provide additional context or insights related to the topic, especially when clarifying technical concepts or providing broader context. However, ensure that the main summary focuses primarily on the content provided.`;
 const DEFAULT_ADDITIONAL_RESOURCES = ``;
 
@@ -43,4 +43,7 @@ A comprehensive summary of all the notes that captures the essential information
 - Technical details where relevant
 
 ${DEFAULT_ADDITIONAL_RESOURCES}
+
+Finish your response with the following line:
+### El fin
 `;

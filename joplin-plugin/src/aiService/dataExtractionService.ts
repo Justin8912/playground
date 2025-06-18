@@ -6,6 +6,7 @@
  */
 import { NoteInfo } from '../reviewNotes/types';
 import * as DataApi from '../reviewNotes/dataApi';
+import joplin from 'api';
 
 /**
  * Represents the different types of extracted content
@@ -43,6 +44,17 @@ const BARE_URL_REGEX = /((?:https?|ftp):\/\/[^\s\])"'><]+)/g; // https://example
  */
 export const extractContent = async (note: NoteInfo): Promise<ExtractedContent> => {
   // Get the full note content if needed
+
+  await joplin.data.post(
+      ['notes'], 
+      null, 
+      {
+        title: "Pre - extract content",
+        body: `Has not extracted the content yet. ${JSON.stringify(note)}`,
+        parent_id: "68d77cb56a5740d2acd797304c944319"
+      }
+    );
+
   const noteContent = note.body || '';
   
   // Extract links from content
@@ -52,6 +64,15 @@ export const extractContent = async (note: NoteInfo): Promise<ExtractedContent> 
   // Get clean text with formatting removed
   const cleanText = cleanNoteContent(noteContent);
   
+  await joplin.data.post(
+      ['notes'], 
+      null, 
+      {
+        title: "Post - extract content",
+        body: `Content was extracted successfully. ${JSON.stringify(cleanText)}`,
+        parent_id: "68d77cb56a5740d2acd797304c944319"
+      }
+    );
   return {
     cleanText,
     internalLinks,
@@ -139,6 +160,16 @@ export const extractExternalLinks = (content: string): LinkInfo[] => {
  * @returns Cleaned text suitable for LLM processing
  */
 export const cleanNoteContent = (content: string): string => {
+   joplin.data.post(
+    ['notes'], 
+    null, 
+    {
+    title: "Pre - cleanNoteContent",
+    body: "Content was extracted successfully.",
+    parent_id: "68d77cb56a5740d2acd797304c944319"
+    }
+  );
+    
   let cleanText = content;
   
   // Remove HTML tags
