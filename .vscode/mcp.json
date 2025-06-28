@@ -1,0 +1,34 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "CAI_MCP_API_KEY",
+      "description": "CAI MCP API Key",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "RALLY_API_KEY",
+      "description": "Rally API Key",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "GITHUB_PAT",
+      "description": "Github PAT",
+      "password": true
+    }
+  ],
+  "servers": {
+    "my-mcp-server-49f396a1": {
+      "type": "stdio",
+      "command": "cai-mcp",
+      "args": [],
+      "env": {
+        "RALLY_API_KEY": "${input:RALLY_API_KEY}",
+        "GITHUB_PAT": "${input:GITHUB_PAT}",
+        "CAI_MCP_API_KEY": "${input:CAI_MCP_API_KEY}"
+      }
+    }
+  }
+}
