@@ -13,7 +13,7 @@ def get_server_client(ip, username="jnste"):
 class AppConfig:
     def __init__(self):
         self.server = {
-            "ip": "192.168.1.159",
+            "ip": "192.168.1.93",
             "username": "jnste"
         }
         self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
