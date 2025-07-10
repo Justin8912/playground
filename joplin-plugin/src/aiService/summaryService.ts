@@ -1,15 +1,10 @@
-/**
- * Summary Service
- * 
- * Handles communication with the OpenRouter.ai API for generating
- * summaries of note content using LLM technology.
- */
-
 import { NoteInfo } from '../reviewNotes/types';
 import { prepareNoteForLlm } from './dataExtractionService';
 import { getConfig } from '../reviewNotes/configService';
 import { getPromptTemplate } from './aiTemplate';
 import { allowsExternalKnowledge } from '../reviewNotes/dataApi';
+
+// TODO: add image support for uploaded images: https://openrouter.ai/docs/features/images-and-pdfs
 
 /**
  * Response format from OpenRouter API
