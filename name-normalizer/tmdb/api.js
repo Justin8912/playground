@@ -43,10 +43,18 @@ export class TvService {
         };
     
         let res = await fetch(url, options)
-
         res = await res.json();
         let result = []
-        res.episodes.map(episode => {result[episode.episode_number-1]=episode.name})
+        try {
+            res.episodes.map(episode => {result[episode.episode_number-1]=episode.name})
+        } catch (err) {
+            throw new Error(`
+                There was an error with loading the episodes from the specified season: [${!seasonNumber ? "MISSING" : seasonNumber}]
+                \nPlease make sure you have the seasons in the show directory in the following format:
+                \nSeason xx (year_released)
+                \nHere is the result of the fetch call: ${JSON.stringify(res)}
+                \n`, err);
+        }
         return result
     }
 }
