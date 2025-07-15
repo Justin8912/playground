@@ -12,12 +12,20 @@ topic, especially when clarifying technical concepts or providing broader contex
 ensure that the main summary focuses primarily on the content provided.
 `;
 
+export const IMPORTANT_INFORMATION = `
+IMPORTANT: the purpose of this document is to summarize content provided in notes and articles.
+Therefore, accuracy is key. UNDER NO CIRCUMSTANCES SHOULD YOU FABRICATE INFORMATION. IF YOU CANNOT
+FIND INFORMATION IT IS OKAY TO TAKE LONGER TO RESPOND OR TO SAY "I DON'T KNOW"
+`
+
 const DEFAULT_ADDITIONAL_RESOURCES = ``;
 
 export const getPromptTemplate = (note: NoteInfo, allowExternalKnowledge: boolean) => `
 I will provide you notes, articles, and potentially references to other content, and I would like you to generate a summary of all the content provided.
 
 ${allowExternalKnowledge ? EXTERNAL_KNOWLEDGE_CONTROL : DEFAULT_KNOWLEDGE_CONTROL}
+
+${IMPORTANT_INFORMATION}
 
 In the case that the content is about code, please summarize the code and provide snippets where necessary using code blocks with proper syntax highlighting.
 
