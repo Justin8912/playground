@@ -1,18 +1,18 @@
 import { NoteInfo } from '../reviewNotes/types';
 
-export const DEFAULT_KNOWLEDGE_CONTROL = 
+const DEFAULT_KNOWLEDGE_CONTROL =
 `IMPORTANT: You SHOULD fetch information from the links provided AND use the note content  
 together to generate a comprehensive summary. DO NOT use any external knowledge or resources (other 
 than the links provided). Feel free to provide additional (or supporting) examples.
 `
 
-export const EXTERNAL_KNOWLEDGE_CONTROL = `
+const EXTERNAL_KNOWLEDGE_CONTROL = `
 You may use your own knowledge to provide additional context or insights related to the 
 topic, especially when clarifying technical concepts or providing broader context. However, 
 ensure that the main summary focuses primarily on the content provided.
 `;
 
-export const IMPORTANT_INFORMATION = `
+const IMPORTANT_INFORMATION = `
 IMPORTANT: the purpose of this document is to summarize content provided in notes and articles.
 Therefore, accuracy is key. UNDER NO CIRCUMSTANCES SHOULD YOU FABRICATE INFORMATION. IF YOU CANNOT
 FIND INFORMATION IT IS OKAY TO TAKE LONGER TO RESPOND OR TO SAY "I DON'T KNOW"

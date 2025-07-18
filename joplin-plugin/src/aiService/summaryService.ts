@@ -2,13 +2,10 @@ import { NoteInfo } from '../reviewNotes/types';
 import { prepareNoteForLlm } from './dataExtractionService';
 import { getConfig } from '../reviewNotes/configService';
 import { getPromptTemplate } from './aiTemplate';
-import { allowsExternalKnowledge } from '../reviewNotes/dataApi';
+import {hasTag} from '../reviewNotes/dataApi';
 
 // TODO: add image support for uploaded images: https://openrouter.ai/docs/features/images-and-pdfs
 
-/**
- * Response format from OpenRouter API
- */
 interface OpenRouterResponse {
   id: string;
   object: string;
@@ -29,9 +26,6 @@ interface OpenRouterResponse {
   };
 }
 
-/**
- * Configuration for the summary request
- */
 export interface SummaryOptions {
   includeLinkedContent?: boolean;
   temperature?: number;
@@ -39,9 +33,6 @@ export interface SummaryOptions {
   model?: string;
 }
 
-/**
- * The default summary options
- */
 const DEFAULT_SUMMARY_OPTIONS: SummaryOptions = {
   includeLinkedContent: true,
   temperature: 0.5,
@@ -49,23 +40,9 @@ const DEFAULT_SUMMARY_OPTIONS: SummaryOptions = {
   model: 'deepseek/deepseek-r1-0528:free'
 };
 
-/**
- * Maximum number of retry attempts for API calls
- */
 const MAX_RETRIES = 3;
-
-/**
- * Base delay for exponential backoff (in milliseconds)
- */
 const BASE_RETRY_DELAY = 1000;
 
-/**
- * Generate a summary for the given note using the LLM API
- * 
- * @param note The note to summarize
- * @param options Configuration options for the summary
- * @returns Promise containing the generated summary text
- */
 export const generateSummary = async (
   note: NoteInfo,
   options: SummaryOptions = {}
@@ -82,40 +59,22 @@ export const generateSummary = async (
   const processedContent = await prepareNoteForLlm(note, {
     includeLinkedContent: mergedOptions.includeLinkedContent
   });
-  
-  // Get the prompt template with variables applied
-  // Check if this note allows external knowledge based on its tags
-  const { knowledgeControlTag } = config;
 
-
-  // Check if external knowledge is allowed for this note based on its tags
-  const allowExternalKnowledge = await allowsExternalKnowledge(note, knowledgeControlTag);
-  
-  // Get the appropriate prompt template
+  const { knowledgeControlTag, llmApiKey, llmApiEndpoint } = config;
+  const allowExternalKnowledge = await hasTag(note, knowledgeControlTag);
   const promptTemplate = getPromptTemplate(note, allowExternalKnowledge);
-  
-  // Create the API request
+
   const response = await callOpenRouterApi(
     promptTemplate,
     processedContent,
-    config.llmApiKey,
-    config.llmApiEndpoint,
+    llmApiKey,
+    llmApiEndpoint,
     mergedOptions
   );
   
   return extractSummaryFromResponse(response);
 };
 
-/**
- * Call the OpenRouter API with retry logic for temporary failures
- * 
- * @param promptTemplate The template for the prompt
- * @param noteContent The processed note content
- * @param apiKey The API key for authentication
- * @param apiEndpoint The API endpoint URL
- * @param options Summary options including model and parameters
- * @returns Promise containing the API response
- */
 const callOpenRouterApi = async (
   promptTemplate: string,
   noteContent: string,
@@ -203,12 +162,6 @@ const isRetryableError = (error: unknown): boolean => {
   return false;
 };
 
-/**
- * Extract the summary text from the API response
- * 
- * @param response The API response object
- * @returns The extracted summary text
- */
 const extractSummaryFromResponse = (response: OpenRouterResponse): string => {
   if (!response.choices || response.choices.length === 0) {
     throw new Error('Invalid API response: No choices returned');

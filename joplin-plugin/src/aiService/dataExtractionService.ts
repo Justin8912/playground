@@ -6,73 +6,31 @@
  */
 import { NoteInfo } from '../reviewNotes/types';
 import * as DataApi from '../reviewNotes/dataApi';
-import joplin from 'api';
 
-/**
- * Represents the different types of extracted content
- */
 export interface ExtractedContent {
-  cleanText: string;         // The cleaned text content
-  internalLinks: LinkInfo[]; // Internal Joplin links
-  externalLinks: LinkInfo[]; // External web links
-  tags: string[];            // Note tags
+  cleanText: string;
+  internalLinks: LinkInfo[];
+  externalLinks: LinkInfo[];
+  tags: string[];
 }
 
-/**
- * Represents a link extracted from note content
- */
 export interface LinkInfo {
-  text: string;  // The link text/description
-  url: string;   // The link URL/target
-  isJoplinLink: boolean; // Whether this is an internal Joplin link
-  noteId?: string; // For Joplin links, the target note ID
+  text: string;
+  url: string;
+  isJoplinLink: boolean;
+  noteId?: string;
 }
 
-/**
- * Regular expressions for parsing different link types
- */
 const JOPLIN_LINK_REGEX = /\[(.*?)\]\(:\/([a-zA-Z0-9]+)\)/g; // [text](:/noteId)
-const JOPLIN_ANCHOR_REGEX = /\[(.*?)\]\(#([a-zA-Z0-9]+)\)/g; // [text](#anchor)
 const EXTERNAL_LINK_REGEX = /\[(.*?)\]\(((?:https?|ftp):\/\/[^\s)]+)\)/g; // [text](https://example.com)
 const BARE_URL_REGEX = /((?:https?|ftp):\/\/[^\s\])"'><]+)/g; // https://example.com
 
-/**
- * Process a note and extract clean text, links, and other relevant information.
- * 
- * @param note The note to process
- * @returns Extracted content including clean text and links
- */
 export const extractContent = async (note: NoteInfo): Promise<ExtractedContent> => {
-  // Get the full note content if needed
-
-  await joplin.data.post(
-      ['notes'], 
-      null, 
-      {
-        title: "Pre - extract content",
-        body: `Has not extracted the content yet. ${JSON.stringify(note)}`,
-        parent_id: "68d77cb56a5740d2acd797304c944319"
-      }
-    );
-
   const noteContent = note.body || '';
-  
-  // Extract links from content
   const internalLinks = extractInternalLinks(noteContent);
   const externalLinks = extractExternalLinks(noteContent);
-  
-  // Get clean text with formatting removed
   const cleanText = cleanNoteContent(noteContent);
-  
-  await joplin.data.post(
-      ['notes'], 
-      null, 
-      {
-        title: "Post - extract content",
-        body: `Content was extracted successfully. ${JSON.stringify(cleanText)}`,
-        parent_id: "68d77cb56a5740d2acd797304c944319"
-      }
-    );
+
   return {
     cleanText,
     internalLinks,
@@ -81,14 +39,6 @@ export const extractContent = async (note: NoteInfo): Promise<ExtractedContent> 
   };
 };
 
-/**
- * Extract internal Joplin links from note content.
- * This only extracts links to other notes ([text](:/noteId) format)
- * and ignores anchor links within the same note ([text](#anchor) format).
- * 
- * @param content The note content to parse
- * @returns Array of internal link information
- */
 export const extractInternalLinks = (content: string): LinkInfo[] => {
   const links: LinkInfo[] = [];
   
@@ -105,19 +55,9 @@ export const extractInternalLinks = (content: string): LinkInfo[] => {
   
   // Reset regex lastIndex
   JOPLIN_LINK_REGEX.lastIndex = 0;
-  
-  // Note: We intentionally skip [text](#anchor) format links
-  // as these are anchors within the same note and not relevant for LLM processing
-  
   return links;
 };
 
-/**
- * Extract external web links from note content.
- * 
- * @param content The note content to parse
- * @returns Array of external link information
- */
 export const extractExternalLinks = (content: string): LinkInfo[] => {
   const links: LinkInfo[] = [];
   
@@ -153,23 +93,7 @@ export const extractExternalLinks = (content: string): LinkInfo[] => {
   return links;
 };
 
-/**
- * Clean and normalize note content for LLM processing.
- * 
- * @param content The raw note content
- * @returns Cleaned text suitable for LLM processing
- */
 export const cleanNoteContent = (content: string): string => {
-   joplin.data.post(
-    ['notes'], 
-    null, 
-    {
-    title: "Pre - cleanNoteContent",
-    body: "Content was extracted successfully.",
-    parent_id: "68d77cb56a5740d2acd797304c944319"
-    }
-  );
-    
   let cleanText = content;
   
   // Remove HTML tags
@@ -202,12 +126,6 @@ export const cleanNoteContent = (content: string): string => {
   return cleanText;
 };
 
-/**
- * Retrieve additional content from linked notes.
- * 
- * @param links Array of internal links to process
- * @returns Map of note IDs to their content
- */
 export const fetchLinkedNoteContent = async (links: LinkInfo[]): Promise<Map<string, string>> => {
   const linkedContent = new Map<string, string>();
   
@@ -236,18 +154,10 @@ export const fetchLinkedNoteContent = async (links: LinkInfo[]): Promise<Map<str
   return linkedContent;
 };
 
-/**
- * Prepare note content for LLM processing, including extracting important context.
- * 
- * @param note The note to process
- * @param options Optional processing options
- * @returns Processed content optimized for LLM input
- */
 export const prepareNoteForLlm = async (
   note: NoteInfo,
   options: { includeLinkedContent?: boolean } = {}
 ): Promise<string> => {
-  // Extract content from the note
   const extracted = await extractContent(note);
   
   // Start with the note's metadata and clean content

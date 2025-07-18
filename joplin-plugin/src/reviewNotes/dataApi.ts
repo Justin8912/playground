@@ -199,33 +199,13 @@ export const getNotebookHierarchy = async (): Promise<NotebookInfo[]> => {
   return hierarchy;
 };
 
-/**
- * Check if a note has a specific tag
- * 
- * @param noteInfo The note to check
- * @param tagName The name of the tag to check for
- * @returns True if the note has the tag, false otherwise
- */
-export const hasTag = (noteInfo: NoteInfo, tagName: string): boolean => {
+export const hasTag = async (noteInfo: NoteInfo, tagName: string): Promise<boolean> => {
+  if (!noteInfo.tags) {
+    noteInfo.tags = await getNoteTags(noteInfo.id);
+  }
   if (!tagName || !noteInfo.tags || noteInfo.tags.length === 0) {
     return false;
   }
   
   return noteInfo.tags.some(tag => tag.toLowerCase() === tagName.toLowerCase());
-};
-
-/**
- * Check if a note allows external knowledge based on its tags
- * 
- * @param noteInfo The note to check
- * @param knowledgeControlTag The tag that enables external knowledge
- * @returns True if external knowledge is allowed for this note
- */
-export const allowsExternalKnowledge = async (noteInfo: NoteInfo, knowledgeControlTag: string): Promise<boolean> => {
-  if (!knowledgeControlTag) {
-    return false;
-  }
-  noteInfo.tags = await getNoteTags(noteInfo.id);
-  
-  return hasTag(noteInfo, knowledgeControlTag);
 };
