@@ -17,7 +17,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@litehex/node-vault": "^1.0.4",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "dotenv": "^17.2.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "googleapis": "^153.0.0"
   }
 }
