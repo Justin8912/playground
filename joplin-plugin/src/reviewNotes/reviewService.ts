@@ -76,23 +76,14 @@ export const createReviewNote = async (
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
-    // Get the current configuration
     const config = await getConfig();
     
-    // Check if LLM API key is configured
     if (!config.llmApiKey) {
       console.warn('LLM API key not configured. Creating review with original content instead.');
-      // Fall back to original behavior if no API key is configured
-      const reviewNote = await DataApi.createNote(
-        `Review of: ${originalNote.title}`,
-        originalNote.body,
-        targetNotebookId
-      );
-      return reviewNote;
+      return;
     }
     
     try {
-      // Generate a summary using the LLM
       const summaryOptions: SummaryOptions = {
         includeLinkedContent: true,
         temperature: 0.5 // Lower temperature for more focused summaries
@@ -100,7 +91,6 @@ export const createReviewNote = async (
       
       const summary = await generateSummary(originalNote, summaryOptions);
       
-      // Create the review note with the generated summary
       const reviewNote = await DataApi.createNote(
         `AI Summary of: ${originalNote.title}`,
         summary,
@@ -110,14 +100,7 @@ export const createReviewNote = async (
       return reviewNote;
     } catch (summaryError) {
       console.error('Error generating summary:', summaryError);
-      
-      // Fall back to original content if summarization fails
-      const reviewNote = await DataApi.createNote(
-        `Review of: ${originalNote.title}`, 
-        `Failed to generate AI summary: ${summaryError.message}\n\n---\n\n${originalNote.body}`,
-        targetNotebookId
-      );
-      return reviewNote;
+      return;
     }
   } catch (error) {
     console.error('Error creating review note:', error);
@@ -130,7 +113,6 @@ export const generateReviewNote = async (
   filterCriteria?: FilterCriteria
 ): Promise<NoteInfo | null> => {
   try {
-    // Get config to check if filtering is enabled
     const config = await getConfig();
 
     // Step 1: Ensure Reviews notebook exists
