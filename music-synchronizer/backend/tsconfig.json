@@ -13,7 +13,9 @@
     "strictPropertyInitialization": false,
     "resolveJsonModule": true
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "lib": [
     "dom",
     "es2017"
