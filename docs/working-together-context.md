@@ -75,7 +75,7 @@ The feature development process follows a structured flow with distinct phases:
 - **Approval**: The Software Engineer approves the milestone
 - **Documentation Update**: Copilot updates the implementation progress document
 - **Knowledge Capture**: Any lessons learned are documented
-- **Next Steps**: Work begins on the next milestone with direction from the Software Engineer
+- **Next Steps**: Work begins on the next milestone with direction from the Software Engineer. DO NOT CONTINUE ON WITH THE NEXT MILESTONE UNTIL AFTER THE SOFTWARE ENGINEER HAS GIVEN THEIR APPROVAL.
 
 ### 5. Feature Completion
 

@@ -70,8 +70,19 @@ export const createNotebook = async (title: string, parentId?: string): Promise<
 
 export const getAllNotes = async (): Promise<NoteInfo[]> => {
   try {
-    const response = await joplin.data.get(['notes'], { fields: 'id,title,body,parent_id' });
-    const notes = await Promise.all(response.items.map(async note => {
+    let allNotes = [];
+    let response = await joplin.data.get(['notes'], { fields: 'id,title,body,parent_id' });
+    allNotes.push(...response.items);
+
+    let responsePage = 1;
+    // The joplin.data.get endpoint is paginated, so we need to loop through all pages
+    while (response.has_more) {
+      responsePage += 1;
+      response = await joplin.data.get(['notes'], { fields: 'id,title,body,parent_id', page: responsePage});
+      allNotes.push(...response.items);
+    }
+
+    const notes = await Promise.all(allNotes.map(async note => {
       const tags = await getNoteTags(note.id);
       return {
         id: note.id,
@@ -81,7 +92,7 @@ export const getAllNotes = async (): Promise<NoteInfo[]> => {
         tags: tags
       };
     }));
-    
+
     return notes;
   } catch (error) {
     console.error('Error getting all notes:', error);
@@ -186,4 +197,15 @@ export const getNotebookHierarchy = async (): Promise<NotebookInfo[]> => {
   });
 
   return hierarchy;
+};
+
+export const hasTag = async (noteInfo: NoteInfo, tagName: string): Promise<boolean> => {
+  if (!noteInfo.tags) {
+    noteInfo.tags = await getNoteTags(noteInfo.id);
+  }
+  if (!tagName || !noteInfo.tags || noteInfo.tags.length === 0) {
+    return false;
+  }
+  
+  return noteInfo.tags.some(tag => tag.toLowerCase() === tagName.toLowerCase());
 };

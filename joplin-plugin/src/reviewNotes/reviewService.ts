@@ -2,6 +2,7 @@ import { FilterCriteria, NoteInfo, NotebookInfo } from './types';
 import * as DataApi from './dataApi';
 import { selectRandomFilteredNote } from './filterUtils';
 import { getConfig } from './configService';
+import { generateSummary, SummaryOptions } from '../aiService/summaryService';
 
 export const ensureReviewsNotebookExists = async (
   reviewsNotebookName = 'Reviews'
@@ -75,13 +76,32 @@ export const createReviewNote = async (
   targetNotebookId: string
 ): Promise<NoteInfo | null> => {
   try {
-    const reviewNote = await DataApi.createNote(
-      originalNote.title, 
-      originalNote.body, 
-      targetNotebookId
-    );
+    const config = await getConfig();
     
-    return reviewNote;
+    if (!config.llmApiKey) {
+      console.warn('LLM API key not configured. Creating review with original content instead.');
+      return;
+    }
+    
+    try {
+      const summaryOptions: SummaryOptions = {
+        includeLinkedContent: true,
+        temperature: 0.5 // Lower temperature for more focused summaries
+      };
+      
+      const summary = await generateSummary(originalNote, summaryOptions);
+      
+      const reviewNote = await DataApi.createNote(
+        `AI Summary of: ${originalNote.title}`,
+        summary,
+        targetNotebookId
+      );
+      
+      return reviewNote;
+    } catch (summaryError) {
+      console.error('Error generating summary:', summaryError);
+      return;
+    }
   } catch (error) {
     console.error('Error creating review note:', error);
     return null;
@@ -93,7 +113,6 @@ export const generateReviewNote = async (
   filterCriteria?: FilterCriteria
 ): Promise<NoteInfo | null> => {
   try {
-    // Get config to check if filtering is enabled
     const config = await getConfig();
 
     // Step 1: Ensure Reviews notebook exists

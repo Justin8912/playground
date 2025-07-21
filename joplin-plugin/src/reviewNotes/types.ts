@@ -18,6 +18,9 @@ export interface ReviewsConfig {
   reviewsNotebookName: string;
   filterEnabled: boolean;
   filterCriteria: FilterCriteria;
+  llmApiKey: string;
+  llmApiEndpoint: string;
+  knowledgeControlTag: string;
 }
 
 export interface FilterCriteria {
