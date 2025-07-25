@@ -1,30 +1,9 @@
 import { youtube_v3, google } from "googleapis";
-
-export interface Song {
-    title: string;
-    artists: string[];
-    description?: string;
-    videoId?: string;
-}
-
-export interface PlaylistImage {
-    url: string;
-}
-
-export interface GetPlaylistIdsResponse {
-    id: string;
-    title: string;
-    description?: string;
-    image?: PlaylistImage;
-}
-
-export interface GetPlaylistsResponse {
-    id: string;
-    title: string;
-    description?: string;
-    image?: PlaylistImage;
-    songs: Song[];
-}
+import {
+    GetPlaylistsResponse, 
+    GetPlaylistIdsResponse,
+    Song
+} from "../Model/MusicService.js"
 
 export class YoutubeMusicClientService {
     private authClient: any;
