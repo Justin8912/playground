@@ -11,7 +11,6 @@ export const getGoogleUserClient = async (userId: string, vaultService: HCPVault
         serverCreds.redirect_uri
     );
     const userCreds: GoogleCredentials = await vaultService.getUserGoogleCredentials(userId);
-    console.log("User Credentials: ", userCreds);
     if (userCreds?.refresh_token) {
         oauth2Client.setCredentials({ refresh_token: userCreds.refresh_token });
     }
