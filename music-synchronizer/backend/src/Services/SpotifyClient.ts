@@ -52,7 +52,7 @@ export class SpotifyClient {
     }
 }
 
-export const SpotifyClientFactory = async (
+export const getSpotifyUserClient = async (
     vaultService: HCPVaultService, 
     userId: string
 ) => {
