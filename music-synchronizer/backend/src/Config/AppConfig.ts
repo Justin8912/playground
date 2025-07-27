@@ -1,7 +1,7 @@
 import {HCPVaultService} from "../Services/VaultService.js";
 import {EnvironmentConfig} from "./EnvironmentConfig.js";
-import {OAuth2Client} from "google-auth-library";
-import {getGoogleUserClient} from "../Services/GoogleClientFactory.js";
+import {getGoogleUserClient, GoogleUserClient} from "../Services/GoogleClientFactory.js";
+import {getSpotifyUserClient, SpotifyClient} from "../Services/SpotifyClientFactory.js";
 
 export class AppConfig {
     private environmentConfig: EnvironmentConfig;
@@ -20,8 +20,13 @@ export class AppConfig {
         return new HCPVaultService(this.environmentConfig.getVaultToken());
     }
 
-    getGoogleClient = async (userId: string): Promise<OAuth2Client> => {
+    // TODO: Determine if this should be here or not
+    getGoogleClient = async (userId: string): Promise<GoogleUserClient> => {
         return await getGoogleUserClient(userId, this.hcpVaultService);
     }
 
+    // TODO: Determine if this should be here or not
+    getSpotifyClient = async (userId: string): Promise<SpotifyClient> => {
+        return await getSpotifyUserClient(this.hcpVaultService, userId);
+    }
 }

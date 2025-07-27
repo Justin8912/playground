@@ -3,6 +3,7 @@ import {AppConfig} from "../Config/AppConfig.js";
 import { getYoutubeMusicService, YoutubeMusicClientService } from "../Services/YoutubeMusicClientService.js";
 import { getGoogleUserClient } from "../Services/GoogleClientFactory.js";
 import { getSpotifyUserClient } from "../Services/SpotifyClientFactory.js";
+import { SpotifyService, getSpotifyService } from "../Services/SpotifyService.js";
 
 export const defaultHandler = async (req: Request, res: Response): Promise<void> => {
     // Need something to extract important information from the request
@@ -20,12 +21,11 @@ const getYoutubeMusicClientService = async () => {
     return await getYoutubeMusicService(googleUserClient);
 }
 
-const getSpotifyMusicClientService = async () => {
+const getSpotifyMusicClientService = async (): Promise<SpotifyService> => {
     // Initialize the spotifyMusicClientService
     const appConfig = new AppConfig();
-    const spotifyClient = getSpotifyUserClient(appConfig.getHcpVaultService(), "justin");
-    // Get and return the spotifyService
-
+    const spotifyClient = await getSpotifyUserClient(appConfig.getHcpVaultService(), "justin");
+    return await getSpotifyService(spotifyClient);
 }
 
 const getYoutubePlaylistIds = async (youtubeMusicService: YoutubeMusicClientService, res: Response) => {
