@@ -1,8 +1,9 @@
 import { HCPVaultService } from "./VaultService.js";
-import { AccessToken } from "@spotify/web-api-ts-sdk";
+import { AccessToken, SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export class SpotifyClient {
     private vaultService: HCPVaultService;
+    private spotifyClient: SpotifyApi;
     private userId: string;
     
     constructor(
@@ -13,7 +14,16 @@ export class SpotifyClient {
         this.userId = userId;
     }
 
-    refreshAccessToken = async (): Promise<AccessToken> => {
+    initialize = async () => {
+        try {
+            await this.refreshSpotifyClient();
+            console.info("Spotify Client initialized successfully.");
+        } catch (err) {
+            throw new Error("Failed to initialize Spotify Client", { cause: err });
+        }
+    }
+
+    refreshSpotifyClient = async (): Promise<void> => {
         console.log("Refreshing spotify access token for user");
 
         const { client_id: clientId, client_secret: clientSecret } = await this.vaultService.getServerSpotifyCredentials();
@@ -48,7 +58,11 @@ export class SpotifyClient {
             this.userId, accessToken
         );
 
-        return accessToken;
+        this.spotifyClient = SpotifyApi.withAccessToken(clientId, accessToken);
+    }
+
+    public getSpotifyClient = (): SpotifyApi => {
+        return this.spotifyClient;
     }
 }
 
@@ -57,6 +71,6 @@ export const getSpotifyUserClient = async (
     userId: string
 ) => {
     const spotifyClient = new SpotifyClient(vaultService, userId);
-    await spotifyClient.refreshAccessToken();
+    await spotifyClient.initialize();
     return spotifyClient;   
 }
