@@ -4,54 +4,25 @@ import {
     GetPlaylistIdsResponse,
     Song
 } from "../Model/MusicService.js"
+import { GoogleUserClient } from "./GoogleClientFactory.js";
 
 export class YoutubeMusicClientService {
-    private authClient: any;
+    private googleUserClient: GoogleUserClient;
     private youtube: youtube_v3.Youtube;
     public playlists: GetPlaylistsResponse[] = [];
 
-    constructor(authClient: any) {
-        this.authClient = authClient;
-        this.youtube = google.youtube({ version: "v3", auth: this.authClient });
+    constructor(googleUserClient: GoogleUserClient) {
+        this.googleUserClient = googleUserClient;
+        this.youtube = google.youtube({ version: "v3", auth: this.googleUserClient.getAuthClient() });
     }
 
     public async initialize(): Promise<void> {
         try {
-            await this.ensureValidToken();
+            await this.googleUserClient.validateToken();
             this.playlists = await this.getPopulatedPlaylists();
             console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
-        }
-    }
-
-    private async refreshAccessToken(): Promise<void> {
-        try {
-            const tokens = await this.authClient.refreshAccessToken();
-            const credentials = tokens.credentials;
-            
-            this.authClient.setCredentials({
-                access_token: credentials.access_token,
-                refresh_token: credentials.refresh_token,
-            });
-            
-            console.log('Access token refreshed successfully');
-        } catch (error) {
-            throw new Error('Failed to refresh YouTube Music access token: ' + error);
-        }
-    }
-
-    private async ensureValidToken(): Promise<void> {
-        try {
-            const tokenInfo = this.authClient.credentials;
-            const currentTime = Math.floor(Date.now() / 1000);
-            
-            if (!tokenInfo || !tokenInfo.expiry_date || tokenInfo.expiry_date < currentTime) {
-                console.log('Token expired or missing, refreshing...');
-                await this.refreshAccessToken();
-            }
-        } catch (error) {
-            throw new Error('Failed to ensure valid YouTube Music token: ' + error);
         }
     }
 
@@ -334,4 +305,10 @@ export class YoutubeMusicClientService {
             throw new Error('Failed to remove song from YouTube Music playlist: ' + error);
         }
     }
+}
+
+export const getYoutubeMusicService = async (googleUserClient: GoogleUserClient): Promise<YoutubeMusicClientService> => {
+    const youtubeMusicService = new YoutubeMusicClientService(googleUserClient);
+    await youtubeMusicService.initialize();
+    return youtubeMusicService;
 }

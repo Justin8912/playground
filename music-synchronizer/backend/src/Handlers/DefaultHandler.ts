@@ -1,26 +1,31 @@
 import {Request, Response} from "express";
 import {AppConfig} from "../Config/AppConfig.js";
-import { YoutubeMusicClientService } from "../Services/YoutubeMusicClientService.js";
+import { getYoutubeMusicService, YoutubeMusicClientService } from "../Services/YoutubeMusicClientService.js";
+import { getGoogleUserClient } from "../Services/GoogleClientFactory.js";
+import { getSpotifyUserClient } from "../Services/SpotifyClientFactory.js";
 
 export const defaultHandler = async (req: Request, res: Response): Promise<void> => {
     // Need something to extract important information from the request
     // something to identify the path
     // await getPopulatedPlaylists(res);
     const youtubeMusicService = await getYoutubeMusicClientService();
-    await removeSongFromPlaylist(youtubeMusicService, res);
+    await getPopulatedPlaylists(youtubeMusicService, res);
 }
 
-const test = async (req: Request, res: Response) => {
-
-}
 
 const getYoutubeMusicClientService = async () => {
+    // Initialize the youtubeMusicClientService 
     const appConfig = new AppConfig();
-    const googleUserClient = await appConfig.getGoogleClient("justin");
-    console.log("Google user client:", googleUserClient);
-    const youtubeMusicService = new YoutubeMusicClientService(googleUserClient)
-    await youtubeMusicService.initialize();
-    return youtubeMusicService;
+    const googleUserClient = await getGoogleUserClient("justin", appConfig.getHcpVaultService());
+    return await getYoutubeMusicService(googleUserClient);
+}
+
+const getSpotifyMusicClientService = async () => {
+    // Initialize the spotifyMusicClientService
+    const appConfig = new AppConfig();
+    const spotifyClient = getSpotifyUserClient(appConfig.getHcpVaultService(), "justin");
+    // Get and return the spotifyService
+
 }
 
 const getYoutubePlaylistIds = async (youtubeMusicService: YoutubeMusicClientService, res: Response) => {
