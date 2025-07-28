@@ -13,12 +13,13 @@ const sanitizeFilename = (title) => {
     return newStr;
 } 
 
-const main = async (tvShow, year, dryRun) => {
+const main = async (tvShow, dryRun) => {
     const baseTvShowPath = tvDirectoryPath + tvShow
     const seasons = fs.readdirSync(baseTvShowPath);
     const tvService = new TvService(process.env.tvService_accessKey);
     const tvShowName = tvShow.split("(")[0].trim()
-    await tvService.setTvSeries(tvShowName, year);
+    const tvShowPremierYear = tvShow.split("(")[1].split(")")[0].trim();
+    await tvService.setTvSeries(tvShowName, tvShowPremierYear);
 
     for (const season of seasons) {
         const seasonPath = `${baseTvShowPath}\\${season}`
@@ -54,11 +55,6 @@ const questions = [
         name: 'tvShow',
         message: 'Choose a tv show whose names you\'d like to format:',
         choices: fs.readdirSync(tvDirectoryPath),
-    },
-    {
-        type: 'number',
-        name: 'year',
-        message: 'The year that the tv show first premiered'
     },
     {
         type: 'confirm',
