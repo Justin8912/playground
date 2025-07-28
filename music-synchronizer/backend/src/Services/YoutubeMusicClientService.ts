@@ -19,14 +19,14 @@ export class YoutubeMusicClientService {
     public async initialize(): Promise<void> {
         try {
             await this.googleUserClient.validateToken();
-            this.playlists = await this.getPopulatedPlaylists();
+            this.playlists = await this.getPlaylists();
             console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
         }
     }
 
-    public async getPopulatedPlaylists(): Promise<GetPlaylistsResponse[]> {
+    public async getPlaylists(): Promise<GetPlaylistsResponse[]> {
         try {
             const playlistIds = await this.getPlaylistIds();
             const playlistPromises = playlistIds.map((playlist: GetPlaylistIdsResponse) => {
@@ -243,7 +243,7 @@ export class YoutubeMusicClientService {
             
             if (this.playlists.length === 0) {
                 console.log('Playlists cache is empty, loading playlists...');
-                this.playlists = await this.getPopulatedPlaylists();
+                this.playlists = await this.getPlaylists();
             }
             
             const foundPlaylist = this.playlists.find(playlist => playlist.title === name);
