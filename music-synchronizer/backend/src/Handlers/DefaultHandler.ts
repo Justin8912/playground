@@ -13,7 +13,7 @@ export const defaultHandler = async (req: Request, res: Response): Promise<void>
     // await getPopulatedPlaylists(youtubeMusicService, res);
 
     const spotifyMusicService = await getSpotifyMusicClientService();
-    await addSongToPlaylistSpotify(spotifyMusicService, res);
+    await addSongsToPlaylistSpotify(spotifyMusicService, res);
 }
 
 
@@ -138,54 +138,38 @@ const getSongUriByQuerySpotify = async (spotifyMusicService: SpotifyService, res
     }
 }
 
-const addSongToPlaylistSpotify = async (spotifyMusicService: SpotifyService, res: Response) => {
-    const song = {
-        title: "backbone",
-        artists: ["chase and status"]
-    };
+const addSongsToPlaylistSpotify = async (spotifyMusicService: SpotifyService, res: Response) => {
+    const songs = [
+        {
+            title: "backbone",
+            artists: ["chase and status"]
+        },
+        {
+            title: "Shivers",
+            artists: ["Ed Sheeran"]
+        },
+        {
+            title: "Bad Habits",
+            artists: ["Ed Sheeran"]
+        }
+    ];
     const playlistName = "Test";
     
     try {
-        // First get the playlist to find its ID
-        const playlist = await spotifyMusicService.getPlaylistByName(playlistName);
-        if (!playlist) {
-            res.status(404).json({
-                message: `Playlist "${playlistName}" not found`,
-                success: false,
-                song,
-                playlistName
-            });
-            return;
-        }
-        
-        // Get the song URI
-        const songUri = await spotifyMusicService.getSongUriByQuery(song);
-        if (!songUri) {
-            res.status(404).json({
-                message: `Song "${song.title}" by ${song.artists.join(', ')} not found on Spotify`,
-                success: false,
-                song,
-                playlistName
-            });
-            return;
-        }
-        
-        // Add the song to the playlist using playlist ID and song URI
-        const result = await spotifyMusicService.addSongToPlaylist(playlist.id, songUri);
+        const result = await spotifyMusicService.addSongsToPlaylist(playlistName, songs);
         res.json({
-            message: `Successfully added "${song.title}" by ${song.artists.join(', ')} to playlist "${playlistName}"`,
+            message: `Successfully added songs to playlist "${playlistName}"`,
             success: result,
-            song,
+            songs,
             playlistName,
-            playlistId: playlist.id,
-            songUri
+            songsCount: songs.length
         });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         res.status(500).json({
-            message: `Failed to add song to playlist: ${errorMessage}`,
+            message: `Failed to add songs to playlist: ${errorMessage}`,
             success: false,
-            song,
+            songs,
             playlistName
         });
     }

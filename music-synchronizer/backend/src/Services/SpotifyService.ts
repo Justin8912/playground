@@ -131,19 +131,42 @@ export class SpotifyService {
         }
     }
 
-    public addSongsToPlaylist = async () => {}
-
-    public addSongToPlaylist = async (playlistId: string, songUri: string): Promise<boolean> => {
+    public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<boolean> => {
         try {
-            console.info(`Adding song with URI "${songUri}" to playlist "${playlistId}"`);
+            console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
             
-            // Add the song to the playlist
-            await this.spotifyApi.playlists.addItemsToPlaylist(playlistId, [songUri]);
+            // First find the playlist by name
+            const playlist = await this.getPlaylistByName(playlistName);
+            if (!playlist) {
+                throw new Error(`Playlist with name "${playlistName}" not found`);
+            }
             
-            console.info(`Successfully added song with URI "${songUri}" to playlist "${playlistId}"`);
+            // Get song URIs for all songs in parallel
+            const songUriPromises = songs.map(song => this.getSongUriByQuery(song));
+            const songUriResults = await Promise.all(songUriPromises);
+            
+            // Filter out null results and collect valid URIs
+            const songUris: string[] = [];
+            songUriResults.forEach((songUri, index) => {
+                if (songUri) {
+                    songUris.push(songUri);
+                    console.info(`Found URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}: ${songUri}`);
+                } else {
+                    console.warn(`Could not find URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}, skipping...`);
+                }
+            });
+            
+            if (songUris.length === 0) {
+                throw new Error(`No songs could be found on Spotify for the provided list`);
+            }
+            
+            // Add all found songs to the playlist
+            await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
+            
+            console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
             return true;
         } catch (err) {
-            throw new Error(`Failed to add song with URI '${songUri}' to playlist '${playlistId}'`, { cause: err });
+            throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
         }
     }
 
