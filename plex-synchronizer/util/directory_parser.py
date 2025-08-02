@@ -9,6 +9,7 @@ def directory_parser(path:str):
         seasons_obj = {}
         seasons = os.listdir(f'{path}/{show}')
         for season in seasons:
+            if (not os.path.isdir(f'{path}/{show}/{season}')): continue
             episodes = os.listdir(f'{path}/{show}/{season}')
             seasons_obj[season] = episodes
         result[show] = seasons_obj

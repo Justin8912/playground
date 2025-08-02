@@ -23,11 +23,23 @@ const main = async (tvShow, dryRun) => {
 
     for (const season of seasons) {
         const seasonPath = `${baseTvShowPath}\\${season}`
+        if (!(fs.statSync(seasonPath)).isDirectory()) {
+            console.log(`${JSON.stringify(season)} is not a directory. Skipping`);
+            continue;
+        }
         const episodes = fs.readdirSync(seasonPath);
         const episodeNames = await tvService.getTvSeasonEpisodes(season.split(" ")[1])
         for (const episode of episodes) {
             const seFormatPattern = /s\d{2}e\d{2}/;
-            const seFormat = (episode.toLowerCase().match(seFormatPattern)).toString();
+            const eFormatPattern = /e\d{2}/;
+            let seFormat;
+            try {
+                seFormat = (episode.toLowerCase().match(seFormatPattern)).toString();
+            } catch (err) {
+                console.log("There was an error trying to use the Season/Epsiode format. Switching to Episode format.");
+                const eFormat = (episode.toLowerCase().match(eFormatPattern)).toString();
+                seFormat = `s01${eFormat}`
+            }
 
             const episodeNumberPattern = /(?<=e)\d{2}/
             const episodeNumber = parseInt((seFormat.match(episodeNumberPattern)).toString());
@@ -68,3 +80,14 @@ inquirer.prompt(questions).then((answers) => {
     console.log('You selected: ', answers);
     main(answers.tvShow, answers.year, answers.dryRun)
 });
+
+// const asd = async () => {
+//     const tvService = new TvService(process.env.tvService_accessKey);
+//     // tvService.tvShowId="31911"
+//     await tvService.setTvSeries("Fullmetal Alchemist Brotherhood", 2009)
+//     const res = await tvService.getTvSeasonEpisodes(1)
+//     console.log(res)
+// }
+
+
+// asd()
