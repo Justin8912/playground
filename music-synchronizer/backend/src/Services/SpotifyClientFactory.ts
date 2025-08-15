@@ -67,8 +67,8 @@ export class SpotifyClient {
 }
 
 export const getSpotifyUserClient = async (
-    vaultService: HCPVaultService, 
-    userId: string
+    userId: string,
+    vaultService: HCPVaultService
 ) => {
     const spotifyClient = new SpotifyClient(vaultService, userId);
     await spotifyClient.initialize();

@@ -26,10 +26,15 @@ export class YoutubeMusicClientService {
         }
     }
 
+    private sleep = async () => {
+        return new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
     public async getPlaylists(): Promise<GetPlaylistsResponse[]> {
         try {
             const playlistIds = await this.getPlaylistIds();
             const playlistPromises = playlistIds.map((playlist: GetPlaylistIdsResponse) => {
+                if (!playlist.description?.toLowerCase().includes("music")) return
                 return this.getSongs(playlist.id).then(songs => ({
                     id: playlist.id,
                     title: playlist.title,
@@ -46,8 +51,8 @@ export class YoutubeMusicClientService {
                         image: playlist.image,
                         songs: []
                     };
-                });
-            });
+                })
+            }).filter(playlist => !!playlist);
 
             const populatedPlaylists = await Promise.all(playlistPromises);
             const validPlaylists = populatedPlaylists.filter(playlist => !!playlist);
@@ -137,6 +142,11 @@ export class YoutubeMusicClientService {
         }
     }
 
+    public async getSongId(song: Song): Promise<void | string> {
+        const query = `${song.title} ${song.artists.join(' ')}`;
+        return await this.getSongIdByQuery(query);
+    }
+
     public async getSongIdByQuery(query: string): Promise<void | string> {
         try {
             const searchResult: any = await this.youtube.search.list({
@@ -145,6 +155,8 @@ export class YoutubeMusicClientService {
                 type: ["video"],
                 maxResults: 1
             });
+
+            await this.sleep();
 
             if (!searchResult?.data?.items || searchResult.data.items.length === 0) {
                 console.log(`No videos found for query: "${query}"`);
@@ -195,8 +207,6 @@ export class YoutubeMusicClientService {
 
     private async addSongToPlaylist(playlistId: string, videoId: string): Promise<any> {
         try {
-            await this.ensureValidToken();
-            
             const response: any = await this.youtube.playlistItems.insert({
                 part: ["snippet"],
                 requestBody: {
@@ -210,6 +220,8 @@ export class YoutubeMusicClientService {
                 }
             });
 
+            await this.sleep();
+
             console.log(`Added video ${videoId} to playlist ${playlistId}`);
             return response;
         } catch (error) {
@@ -218,20 +230,29 @@ export class YoutubeMusicClientService {
     }
 
     // Maybe have a public facing method that allows adding multiple songs by name at once
-    public async addSongsToPlaylist(playlistId: string, videoIds: string[]): Promise<void> {
+    public async addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<void> {
         try {
             const responses = [];
-            for (const videoId of videoIds) {
+            const playlistId = (await this.getPlaylistByName(playlistName))?.id;
+
+            if (!playlistId) {
+                throw new Error(`Playlist with name "${playlistName}" not found`);
+            }
+
+            for (const song of songs) {
                 try {
-                    const response = await this.addSongToPlaylist(playlistId, videoId);
-                    responses.push(response);
+                    const videoId = await this.getSongId(song);
+                    if (videoId) {
+                        const response = await this.addSongToPlaylist(playlistId, videoId);
+                        responses.push(response);
+                    }
                 } catch (error) {
-                    console.warn(`Failed to add video ${videoId} to playlist ${playlistId}:`, error);
+                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
                     // Continue with other songs rather than failing completely
                 }
             }
 
-            console.log(`Successfully added ${responses.length} out of ${videoIds.length} songs to playlist ${playlistId}`);
+            console.log(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
         } catch (error) {
             throw new Error('Failed to add songs to YouTube Music playlist: ' + error);
         }

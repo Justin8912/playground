@@ -21,6 +21,7 @@ interface GetPlaylistsResponse extends GetPlaylistIdsResponse {
 export class SpotifyService {
     private spotifyClient: SpotifyClient;
     private spotifyApi: SpotifyApi;
+    private playlists: GetPlaylistsResponse[] = [];
 
     constructor(
         spotifyClient: SpotifyClient,
@@ -32,12 +33,16 @@ export class SpotifyService {
         try {
             await this.spotifyClient.initialize();
             this.setSpotifyApi(this.spotifyClient.getSpotifyClient());
+            this.playlists = await this.getPlaylists();
             console.info("Spotify Service initialized successfully.");
         } catch (err) {
             throw new Error("Failed to initialize Spotify Service", { cause: err });
         }
     }
 
+    private sleep = async () => {
+        return new Promise(resolve => setTimeout(resolve, 1000));
+    }
     private setSpotifyApi = (spotifyApi: SpotifyApi) => {
         this.spotifyApi = spotifyApi;
     }
@@ -46,10 +51,12 @@ export class SpotifyService {
         try {
             console.info("Retrieving playlists from Spotify");
             const playlistIds = await this.getPlaylistIds();
+            await this.sleep();
             const response = await Promise.all(playlistIds.map(async (playlist) => ({
                 ...playlist,
                 songs: await this.getSongs(playlist.id)
             })));
+            await this.sleep();
             return response;
         } catch (err) {
             throw new Error("Failed to retrieve playlists from Spotify", { cause: err });
@@ -59,6 +66,7 @@ export class SpotifyService {
     private getSongs = async (playlistId: string): Promise<Song[]> => {
         try {
             const playlistItems = await this.spotifyApi.playlists.getPlaylistItems(playlistId);
+            await this.sleep();
             return playlistItems.items.map((song: PlaylistedTrack<Track>) => {
                 return {
                     title: song?.track?.name || 'Unknown Title',
@@ -113,11 +121,11 @@ export class SpotifyService {
             console.info(`Searching for song: "${song.title}" by ${song.artists.join(', ')}`);
             
             // Create search query string
-            const query = `track:"${song.title}" artist:"${song.artists.join(' ')}"`;
+            const query = `${song.title} ${song.artists.join(' ')}`;
             
             // Search for the track
             const searchResults = await this.spotifyApi.search(query, ['track'], 'US', 1);
-            
+            await this.sleep();
             if (searchResults.tracks.items.length > 0) {
                 const track = searchResults.tracks.items[0];
                 console.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);

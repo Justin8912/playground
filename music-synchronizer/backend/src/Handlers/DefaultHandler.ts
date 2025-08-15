@@ -11,9 +11,10 @@ export const defaultHandler = async (req: Request, res: Response): Promise<void>
     // await getPopulatedPlaylists(res);
     // const youtubeMusicService = await getYoutubeMusicClientService();
     // await getPopulatedPlaylists(youtubeMusicService, res);
-
+    const youtubeMusicService = await getYoutubeMusicClientService();
     const spotifyMusicService = await getSpotifyMusicClientService();
-    await addSongsToPlaylistSpotify(spotifyMusicService, res);
+    // await addSongsToPlaylistSpotify(spotifyMusicService, res);
+    await synchronizeFromSpotifyToYoutube(res, youtubeMusicService, spotifyMusicService);
 }
 
 
@@ -27,7 +28,7 @@ const getYoutubeMusicClientService = async () => {
 const getSpotifyMusicClientService = async (): Promise<SpotifyService> => {
     // Initialize the spotifyMusicClientService
     const appConfig = new AppConfig();
-    const spotifyClient = await getSpotifyUserClient(appConfig.getHcpVaultService(), "justin");
+    const spotifyClient = await getSpotifyUserClient("justin", appConfig.getHcpVaultService());
     return await getSpotifyService(spotifyClient);
 }
 
@@ -173,4 +174,52 @@ const addSongsToPlaylistSpotify = async (spotifyMusicService: SpotifyService, re
             playlistName
         });
     }
+}
+
+const synchronizeFromYoutubeToSpotify = async (res: Response, youtubeMusicService: YoutubeMusicClientService, spotifyMusicService: SpotifyService): Promise<void> => {
+    // Get playlists from YouTube Music
+    const youtubePlaylists = await youtubeMusicService.getPlaylists();
+    console.info("Retrieved YouTube Music playlists:", youtubePlaylists);
+    const sourcePlaylist = await youtubeMusicService.getPlaylistByName("Test");
+
+    const targetPlaylist = await spotifyMusicService.getPlaylistByName("Test");
+
+
+    if (!targetPlaylist) {
+        console.log("Could not find target playlist");
+        return;
+    }
+
+    if (!sourcePlaylist) {
+        console.log("Could not find source playlist");
+        return;
+    }
+
+    await spotifyMusicService.addSongsToPlaylist(targetPlaylist.title, sourcePlaylist.songs);
+
+    res.json({ message: "Synchronization completed successfully." });
+}
+
+const synchronizeFromSpotifyToYoutube = async (res: Response, youtubeMusicService: YoutubeMusicClientService, spotifyMusicService: SpotifyService): Promise<void> => {
+    // Get playlists from YouTube Music
+    const youtubePlaylists = await youtubeMusicService.getPlaylists();
+    console.info("Retrieved YouTube Music playlists:", youtubePlaylists);
+    const targetPlaylist = await youtubeMusicService.getPlaylistByName("Test");
+
+    const sourcePlaylist = await spotifyMusicService.getPlaylistByName("Test");
+
+
+    if (!targetPlaylist) {
+        console.log("Could not find target playlist");
+        return;
+    }
+
+    if (!sourcePlaylist) {
+        console.log("Could not find source playlist");
+        return;
+    }
+
+    await youtubeMusicService.addSongsToPlaylist(targetPlaylist.title, sourcePlaylist.songs);
+
+    res.json({ message: "Synchronization completed successfully." });
 }
