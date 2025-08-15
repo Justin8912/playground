@@ -74,33 +74,33 @@ export class YtMusicService {
         return result;
     }
 
-    videoScrapper = async (videoId: string): Promise<Song> => {
-        if (!videoId) {
-            logger.info("Video ID is not defined.");
-            return {} as Song;
-        }
-        const browser = await puppeteer.launch({
-            executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-            headless: true
-        });
-        const page = await browser.newPage();
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
-        await page.goto(url, { waitUntil: 'networkidle2' });
-        const data = await page.evaluate(() => {
-            const titleElement = document.querySelector('.yt-video-attribute-view-model__title');
-            const artistElement = document.querySelector('.yt-video-attribute-view-model__subtitle');
+    // videoScrapper = async (videoId: string): Promise<Song> => {
+    //     if (!videoId) {
+    //         logger.info("Video ID is not defined.");
+    //         return {} as Song;
+    //     }
+    //     const browser = await puppeteer.launch({
+    //         executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    //         headless: true
+    //     });
+    //     const page = await browser.newPage();
+    //     const url = `https://www.youtube.com/watch?v=${videoId}`;
+    //     await page.goto(url, { waitUntil: 'networkidle2' });
+    //     const data = await page.evaluate(() => {
+    //         const titleElement = document.querySelector('.yt-video-attribute-view-model__title');
+    //         const artistElement = document.querySelector('.yt-video-attribute-view-model__subtitle');
 
-            const title = titleElement ? titleElement.innerText : 'Title not found';
-            const artists = artistElement ? artistElement.innerText : 'Artists not found';
+    //         const title = titleElement ? titleElement.innerText : 'Title not found';
+    //         const artists = artistElement ? artistElement.innerText : 'Artists not found';
 
-            return { title, artists };
-        });
-        await browser.close();
-        return {
-            title: data.title,
-            artists: data.artists.split(", ")
-        }
-    }
+    //         return { title, artists };
+    //     });
+    //     await browser.close();
+    //     return {
+    //         title: data.title,
+    //         artists: data.artists.split(", ")
+    //     }
+    // }
 
     getSongs = async (playlistId: string): Promise<Song[]> => {
         let nextPageToken: string | undefined = "test";
@@ -139,7 +139,7 @@ export class YtMusicService {
     }
 
     // For communicating between different applications
-    formatMetadata = (song) => {}
+    // formatMetadata = (song) => {}
 
     getSongIdByQuery = async (query:string): Promise<void | string> => {
         let searchResult = await this.youtube.search.list(
