@@ -44,8 +44,13 @@ export class TvService {
     
         let res = await fetch(url, options)
         res = await res.json();
+
+        if (res.status_code === 34) {
+            throw new Error(`The TV show could not be found with the provided information: ${url}.\nIt is possible that this season is not out on TMDB yet.`);
+        }
         let result = []
         try {
+            console.log("Here is the result:", res);
             res.episodes.map(episode => {result[episode.episode_number-1]=episode.name})
         } catch (err) {
             throw new Error(`
