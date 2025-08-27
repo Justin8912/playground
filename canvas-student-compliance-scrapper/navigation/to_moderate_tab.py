@@ -55,10 +55,6 @@ def navigate_to_moderate_tab(driver):
         raise
 
 
-def back_to_moderate_tab(driver, student_name):
-    # Navigate back to moderate tab using multiple strategies
-    print(f"  Using browser back for {student_name}")
+def back_to_moderate_tab(driver):
     driver.back()
     time.sleep(0.75)
-#     if not switch_to_canvas_iframe(driver):
-#         raise Exception("Could not switch back to Canvas iframe when attempting to navigate back to the moderate tab.")

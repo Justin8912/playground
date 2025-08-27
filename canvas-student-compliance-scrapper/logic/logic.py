@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from navigation.to_moderate_tab import back_to_moderate_tab
-from navigation.switch_to_iframe import switch_to_canvas_iframe
 import time
 
 
@@ -11,7 +10,7 @@ def get_student_compliance_data(result, driver):
     """Collect compliance data from students across all pages in the Canvas iframe."""
     print("Beginning to retrieve student compliance data.")
     students_processed_per_page = {}
-    student_compliance = {}
+    student_violations = {}
     page_number = 1
     students_processed_in_batch = 0
 
@@ -27,7 +26,7 @@ def get_student_compliance_data(result, driver):
             print(f"Found {student_count} students on page {page_number}")
 
             # Process all students on current page
-            students_processed_in_batch = process_students(driver, student_compliance, student_count, page_number)
+            students_processed_in_batch = process_students(driver, student_violations, student_count, page_number)
 
             # Look for Next button to proceed to next page
             try:
@@ -57,11 +56,11 @@ def get_student_compliance_data(result, driver):
             else:
                 students_processed_per_page[page_number] = 0
 
-    total_students = len(student_compliance)
+    total_students = len(student_violations)
     print(f"\n--- Pagination Complete ---")
     print(f"Processed {page_number} pages with {total_students} total students")
     result["students_processed_per_page"] = students_processed_per_page
-    result["student_compliance"] = student_compliance
+    result["student_violations"] = student_violations
     return result
 
 def count_quiz_violations(driver):
@@ -85,7 +84,7 @@ def count_quiz_violations(driver):
 
     return violation_count
 
-def get_compliance_data(driver, student_compliance, student_name):
+def get_compliance_data(driver, student_violations, student_name):
     time.sleep(0.5)
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "table"))
@@ -93,12 +92,12 @@ def get_compliance_data(driver, student_compliance, student_name):
 
     # Count violations
     violation_count = count_quiz_violations(driver)
-    student_compliance[student_name] = violation_count
+    student_violations[student_name] = violation_count
     print(f"  Found {violation_count} violations for {student_name}")
 
-    back_to_moderate_tab(driver, student_name)
+    back_to_moderate_tab(driver)
 
-def process_students(driver, student_compliance, student_count, page_number):
+def process_students(driver, student_violations, student_count, page_number):
     students_processed = 0
     for i in range(student_count):
         try:
@@ -127,7 +126,7 @@ def process_students(driver, student_compliance, student_count, page_number):
 
             if (session_log_button):
                 session_log_button.click()
-                get_compliance_data(driver, student_compliance, student_name)
+                get_compliance_data(driver, student_violations, student_name)
                 students_processed += 1
             else:
                 print(f"  No session log button found for {student_name}, skipping")

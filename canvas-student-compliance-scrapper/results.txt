@@ -1,0 +1,19 @@
+Students Processed per page
+Expect 50 students per page, except the last page which may have less:
+
+	- Page number 1: 50 students processed
+	- Page number 2: 50 students processed
+	- Page number 3: 49 students processed
+
+-----------------
+Student report section
+Students are selected based on if their moderate tab shows the log "Stopped viewing the quiz-taking page".
+
+	- Student D: 5 violations
+	- Student A: 3 violations
+	- Student E: 2 violations
+	- Student C: 1 violations
+	- Student B: 0 violations
+
+5 students were processed.
+-----------------
