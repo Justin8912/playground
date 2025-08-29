@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from navigation.to_moderate_tab import back_to_moderate_tab
+from navigation.next_moderation_page import next_moderation_page
 import time
 
 
@@ -30,15 +31,14 @@ def get_student_compliance_data(result, driver):
 
             # Look for Next button to proceed to next page
             try:
-                next_button = driver.find_element(By.CSS_SELECTOR, "button[data-direction='next']")
-
-                if next_button.is_enabled():
-                    print(f"Found Next button, proceeding to page {page_number + 1}")
-                    next_button.click()
-                    time.sleep(1)  # Wait for page to load
-                    page_number += 1
+                next_moderation_page_output = next_moderation_page(driver, page_number)
+                if (next_moderation_page_output != False):
+                    students_processed_per_page[page_number] = students_processed_in_batch if students_processed_in_batch else 0
+                    page_number = next_moderation_page_output
+                    # Wait a couple seconds after moving to the next page
+                    time.sleep(2)
                 else:
-                    print("Next button is disabled, reached final page")
+                    print("Final page reached")
                     break
 
             except (NoSuchElementException, TimeoutException):
@@ -50,11 +50,6 @@ def get_student_compliance_data(result, driver):
             print(f"Could not find main student table on page {page_number}")
             driver.save_screenshot("error_logic.png")
             break
-        finally:
-            if (students_processed_in_batch):
-                students_processed_per_page[page_number] = students_processed_in_batch
-            else:
-                students_processed_per_page[page_number] = 0
 
     total_students = len(student_violations)
     print(f"\n--- Pagination Complete ---")
