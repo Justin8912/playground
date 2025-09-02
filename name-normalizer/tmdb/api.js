@@ -50,7 +50,6 @@ export class TvService {
         }
         let result = []
         try {
-            console.log("Here is the result:", res);
             res.episodes.map(episode => {result[episode.episode_number-1]=episode.name})
         } catch (err) {
             throw new Error(`
