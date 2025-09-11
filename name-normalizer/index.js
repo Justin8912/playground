@@ -36,7 +36,7 @@ const main = async (tvShow, dryRun) => {
             try {
                 seFormat = (episode.toLowerCase().match(seFormatPattern)).toString();
             } catch (err) {
-                console.log("There was an error trying to use the Season/Epsiode format. Switching to Episode format.");
+                console.log(`There was an error trying to use the Season/Epsiode format for episode: ${episode}. Switching to Episode format.`);
                 const eFormat = (episode.toLowerCase().match(eFormatPattern)).toString();
                 seFormat = `s01${eFormat}`
             }
