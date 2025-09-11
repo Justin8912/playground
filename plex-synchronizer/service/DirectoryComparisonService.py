@@ -71,7 +71,6 @@ class DirectoryComparisonService:
     def display_directory_structure_differences(self):
         # TODO: implement this function to print the different between directories _better_
         print(json.dumps(self.comparison_result["local"], indent=2))
-        exit
 
     def compare_directory_structures(self, local, remote):
         self.comparison_result = compare_directory_structures(local, remote)
