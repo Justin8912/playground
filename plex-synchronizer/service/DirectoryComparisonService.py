@@ -44,7 +44,6 @@ def compare_directory_structures(local, remote):
                     remote_episodes = copy.deepcopy(remote[show][season])
                     comparison = compare_arrays(local_episodes, remote_episodes)
                     if len(local_episodes):
-                        print(f'populating lopcal with {local_episodes}')
                         if show not in result["local"]:
                             result["local"][show] = {}
                         result["local"][show] = {**result["local"][show], season: comparison["local"]}
@@ -62,7 +61,8 @@ class DirectoryComparisonService:
 
     def display_directory_structure_differences(self):
         # TODO: implement this function to print the different between directories _better_
-        print(json.dumps(self.comparison_result, indent=2))
+        print(json.dumps(self.comparison_result["local"], indent=2))
+        exit
 
     def compare_directory_structures(self, local, remote):
         self.comparison_result = compare_directory_structures(local, remote)
