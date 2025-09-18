@@ -1,6 +1,7 @@
 import { SpotifyApi, SimplifiedPlaylist, PlaylistedTrack, Track } from "@spotify/web-api-ts-sdk";
-import { SpotifyClient } from "./SpotifyClientFactory.js";
+import {getSpotifyUserClient, SpotifyClient} from "./SpotifyClientFactory.js";
 import { HCPVaultService } from "./VaultService.js";
+import logger from "../Util/logger.js";
 
 interface GetPlaylistIdsResponse {
     id: string;
@@ -33,7 +34,8 @@ export class SpotifyService {
         try {
             await this.spotifyClient.initialize();
             this.setSpotifyApi(this.spotifyClient.getSpotifyClient());
-            this.playlists = await this.getPlaylists();
+            // TODO: we will want to implement caching to avoid hitting rate limits
+            // this.playlists = await this.getPlaylists();
             console.info("Spotify Service initialized successfully.");
         } catch (err) {
             throw new Error("Failed to initialize Spotify Service", { cause: err });
@@ -204,8 +206,11 @@ export class SpotifyService {
 }
 
 export const getSpotifyService = async (
-    spotifyClient: SpotifyClient
+    user: string,
+    hcpVaultService: HCPVaultService
 ): Promise<SpotifyService> => {
+    logger.info(`Retrieving spotify service for user: ${user}`);
+    const spotifyClient = await getSpotifyUserClient(user, hcpVaultService);
     const spotifyService = new SpotifyService(spotifyClient);
     await spotifyService.initialize();
     return spotifyService;

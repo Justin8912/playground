@@ -13,7 +13,7 @@ export const defaultHandler = async (req: Request, res: Response): Promise<void>
     // await getPopulatedPlaylists(youtubeMusicService, res);
     const youtubeMusicService = await getYoutubeMusicClientService();
     const spotifyMusicService = await getSpotifyMusicClientService();
-    // await addSongsToPlaylistSpotify(spotifyMusicService, res);
+    await addSongsToPlaylistSpotify(spotifyMusicService, res);
     await synchronizeFromSpotifyToYoutube(res, youtubeMusicService, spotifyMusicService);
 }
 
@@ -21,15 +21,13 @@ export const defaultHandler = async (req: Request, res: Response): Promise<void>
 const getYoutubeMusicClientService = async () => {
     // Initialize the youtubeMusicClientService 
     const appConfig = new AppConfig();
-    const googleUserClient = await getGoogleUserClient("justin", appConfig.getHcpVaultService());
-    return await getYoutubeMusicService(googleUserClient);
+    return await getYoutubeMusicService("justin", appConfig.getHcpVaultService());
 }
 
 const getSpotifyMusicClientService = async (): Promise<SpotifyService> => {
     // Initialize the spotifyMusicClientService
     const appConfig = new AppConfig();
-    const spotifyClient = await getSpotifyUserClient("justin", appConfig.getHcpVaultService());
-    return await getSpotifyService(spotifyClient);
+    return await getSpotifyService("justin", appConfig.getHcpVaultService());
 }
 
 const getYoutubePlaylistIds = async (youtubeMusicService: YoutubeMusicClientService, res: Response) => {
@@ -38,7 +36,7 @@ const getYoutubePlaylistIds = async (youtubeMusicService: YoutubeMusicClientServ
 }
 
 const getPopulatedPlaylists = async (youtubeMusicService: YoutubeMusicClientService, res: Response) => {
-    const result = await youtubeMusicService.getPopulatedPlaylists();
+    const result = await youtubeMusicService.getPlaylists();
     res.json(result);
 }
 

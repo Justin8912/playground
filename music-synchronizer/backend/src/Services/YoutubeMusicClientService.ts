@@ -4,7 +4,9 @@ import {
     GetPlaylistIdsResponse,
     Song
 } from "../Model/MusicService.js"
-import { GoogleUserClient } from "./GoogleClientFactory.js";
+import {getGoogleUserClient, GoogleUserClient} from "./GoogleClientFactory.js";
+import {HCPVaultService} from "./VaultService.js";
+import logger from "../Util/logger.js";
 
 export class YoutubeMusicClientService {
     private googleUserClient: GoogleUserClient;
@@ -19,7 +21,8 @@ export class YoutubeMusicClientService {
     public async initialize(): Promise<void> {
         try {
             await this.googleUserClient.validateToken();
-            this.playlists = await this.getPlaylists();
+            // TODO: We will want to implement caching at some point so that we can avoid hitting rate limits
+            // this.playlists = await this.getPlaylists();
             console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
@@ -328,7 +331,12 @@ export class YoutubeMusicClientService {
     }
 }
 
-export const getYoutubeMusicService = async (googleUserClient: GoogleUserClient): Promise<YoutubeMusicClientService> => {
+export const getYoutubeMusicService = async (
+    user: string,
+    vaultService: HCPVaultService
+): Promise<YoutubeMusicClientService> => {
+    logger.info(`Retrieving spotify service for user: ${user}`);
+    const googleUserClient = await getGoogleUserClient(user, vaultService);
     const youtubeMusicService = new YoutubeMusicClientService(googleUserClient);
     await youtubeMusicService.initialize();
     return youtubeMusicService;

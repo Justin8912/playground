@@ -19,14 +19,4 @@ export class AppConfig {
     getHcpVaultService = (): HCPVaultService => {
         return new HCPVaultService(this.environmentConfig.getVaultToken());
     }
-
-    // TODO: Determine if this should be here or not
-    getGoogleClient = async (userId: string): Promise<GoogleUserClient> => {
-        return await getGoogleUserClient(userId, this.hcpVaultService);
-    }
-
-    // TODO: Determine if this should be here or not
-    getSpotifyClient = async (userId: string): Promise<SpotifyClient> => {
-        return await getSpotifyUserClient(this.hcpVaultService, userId);
-    }
 }

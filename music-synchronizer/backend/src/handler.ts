@@ -1,14 +1,12 @@
 import express, {Request, Response} from "express";
 import dotenv from "dotenv";
 import {defaultHandler} from "./Handlers/DefaultHandler.js";
+import {AppConfig} from "./Config/AppConfig.js";
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT;
-
-// app.get("/", (req: Request, res: Response) => {
-//   res.json({ message: "API is running" });
-// });
+export const appConfig: AppConfig = new AppConfig();
 
 app.listen(PORT, () => {
   if (!PORT) {
