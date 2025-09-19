@@ -1,22 +1,19 @@
 import {YoutubeMusicClientService} from "./YoutubeMusicClientService.js";
 import {SpotifyService} from "./SpotifyService.js";
-import {GetPlaylistsResponse} from "../Model/MusicService.js";
+import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
+import {findDifferences} from "../Util/findDifferences.js";
 
 export const synchronizeMusicSources = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService
 ): Promise<boolean> => {
     try {
-        // Get the playlists from the source client
-        const sourcePlaylists: GetPlaylistsResponse = await sourceClient.getPlaylists();
-        // Get the playlists from the target client
-        const targetPlaylists: GetPlaylistsResponse = await targetClient.getPlaylists();
+        const sourcePlaylists: GetPlaylistsResponse[] = await sourceClient.getPlaylists();
+        const targetPlaylists: GetPlaylistsResponse[] = await targetClient.getPlaylists();
 
-        // For each playlist in the source client, check if it exists in the target client
         for (const sourcePlaylist of sourcePlaylists) {
-            // If it does, lets just go ahead and add them for now.
-            if (await targetClient.getPlaylistByName(sourcePlaylist.title)) {
-                // Add all the songs to the playlist
+            const targetPlaylist = await targetClient.getPlaylistByName(sourcePlaylist.title)
+            if (targetPlaylist) {
                 await targetClient.addSongsToPlaylist(sourcePlaylist.title, sourcePlaylist.songs);
             }
         }
@@ -25,6 +22,56 @@ export const synchronizeMusicSources = async (
         console.error("Something went wrong", {cause: error});
         return false
     }
+}
 
+export const getPlaylistDifferences = async (
+    playlistName: string,
+    sourceClient: YoutubeMusicClientService | SpotifyService,
+    targetClient: YoutubeMusicClientService | SpotifyService
+): Promise<Song[] | null> => {
+    try {
+        const sourcePlaylist: GetPlaylistsResponse | null = await sourceClient.getPlaylistByName(playlistName);
+        const targetPlaylist: GetPlaylistsResponse | null = await targetClient.getPlaylistByName(playlistName);
 
+        if (!sourcePlaylist || !targetPlaylist) {
+            console.error(`${!sourcePlaylist ? "Source playlist not found": "Source playlist found"}\n${!targetPlaylist ? "target playlist not found": "target playlist found"}`);
+            return null;
+        }
+
+        const differentSongs = findDifferences(
+            sourcePlaylist as any as GetPlaylistsResponse,
+            targetPlaylist as any as GetPlaylistsResponse
+        )
+
+        return differentSongs;
+    } catch (error) {
+        console.error("Something went wrong", {cause: error});
+        return null;
+    }
+}
+
+export const synchronizePlaylist = async (
+    playlistName: string,
+    sourceClient: YoutubeMusicClientService | SpotifyService,
+    targetClient: YoutubeMusicClientService | SpotifyService
+): Promise<Song[] | null> => {
+    try {
+        const sourcePlaylist: GetPlaylistsResponse | null = await sourceClient.getPlaylistByName(playlistName);
+        const targetPlaylist: GetPlaylistsResponse | null = await targetClient.getPlaylistByName(playlistName);
+
+        if (!sourcePlaylist || !targetPlaylist) {
+            console.error(`${!sourcePlaylist ? "Source playlist not found": "Source playlist found"}\n${!targetPlaylist ? "target playlist not found": "target playlist found"}`);
+            return null;
+        }
+
+        const differentSongs = findDifferences(
+            sourcePlaylist as any as GetPlaylistsResponse,
+            targetPlaylist as any as GetPlaylistsResponse
+        )
+
+        return await targetClient.addSongsToPlaylist(playlistName, differentSongs);
+    } catch (error) {
+        console.error("Something went wrong", {cause: error});
+        return null;
+    }
 }

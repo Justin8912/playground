@@ -7,9 +7,10 @@ import {
 import {getGoogleUserClient, GoogleUserClient} from "./GoogleClientFactory.js";
 import {HCPVaultService} from "./VaultService.js";
 import logger from "../Util/logger.js";
-import {normalizeSongTitle} from "../Util/titleMatcher.js";
+import {isSongMatch, normalizeSongTitle} from "../Util/titleMatcher.js";
+import {MusicServiceInterface} from "./MusicServiceInterface.js";
 
-export class YoutubeMusicClientService {
+export class YoutubeMusicClientService implements MusicServiceInterface {
     private googleUserClient: GoogleUserClient;
     private youtube: youtube_v3.Youtube;
     public playlists: GetPlaylistsResponse[] = [];
@@ -23,7 +24,7 @@ export class YoutubeMusicClientService {
         try {
             await this.googleUserClient.validateToken();
             // TODO: We will want to implement caching at some point so that we can avoid hitting rate limits
-            this.playlists = await this.getPlaylists();
+            // this.playlists = await this.getPlaylists();
             console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
@@ -146,12 +147,12 @@ export class YoutubeMusicClientService {
         }
     }
 
-    public async getSongId(song: Song): Promise<void | string> {
+    public async getSongId(song: Song): Promise<void | Song> {
         const query = `${song.title} ${song.artists.join(' ')}`;
         return await this.getSongIdByQuery(query);
     }
 
-    public async getSongIdByQuery(query: string): Promise<void | string> {
+    public async getSongIdByQuery(query: string): Promise<void | Song> {
         try {
             const searchResult: any = await this.youtube.search.list({
                 part: ["snippet"],
@@ -171,7 +172,12 @@ export class YoutubeMusicClientService {
                 if (video?.id?.kind?.toLowerCase() === "youtube#video") {
                     const videoId = video.id.videoId;
                     console.log(`Found video "${video.snippet?.title}" with ID: ${videoId} for query: "${query}"`);
-                    return videoId;
+                    return {
+                        title: video.snippet.title,
+                        artists: [video.snippet.channelTitle],
+                        description: video.snippet.description,
+                        videoId
+                    }
                 }
             }
 
@@ -234,8 +240,9 @@ export class YoutubeMusicClientService {
     }
 
     // Maybe have a public facing method that allows adding multiple songs by name at once
-    public async addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<void> {
+    public async addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
         try {
+            const failedSongAdds: Song[] = [];
             const responses = [];
             const playlistId = (await this.getPlaylistByName(playlistName))?.id;
 
@@ -245,24 +252,33 @@ export class YoutubeMusicClientService {
 
             for (const song of songs) {
                 try {
-                    const videoId = await this.getSongId(song);
-                    if (videoId) {
-                        const response = await this.addSongToPlaylist(playlistId, videoId);
-                        responses.push(response);
+                    const video = await this.getSongId(song);
+                    if (video) {
+                        if (isSongMatch(
+                            {title: song.title, artist: song.artists.join(' ')},
+                            {title: video.title, artist: video.artists.join(' ')}
+                        )) {
+                            const response = await this.addSongToPlaylist(playlistId, video.videoId as string);
+                            responses.push(response);
+                        } else {
+                            failedSongAdds.push(song);
+                        }
                     }
                 } catch (error) {
-                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
                     // Continue with other songs rather than failing completely
+                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
+                    failedSongAdds.push(song);
                 }
             }
 
             console.log(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
+            return failedSongAdds;
         } catch (error) {
             throw new Error('Failed to add songs to YouTube Music playlist: ' + error);
         }
     }
 
-    public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse | undefined> {
+    public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse | null> {
         try {
             console.log(`Searching for playlist by name: "${name}"`);
             
@@ -270,15 +286,15 @@ export class YoutubeMusicClientService {
                 console.log('Playlists cache is empty, loading playlists...');
                 this.playlists = await this.getPlaylists();
             }
-            
-            const foundPlaylist = this.playlists.find(playlist => playlist.title === name);
-            
+            const foundPlaylist = this.playlists.find(
+                playlist => playlist.title.toLowerCase() === name.toLowerCase()
+            );
             if (foundPlaylist) {
                 console.log(`Found playlist "${name}" with ID: ${foundPlaylist.id}`);
                 return foundPlaylist;
             } else {
                 console.log(`No playlist found with name: "${name}"`);
-                return undefined;
+                return null;
             }
         } catch (error) {
             throw new Error('Failed to get YouTube Music playlist by name: ' + error);

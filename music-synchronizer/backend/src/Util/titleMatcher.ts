@@ -20,6 +20,10 @@ export const normalizeSongTitle = (title:string): string => {
     return filterSongTitle(title.toLowerCase());
 }
 
+export const removeParenthesisContent = (title: string): string => {
+    return title.replace(/ *\([^)]*\) */g, ' ').replace(/ +/g, ' ').trim();
+}
+
 /**
  * Returns a similarity score between 0 and 1 for two strings.
  * Uses Jaccard similarity on word sets.
@@ -58,6 +62,9 @@ export const isSongMatch = (
 
     if (!strictSongArtistDistinction) {
         const combinedScore = similarity(`${sourceTitle} ${sourceArtist}`, `${targetTitle} ${targetArtist}`);
-        return combinedScore > 0.2
+        if (combinedScore > 0.2) return true
+        // Try without parenthesis content
+        const combinedScoreWithoutParenthesis = similarity(`${removeParenthesisContent(sourceTitle)} ${sourceArtist}`, `${removeParenthesisContent(targetTitle)} ${targetArtist}`);
+        return combinedScoreWithoutParenthesis > 0.2
     } else return true;
 };

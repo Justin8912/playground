@@ -77,7 +77,7 @@ const removeSongFromPlaylist = async (youtubeMusicService: YoutubeMusicClientSer
 }
 
 const getPlaylistIdsSpotify = async (spotifyMusicService: SpotifyService, res: Response) => {
-    const result = await spotifyMusicService.getPlaylistIds();
+    const result = await spotifyMusicService.getPlaylistsWithoutSongs();
     res.json(result);
 }
 

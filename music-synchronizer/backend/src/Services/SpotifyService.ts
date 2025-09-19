@@ -3,24 +3,14 @@ import {getSpotifyUserClient, SpotifyClient} from "./SpotifyClientFactory.js";
 import { HCPVaultService } from "./VaultService.js";
 import logger from "../Util/logger.js";
 import {isSongMatch} from "../Util/titleMatcher.js";
+import {MusicServiceInterface} from "./MusicServiceInterface.js";
+import {
+    GetPlaylistsResponse,
+    Song,
+    GetPlaylistsWithoutSongs
+} from "../Model/MusicService.js"
 
-interface GetPlaylistsWithoutSongs {
-    id: string;
-    description: string | null;
-    images?: { url: string }[];
-    title: string;
-}
-
-interface Song {
-    title: string;
-    artists: string[];
-}
-
-interface GetPlaylistsResponse extends GetPlaylistsWithoutSongs {
-    songs: Song[];
-}
-
-export class SpotifyService {
+export class SpotifyService implements MusicServiceInterface {
     private spotifyClient: SpotifyClient;
     private spotifyApi: SpotifyApi;
     private playlists: GetPlaylistsResponse[] = [];
@@ -53,9 +43,9 @@ export class SpotifyService {
     public getPlaylists = async (): Promise<GetPlaylistsResponse[]> => {
         try {
             console.info("Retrieving playlists from Spotify");
-            const playlistIds = await this.getPlaylistIds();
+            const playlistIds = await this.getPlaylistsWithoutSongs();
             await this.sleep();
-            const response = await Promise.all(playlistIds.map(async (playlist) => ({
+            const response = await Promise.all(playlistIds.map(async (playlist: GetPlaylistsWithoutSongs) => ({
                 ...playlist,
                 songs: await this.getSongs(playlist.id)
             })));
@@ -81,7 +71,7 @@ export class SpotifyService {
         }
     }
 
-    public getPlaylistIds = async (): Promise<GetPlaylistsWithoutSongs[]> => {
+    public getPlaylistsWithoutSongs = async (): Promise<GetPlaylistsWithoutSongs[]> => {
         try {
             const playlists = await this.spotifyApi.currentUser.playlists.playlists(50);
             return playlists.items.map((playlist: SimplifiedPlaylist) => {
@@ -149,8 +139,9 @@ export class SpotifyService {
         }
     }
 
-    public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<boolean> => {
+    public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<Song[]> => {
         try {
+            const failedSongAdds = [];
             console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
             
             // First find the playlist by name
@@ -166,7 +157,11 @@ export class SpotifyService {
             // Get song uris sequentially to avoid rate limiting
             for (const song of songs) {
                 const searchResult = await this.getSongUriByQuery(song)
-                songUriResults.push(searchResult);
+                if (!searchResult) {
+                    failedSongAdds.push(song);
+                } else {
+                    songUriResults.push(searchResult);
+                }
                 await this.sleep();
             }
             // Filter out null results and collect valid URIs
@@ -188,7 +183,7 @@ export class SpotifyService {
             await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
             
             console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
-            return true;
+            return failedSongAdds;
         } catch (err) {
             throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
         }
@@ -202,7 +197,7 @@ export class SpotifyService {
             if (this.playlists.length === 0) {
                 this.playlists = await this.getPlaylists();
             }
-
+            console.log("Playlists: ", this.playlists.map(p=>p.title));
             matchingPlaylist = this.playlists.find(playlist =>
                 playlist.title.toLowerCase() === name.toLowerCase()
             );
