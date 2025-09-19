@@ -4,7 +4,8 @@
   "type": "module",
   "main": "handler.ts",
   "scripts": {
-    "start": "tsx src/handler.ts"
+    "start": "tsx src/handler.ts",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +15,8 @@
     "@types/express": "^5.0.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.24.0",

@@ -13,10 +13,11 @@ export const defaultHandler = async (req: Request, res: Response): Promise<void>
     // await getPopulatedPlaylists(youtubeMusicService, res);
     const youtubeMusicService = await getYoutubeMusicClientService();
     const spotifyMusicService = await getSpotifyMusicClientService();
-    await addSongsToPlaylistSpotify(spotifyMusicService, res);
-    await synchronizeFromSpotifyToYoutube(res, youtubeMusicService, spotifyMusicService);
+    // await addSongsToPlaylistSpotify(spotifyMusicService, res);
+    // await synchronizeFromSpotifyToYoutube(res, youtubeMusicService, spotifyMusicService);
+    // await getPlaylistByNameSpotify(spotifyMusicService, res)
+    // await getPlaylistsSpotify(spotifyMusicService, res);
 }
-
 
 const getYoutubeMusicClientService = async () => {
     // Initialize the youtubeMusicClientService 
@@ -98,7 +99,7 @@ const createPlaylistSpotify = async (spotifyMusicService: SpotifyService, res: R
 }
 
 const getPlaylistByNameSpotify = async (spotifyMusicService: SpotifyService, res: Response) => {
-    const playlistName = "NonExistentPlaylist"; // Testing with a playlist that doesn't exist
+    const playlistName = "Test"; // Testing with a playlist that doesn't exist
     const playlist = await spotifyMusicService.getPlaylistByName(playlistName);
     
     if (playlist) {

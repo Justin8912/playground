@@ -1,12 +1,13 @@
 import { youtube_v3, google } from "googleapis";
 import {
     GetPlaylistsResponse, 
-    GetPlaylistIdsResponse,
+    GetPlaylistsWithoutSongs,
     Song
 } from "../Model/MusicService.js"
 import {getGoogleUserClient, GoogleUserClient} from "./GoogleClientFactory.js";
 import {HCPVaultService} from "./VaultService.js";
 import logger from "../Util/logger.js";
+import {normalizeSongTitle} from "../Util/titleMatcher.js";
 
 export class YoutubeMusicClientService {
     private googleUserClient: GoogleUserClient;
@@ -22,7 +23,7 @@ export class YoutubeMusicClientService {
         try {
             await this.googleUserClient.validateToken();
             // TODO: We will want to implement caching at some point so that we can avoid hitting rate limits
-            // this.playlists = await this.getPlaylists();
+            this.playlists = await this.getPlaylists();
             console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
@@ -36,7 +37,7 @@ export class YoutubeMusicClientService {
     public async getPlaylists(): Promise<GetPlaylistsResponse[]> {
         try {
             const playlistIds = await this.getPlaylistIds();
-            const playlistPromises = playlistIds.map((playlist: GetPlaylistIdsResponse) => {
+            const playlistPromises = playlistIds.map((playlist: GetPlaylistsWithoutSongs) => {
                 if (!playlist.description?.toLowerCase().includes("music")) return
                 return this.getSongs(playlist.id).then(songs => ({
                     id: playlist.id,
@@ -67,10 +68,10 @@ export class YoutubeMusicClientService {
         }
     }
 
-    public async getPlaylistIds(): Promise<GetPlaylistIdsResponse[]> {
+    public async getPlaylistIds(): Promise<GetPlaylistsWithoutSongs[]> {
         try {            
             let nextPageToken: string | undefined = undefined;
-            let result: GetPlaylistIdsResponse[] = [];
+            let result: GetPlaylistsWithoutSongs[] = [];
             
             while (nextPageToken !== null) {
                 const response: any = await this.youtube.playlists.list({
@@ -125,7 +126,7 @@ export class YoutubeMusicClientService {
                         const description = item.snippet?.description;
                         
                         return {
-                            title: title,
+                            title: normalizeSongTitle(title),
                             artists: [channelTitle],
                             description: description,
                             videoId: videoId

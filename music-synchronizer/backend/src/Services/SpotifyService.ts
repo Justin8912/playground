@@ -2,8 +2,9 @@ import { SpotifyApi, SimplifiedPlaylist, PlaylistedTrack, Track } from "@spotify
 import {getSpotifyUserClient, SpotifyClient} from "./SpotifyClientFactory.js";
 import { HCPVaultService } from "./VaultService.js";
 import logger from "../Util/logger.js";
+import {isSongMatch} from "../Util/titleMatcher.js";
 
-interface GetPlaylistIdsResponse {
+interface GetPlaylistsWithoutSongs {
     id: string;
     description: string | null;
     images?: { url: string }[];
@@ -15,7 +16,7 @@ interface Song {
     artists: string[];
 }
 
-interface GetPlaylistsResponse extends GetPlaylistIdsResponse {
+interface GetPlaylistsResponse extends GetPlaylistsWithoutSongs {
     songs: Song[];
 }
 
@@ -80,11 +81,10 @@ export class SpotifyService {
         }
     }
 
-    public getPlaylistIds = async (): Promise<GetPlaylistIdsResponse[]> => {
+    public getPlaylistIds = async (): Promise<GetPlaylistsWithoutSongs[]> => {
         try {
             const playlists = await this.spotifyApi.currentUser.playlists.playlists(50);
             return playlists.items.map((playlist: SimplifiedPlaylist) => {
-                console.log("Here is the playlist: ", playlist);
                 return {
                     id: playlist.id,
                     description: playlist.description,
@@ -129,9 +129,17 @@ export class SpotifyService {
             const searchResults = await this.spotifyApi.search(query, ['track'], 'US', 1);
             await this.sleep();
             if (searchResults.tracks.items.length > 0) {
-                const track = searchResults.tracks.items[0];
+                const track: Track = searchResults.tracks.items[0];
                 console.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
-                return track.uri;
+                if (isSongMatch(
+                    {title: song.title, artist: song.artists.join(" ")},
+                    {title: track.name, artist: track.artists.map(a=>a.name).join(" ")}
+                )) {
+                    return track.uri;
+                } else {
+                    console.info(`\`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} does not match original song`)
+                    return null
+                }
             } else {
                 console.info(`No song found for query: "${song.title}" by ${song.artists.join(', ')}`);
                 return null;
@@ -152,9 +160,15 @@ export class SpotifyService {
             }
             
             // Get song URIs for all songs in parallel
-            const songUriPromises = songs.map(song => this.getSongUriByQuery(song));
-            const songUriResults = await Promise.all(songUriPromises);
-            
+            // const songUriPromises = songs.map(song => this.getSongUriByQuery(song));
+            // const songUriResults = await Promise.all(songUriPromises);
+            let songUriResults = []
+            // Get song uris sequentially to avoid rate limiting
+            for (const song of songs) {
+                const searchResult = await this.getSongUriByQuery(song)
+                songUriResults.push(searchResult);
+                await this.sleep();
+            }
             // Filter out null results and collect valid URIs
             const songUris: string[] = [];
             songUriResults.forEach((songUri, index) => {
@@ -183,13 +197,17 @@ export class SpotifyService {
     public getPlaylistByName = async (name: string): Promise<GetPlaylistsResponse | null> => {
         try {
             console.info(`Searching for playlist with name: ${name}`);
-            
-            const playlists = await this.getPlaylists();
-            
-            const matchingPlaylist = playlists.find(playlist => 
+
+            let matchingPlaylist;
+            if (this.playlists.length === 0) {
+                this.playlists = await this.getPlaylists();
+            }
+
+            matchingPlaylist = this.playlists.find(playlist =>
                 playlist.title.toLowerCase() === name.toLowerCase()
             );
-            
+
+
             if (matchingPlaylist) {
                 console.info(`Found playlist: ${matchingPlaylist.title} with ID: ${matchingPlaylist.id}`);
                 return matchingPlaylist;
