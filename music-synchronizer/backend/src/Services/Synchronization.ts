@@ -9,7 +9,6 @@ export const synchronizeMusicSources = async (
 ): Promise<boolean> => {
     try {
         const sourcePlaylists: GetPlaylistsResponse[] = await sourceClient.getPlaylists();
-        const targetPlaylists: GetPlaylistsResponse[] = await targetClient.getPlaylists();
 
         for (const sourcePlaylist of sourcePlaylists) {
             const targetPlaylist = await targetClient.getPlaylistByName(sourcePlaylist.title)

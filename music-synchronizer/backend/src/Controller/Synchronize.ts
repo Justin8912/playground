@@ -1,3 +1,4 @@
+import {Request, Response} from "express";
 import {getPlaylistDifferences, synchronizeMusicSources, synchronizePlaylist} from "../Services/Synchronization.js";
 import {getSpotifyService} from "../Services/SpotifyService.js";
 import {getYoutubeMusicService} from "../Services/YoutubeMusicClientService.js";
@@ -18,7 +19,7 @@ const serviceTypeToClientMap = {
 const appConfig: AppConfig = new AppConfig();
 const hcpVaultService = appConfig.getHcpVaultService();
 
-export const synchronizeDiscographyController = async (req, res) => {
+export const synchronizeDiscographyController = async (req: Request, res: Response) => {
     const sourceUser = req.params.sourceUser;
     const targetUser = req.params.targetUser;
     const sourceService = req.params.sourceService;
@@ -44,7 +45,7 @@ export const synchronizeDiscographyController = async (req, res) => {
     }
 }
 
-export const getPlaylistDifferencesController = async (req, res) => {
+export const getPlaylistDifferencesController = async (req: Request, res: Response) => {
     const {
         sourceUser,
         targetUser,
@@ -68,7 +69,7 @@ export const getPlaylistDifferencesController = async (req, res) => {
     }
 }
 
-export const synchronizePlaylistController = async (req, res) => {
+export const synchronizePlaylistController = async (req: Request, res: Response) => {
     const {
         sourceUser,
         targetUser,
@@ -92,7 +93,7 @@ export const synchronizePlaylistController = async (req, res) => {
     }
 }
 
-const extractParamsFromReq = (requiredParams: string[], req): any => {
+const extractParamsFromReq = (requiredParams: string[], req: Request): any => {
     const res = {}
     for (const param of requiredParams) {
         const paramVal = req.params[param];
