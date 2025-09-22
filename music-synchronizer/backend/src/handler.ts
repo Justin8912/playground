@@ -1,5 +1,4 @@
 import express, {Request, Response} from "express";
-import {defaultHandler} from "./Handlers/DefaultHandler.js";
 import {
     synchronizeDiscographyController,
     getPlaylistDifferencesController,
@@ -18,7 +17,9 @@ app.listen(PORT, () => {
 });
 
 app.get("/", async (req: Request, res: Response) => {
-  await defaultHandler(req, res);
+  res.json({
+      response: "Server is up and running."
+  })
 })
 
 app.get(
