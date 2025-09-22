@@ -156,6 +156,7 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
     }
 }
 
+// Helper functions
 const extractParamsFromReq = (requiredParams: string[], req: Request): any => {
     const res = {}
     for (const param of requiredParams) {
