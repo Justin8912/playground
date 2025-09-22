@@ -108,35 +108,27 @@ export class SpotifyService implements MusicServiceInterface {
         }
     }
 
-    public getSongUriByQuery = async (song: Song): Promise<string | null> => {
+    public getSongByQuery = async (query: string): Promise<Track | null> => {
         try {
-            console.info(`Searching for song: "${song.title}" by ${song.artists.join(', ')}`);
-            
-            // Create search query string
-            const query = `${song.title} ${song.artists.join(' ')}`;
-            
-            // Search for the track
+            console.info(`Searching for song: "${query}"`);
             const searchResults = await this.spotifyApi.search(query, ['track'], 'US', 1);
             await this.sleep();
-            if (searchResults.tracks.items.length > 0) {
-                const track: Track = searchResults.tracks.items[0];
+            if (searchResults?.tracks?.items?.length > 0) {
+                const track: Track = searchResults.tracks?.items[0] as Track;
                 console.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
-                if (isSongMatch(
-                    {title: song.title, artist: song.artists.join(" ")},
-                    {title: track.name, artist: track.artists.map(a=>a.name).join(" ")}
-                )) {
-                    return track.uri;
-                } else {
-                    console.info(`\`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} does not match original song`)
-                    return null
-                }
+                return track
             } else {
-                console.info(`No song found for query: "${song.title}" by ${song.artists.join(', ')}`);
+                console.info(`No song found for query: "${query}"`);
                 return null;
             }
         } catch (err) {
-            throw new Error(`Failed to search for song '${song.title}' by '${song.artists.join(', ')}'`, { cause: err });
+            throw new Error(`Failed to search for song '${query}'`, { cause: err });
         }
+    }
+
+    public getSong = async (song: Song): Promise<Track | null> => {
+        const query = `${song.title} ${song.artists.join(' ')}`;
+        return this.getSongByQuery(query);
     }
 
     public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<Song[]> => {
@@ -156,11 +148,19 @@ export class SpotifyService implements MusicServiceInterface {
             let songUriResults = []
             // Get song uris sequentially to avoid rate limiting
             for (const song of songs) {
-                const searchResult = await this.getSongUriByQuery(song)
+                const searchResult = (await this.getSong(song))?.uri
                 if (!searchResult) {
                     failedSongAdds.push(song);
                 } else {
-                    songUriResults.push(searchResult);
+                    if (isSongMatch(
+                        {title: song.title, artist: song.artists.join(" ")},
+                        {title: searchResult.name, artist: searchResult.artists.map(a=>a.name).join(" ")}
+                    )) {
+                        songUriResults.push(searchResult);
+                    } else {
+                        console.warn(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        failedSongAdds.push(song);
+                    }
                 }
                 await this.sleep();
             }

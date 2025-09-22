@@ -147,12 +147,12 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
         }
     }
 
-    public async getSongId(song: Song): Promise<void | Song> {
+    public async getSong(song: Song): Promise<void | Song> {
         const query = `${song.title} ${song.artists.join(' ')}`;
-        return await this.getSongIdByQuery(query);
+        return await this.getSongByQuery(query);
     }
 
-    public async getSongIdByQuery(query: string): Promise<void | Song> {
+    public async getSongByQuery(query: string): Promise<void | Song> {
         try {
             const searchResult: any = await this.youtube.search.list({
                 part: ["snippet"],
@@ -252,7 +252,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
             for (const song of songs) {
                 try {
-                    const video = await this.getSongId(song);
+                    const video = await this.getSong(song);
                     if (video) {
                         if (isSongMatch(
                             {title: song.title, artist: song.artists.join(' ')},
@@ -261,6 +261,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                             const response = await this.addSongToPlaylist(playlistId, video.videoId as string);
                             responses.push(response);
                         } else {
+                            console.warn(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                             failedSongAdds.push(song);
                         }
                     }
