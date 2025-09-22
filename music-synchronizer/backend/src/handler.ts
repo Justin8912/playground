@@ -4,7 +4,7 @@ import {
     synchronizeDiscographyController,
     getPlaylistDifferencesController,
     synchronizePlaylistController, getProposedUpdatesController
-} from "./Controller/Synchronize.js";
+} from "./Controller/SynchronizationController.js";
 
 export const app = express();
 const PORT = process.env.PORT;

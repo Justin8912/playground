@@ -5,30 +5,23 @@ import {
     synchronizePlaylist,
     synchronizePlaylistWithDifferencesProvided
 } from "../Services/Synchronization.js";
-import {getSpotifyService} from "../Services/SpotifyService.js";
-import {getYoutubeMusicService} from "../Services/YoutubeMusicClientService.js";
 import {AppConfig} from "../Config/AppConfig.js";
+import {ProposedChanges} from "../Model/Controller.js";
+import {Song} from "../Model/MusicService.js";
+import {
+    isSupportedService, PROPOSED_CHANGES_HEADER,
+    PROPOSED_CHANGES_MEMORY_KEY, serviceTypeToClientMap, SupportedService, SYNCHRONIZE_DIFFERENCES_HEADER,
+    SYNCHRONIZE_DIFFERENCES_MEMORY_KEY
+} from "./controllerHelpers.js";
 import dotenv from "dotenv";
 dotenv.config();
-
-export type SupportedService = "spotify" | "youtube";
-export const isSupportedService = (sourceService: string, targetService: string) => {
-    if (["spotify", "youtube"].includes(sourceService) && ["spotify", "youtube"].includes(targetService)) return true;
-    else throw new Error(`Unsupported service. Supported services are 'spotify' and 'youtube' received source: ${sourceService} target: ${targetService}.`);
-}
-const serviceTypeToClientMap = {
-    "spotify": getSpotifyService,
-    "youtube": getYoutubeMusicService
-}
 
 const appConfig: AppConfig = new AppConfig();
 const hcpVaultService = appConfig.getHcpVaultService();
 
-const SYNCHRONIZE_DIFFERENCES_HEADER = "differences-request-id";
-const SYNCHRONIZE_DIFFERENCES_MEMORY_KEY = "SYNCHRONIZE_DIFFERENCES";
-
 let memory = {
-    [SYNCHRONIZE_DIFFERENCES_MEMORY_KEY]: {}
+    [SYNCHRONIZE_DIFFERENCES_MEMORY_KEY]: {},
+    [PROPOSED_CHANGES_MEMORY_KEY]: {}
 };
 
 export const synchronizeDiscographyController = async (req: Request, res: Response) => {
@@ -100,14 +93,30 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
         const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response;
-        if (req.headers[SYNCHRONIZE_DIFFERENCES_HEADER]) {
+        if (req.headers[PROPOSED_CHANGES_HEADER]) {
+            console.log("Using proposedChanges");
+            const proposedChanges: ProposedChanges = getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.headers[PROPOSED_CHANGES_HEADER] as string, req)
+            if (!proposedChanges) {
+                res.status(404).json({
+                    error: "Could not find differences in memory with provided request id and matching request parameters."
+                });
+            }
+
+            // For now lets just add songs where the changes are confident.
+            // TODO: In the future, we should add a controller that will allow modification of the "confidentProposedChanges"
+            //   object and this will allow users to specifically identify which songs they want to add if the confidence
+            //   score is low.
+            const songsToAdd: Song[] = [...proposedChanges.confidentProposedChanges.map(song => song.targetSong)]
+            response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, songsToAdd);
+        } else if (req.headers[SYNCHRONIZE_DIFFERENCES_HEADER]) {
+            console.log("Using differences")
             const differences = getObjectFromMemory(SYNCHRONIZE_DIFFERENCES_MEMORY_KEY, req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string, req)
             if (!differences) {
                 res.status(404).json({
                     error: "Could not find differences in memory with provided request id and matching request parameters."
                 });
             }
-            response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, memory[SYNCHRONIZE_DIFFERENCES_MEMORY_KEY][req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string]);
+            response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, differences);
         } else {
             response = await synchronizePlaylist(playlist, sourceClient, targetClient);
         }
@@ -147,6 +156,8 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
             response = await getProposedUpdates(playlist, sourceClient, targetClient);
         }
 
+        const requestId = createMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, req.params, response);
+        res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
         res.json(response ? response : "Synchronization Failed.");
     } catch (err) {
         res.status(500).json({

@@ -8,4 +8,5 @@ export interface MusicServiceInterface {
     createPlaylist(name: string, description?: string): Promise<string>
     addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]>
     getPlaylistByName(name: string): Promise<GetPlaylistsResponse | null>
+    getSong(song: Song): Promise<Song | null>
 }

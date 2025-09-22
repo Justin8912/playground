@@ -147,12 +147,12 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
         }
     }
 
-    public async getSong(song: Song): Promise<void | Song> {
+    public async getSong(song: Song): Promise<Song | null> {
         const query = `${song.title} ${song.artists.join(' ')}`;
         return await this.getSongByQuery(query);
     }
 
-    public async getSongByQuery(query: string): Promise<void | Song> {
+    public async getSongByQuery(query: string): Promise<Song | null> {
         try {
             const searchResult: any = await this.youtube.search.list({
                 part: ["snippet"],
@@ -165,7 +165,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
             if (!searchResult?.data?.items || searchResult.data.items.length === 0) {
                 console.log(`No videos found for query: "${query}"`);
-                return undefined;
+                return null;
             }
 
             for (const video of searchResult.data.items) {
@@ -182,7 +182,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             }
 
             console.log(`No valid YouTube videos found for query: "${query}"`);
-            return undefined;
+            return null;
         } catch (error) {
             throw new Error('Failed to search for YouTube Music video: ' + error);
         }
