@@ -2,6 +2,7 @@
  * Normalizes a song title or artist for comparison.
  */
 import {pipe} from "./pipe.js";
+import {Song} from "../Model/MusicService.js";
 
 export const normalizeSongTitle = (title:string): string => {
     let removeAfterPipe = (title: string) => title.split('|')[0].trim();
@@ -44,15 +45,12 @@ const similarity = (a: string, b: string): number => {
  * Determines if two songs are a strong match.
  * Returns true if they are, false otherwise.
  */
-export const isSongMatch = (
-    source: { title: string; artist: string },
-    target: { title: string; artist: string }
-): boolean => {
-    console.log(`Song comparison: \n\tsource: ${source.title} by ${source.artist}\n\ttarget: ${target.title} by ${target.artist}`);
+export const doSongsMatch = (source: Song, target: Song): boolean => {
+    console.log(`Song comparison: \n\tsource: ${source.title} by ${source.artists}\n\ttarget: ${target.title} by ${target.artists}`);
     const sourceTitle = normalizeSongTitle(source.title);
     const targetTitle = normalizeSongTitle(target.title);
-    const sourceArtist = source.artist.toLowerCase();
-    const targetArtist = target.artist.toLowerCase();
+    const sourceArtist = source.artists.join(" ").toLowerCase();
+    const targetArtist = target.artists.join(" ").toLowerCase();
 
     // Require high similarity for both title and artist
     const titleScore = similarity(sourceTitle, targetTitle);

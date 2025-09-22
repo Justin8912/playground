@@ -2,6 +2,8 @@ import {YoutubeMusicClientService} from "./YoutubeMusicClientService.js";
 import {SpotifyService} from "./SpotifyService.js";
 import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
 import {findDifferences} from "../Util/findDifferences.js";
+import {doSongsMatch} from "../Util/titleMatcher.js";
+import {ProposedChanges} from "../Model/Controller.js";
 
 export const synchronizeMusicSources = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
@@ -86,16 +88,24 @@ export const getProposedUpdates = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService,
     differences?: Song[]
-): Promise<Song[] | null> => {
+): Promise<ProposedChanges | null> => {
     try {
         if (!differences) {
             differences = await getPlaylistDifferences(playlistName, sourceClient, targetClient) as Song[];
         }
 
-        let proposedChanges: Song[] = [];
+        let proposedChanges: ProposedChanges = {
+            confidentProposedChanges: [],
+            uncertainProposedChanges: []
+        };
         for (const song of differences) {
-            const proposedSong = await targetClient.getSong(song)
-            if (proposedSong) proposedChanges.push(proposedSong);
+            const proposedSong = await targetClient.getSong(song) as Song
+            if (proposedSong) {
+                if (doSongsMatch(song, proposedSong)) proposedChanges.confidentProposedChanges.push({sourceSong: song, targetSong: proposedSong});
+                else {
+                    proposedChanges.uncertainProposedChanges.push({sourceSong: song, targetSong: proposedSong});
+                }
+            }
         }
 
         return proposedChanges;

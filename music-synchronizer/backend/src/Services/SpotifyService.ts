@@ -2,7 +2,7 @@ import { SpotifyApi, SimplifiedPlaylist, PlaylistedTrack, Track } from "@spotify
 import {getSpotifyUserClient, SpotifyClient} from "./SpotifyClientFactory.js";
 import { HCPVaultService } from "./VaultService.js";
 import logger from "../Util/logger.js";
-import {isSongMatch} from "../Util/titleMatcher.js";
+import {doSongsMatch} from "../Util/titleMatcher.js";
 import {MusicServiceInterface} from "./MusicServiceInterface.js";
 import {
     GetPlaylistsResponse,
@@ -163,10 +163,7 @@ export class SpotifyService implements MusicServiceInterface {
                 if (!searchResult) {
                     failedSongAdds.push(song);
                 } else {
-                    if (isSongMatch(
-                        {title: song.title, artist: song.artists.join(" ")},
-                        {title: searchResult.title, artist: searchResult.artists.join(" ")}
-                    )) {
+                    if (doSongsMatch(song, searchResult)) {
                         songUriResults.push(searchResult);
                     } else {
                         console.warn(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);

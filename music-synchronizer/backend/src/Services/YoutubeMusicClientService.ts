@@ -7,7 +7,7 @@ import {
 import {getGoogleUserClient, GoogleUserClient} from "./GoogleClientFactory.js";
 import {HCPVaultService} from "./VaultService.js";
 import logger from "../Util/logger.js";
-import {isSongMatch, normalizeSongTitle} from "../Util/titleMatcher.js";
+import {doSongsMatch, normalizeSongTitle} from "../Util/titleMatcher.js";
 import {MusicServiceInterface} from "./MusicServiceInterface.js";
 
 export class YoutubeMusicClientService implements MusicServiceInterface {
@@ -254,10 +254,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 try {
                     const video = await this.getSong(song);
                     if (video) {
-                        if (isSongMatch(
-                            {title: song.title, artist: song.artists.join(' ')},
-                            {title: video.title, artist: video.artists.join(' ')}
-                        )) {
+                        if (doSongsMatch(song, video)) {
                             const response = await this.addSongToPlaylist(playlistId, video.videoId as string);
                             responses.push(response);
                         } else {
