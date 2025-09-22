@@ -1,5 +1,10 @@
 import {Request, Response} from "express";
-import {getPlaylistDifferences, synchronizeMusicSources, synchronizePlaylist} from "../Services/Synchronization.js";
+import {
+    getPlaylistDifferences,
+    synchronizeMusicSources,
+    synchronizePlaylist,
+    synchronizePlaylistWithDifferencesProvided
+} from "../Services/Synchronization.js";
 import {getSpotifyService} from "../Services/SpotifyService.js";
 import {getYoutubeMusicService} from "../Services/YoutubeMusicClientService.js";
 import {AppConfig} from "../Config/AppConfig.js";
@@ -18,6 +23,13 @@ const serviceTypeToClientMap = {
 
 const appConfig: AppConfig = new AppConfig();
 const hcpVaultService = appConfig.getHcpVaultService();
+
+const SYNCHRONIZE_DIFFERENCES_HEADER = "differences-request-id";
+const SYNCHRONIZE_DIFFERENCES_MEMORY_KEY = "SYNCHRONIZE_DIFFERENCES";
+
+let memory = {
+    [SYNCHRONIZE_DIFFERENCES_MEMORY_KEY]: {}
+};
 
 export const synchronizeDiscographyController = async (req: Request, res: Response) => {
     const sourceUser = req.params.sourceUser;
@@ -60,6 +72,11 @@ export const getPlaylistDifferencesController = async (req: Request, res: Respon
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response = await getPlaylistDifferences(playlist, sourceClient, targetClient);
 
+        if (response) {
+            let requestId = createMemoryObject(SYNCHRONIZE_DIFFERENCES_MEMORY_KEY, req.params, response);
+            res.setHeader(SYNCHRONIZE_DIFFERENCES_HEADER, requestId);
+        }
+
         res.json(response ? response : "Synchronization Failed.");
     } catch (err) {
         res.status(500).json({
@@ -82,7 +99,18 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
     try {
         const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
-        let response = await synchronizePlaylist(playlist, sourceClient, targetClient);
+        let response;
+        if (req.headers[SYNCHRONIZE_DIFFERENCES_HEADER]) {
+            const differences = getObjectFromMemory(SYNCHRONIZE_DIFFERENCES_MEMORY_KEY, req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string, req)
+            if (!differences) {
+                res.status(404).json({
+                    error: "Could not find differences in memory with provided request id and matching request parameters."
+                });
+            }
+            response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, memory[SYNCHRONIZE_DIFFERENCES_MEMORY_KEY][req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string]);
+        } else {
+            response = await synchronizePlaylist(playlist, sourceClient, targetClient);
+        }
 
         res.json(response ? response : "Synchronization Failed.");
     } catch (err) {
@@ -104,4 +132,42 @@ const extractParamsFromReq = (requiredParams: string[], req: Request): any => {
         res[param] = paramVal
     }
     return res;
+}
+
+// The requestInputParameters should include path parameters and query parameters relevant to the request made
+const getObjectFromMemory = (key: string, requestId: string, req: Request): any => {
+    if (key.trim() === "" || requestId.trim() === "") {
+        console.error("Cannot retrieve object from memory without key and requestId");
+        return null;
+    }
+
+    const memoryObject = memory[key][requestId];
+
+    if (!memoryObject) {
+        console.log("Could not find object in memory with provided key and requestId");
+        return null;
+    }
+
+    const memoryObjectRequestDetails = memoryObject.requestDetails || {};
+    const requestInputParameters = {
+        ...req.headers,
+        ...req.query,
+        ...req.params
+    }
+
+    for (const key of Object.keys(memoryObjectRequestDetails)) {
+        if (requestInputParameters[key] !== memoryObjectRequestDetails[key]) {
+            console.error(`requestInputParameter ${key} with value ${requestInputParameters[key]} does not match the stored requestDetails value of ${memoryObjectRequestDetails[key]}`);
+            return null;
+        }
+    }
+
+    return memoryObject;
+}
+
+const createMemoryObject = (key: string, requestDetails, memoryObject): string => {
+    let requestId = crypto.randomUUID()
+    memory[key][requestId] = memoryObject;
+    memory[key][requestId].requestDetails = requestDetails;
+    return requestId;
 }
