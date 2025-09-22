@@ -80,3 +80,27 @@ export const synchronizePlaylistWithDifferencesProvided = async (
         return null;
     }
 }
+
+export const getProposedUpdates = async (
+    playlistName: string,
+    sourceClient: YoutubeMusicClientService | SpotifyService,
+    targetClient: YoutubeMusicClientService | SpotifyService,
+    differences?: Song[]
+): Promise<Song[] | null> => {
+    try {
+        if (!differences) {
+            differences = await getPlaylistDifferences(playlistName, sourceClient, targetClient) as Song[];
+        }
+
+        let proposedChanges: Song[] = [];
+        for (const song of differences) {
+            const proposedSong = await targetClient.getSong(song)
+            if (proposedSong) proposedChanges.push(proposedSong);
+        }
+
+        return proposedChanges;
+    } catch (err) {
+        console.error("Something went wrong", {cause: err});
+        return null;
+    }
+}

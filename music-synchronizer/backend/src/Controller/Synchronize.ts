@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {
-    getPlaylistDifferences,
+    getPlaylistDifferences, getProposedUpdates,
     synchronizeMusicSources,
     synchronizePlaylist,
     synchronizePlaylistWithDifferencesProvided
@@ -110,6 +110,41 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
             response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, memory[SYNCHRONIZE_DIFFERENCES_MEMORY_KEY][req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string]);
         } else {
             response = await synchronizePlaylist(playlist, sourceClient, targetClient);
+        }
+
+        res.json(response ? response : "Synchronization Failed.");
+    } catch (err) {
+        res.status(500).json({
+            error: "Failed to synchronize playlists.",
+            details: err instanceof Error ? err.message : String(err)
+        });
+    }
+}
+
+export const getProposedUpdatesController = async (req: Request, res: Response) => {
+    const {
+        sourceUser,
+        targetUser,
+        sourceService,
+        targetService,
+        playlist
+    } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService", "playlist"], req)
+    isSupportedService(sourceService, targetService)
+
+    try {
+        const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
+        const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
+        let response;
+        if (req.headers[SYNCHRONIZE_DIFFERENCES_HEADER]) {
+            const differences = getObjectFromMemory(SYNCHRONIZE_DIFFERENCES_MEMORY_KEY, req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string, req)
+            if (!differences) {
+                res.status(404).json({
+                    error: "Could not find differences in memory with provided request id and matching request parameters."
+                });
+            }
+            response = await getProposedUpdates(playlist, sourceClient, targetClient, memory[SYNCHRONIZE_DIFFERENCES_MEMORY_KEY][req.headers[SYNCHRONIZE_DIFFERENCES_HEADER] as string]);
+        } else {
+            response = await getProposedUpdates(playlist, sourceClient, targetClient);
         }
 
         res.json(response ? response : "Synchronization Failed.");

@@ -3,7 +3,7 @@ import {defaultHandler} from "./Handlers/DefaultHandler.js";
 import {
     synchronizeDiscographyController,
     getPlaylistDifferencesController,
-    synchronizePlaylistController
+    synchronizePlaylistController, getProposedUpdatesController
 } from "./Controller/Synchronize.js";
 
 export const app = express();
@@ -28,15 +28,23 @@ app.get(
 )
 
 app.get(
-    "/synchronize/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
+    "/differences/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
         // NOTE: differences generated here are actually just additive changes. So if the target service does not have a
         // song that the source service has, it will be added to the differences list.
-        let differences = await getPlaylistDifferencesController(req, res);
+        await getPlaylistDifferencesController(req, res);
     }
 )
 
 app.post(
     "/synchronize/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
         await synchronizePlaylistController(req, res);
+    }
+)
+
+app.get(
+    "/updates/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
+        // NOTE: differences generated here are actually just additive changes. So if the target service does not have a
+        // song that the source service has, it will be added to the differences list.
+        await getProposedUpdatesController(req, res);
     }
 )

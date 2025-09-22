@@ -264,6 +264,9 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                             console.warn(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                             failedSongAdds.push(song);
                         }
+                    } else {
+                        console.warn(`The following song was not found in youtube:\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        failedSongAdds.push(song);
                     }
                 } catch (error) {
                     // Continue with other songs rather than failing completely
