@@ -66,7 +66,6 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response;
         if (req.headers[PROPOSED_CHANGES_HEADER]) {
-            console.log("Using proposedChanges");
             const proposedChanges: ProposedChanges = getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.headers[PROPOSED_CHANGES_HEADER] as string, req)
             if (!proposedChanges) {
                 res.status(404).json({
@@ -108,12 +107,14 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response;
         if (req.headers[PROPOSED_CHANGES_HEADER]) {
-            const proposedChanges: ProposedChanges = getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.headers[PROPOSED_CHANGES_HEADER] as string, req)
+            const requestId = req.headers[PROPOSED_CHANGES_HEADER] as string;
+            const proposedChanges: ProposedChanges = getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
             if (!proposedChanges) {
                 res.status(404).json({
                     error: "Could not find differences in memory with provided request id and matching request parameters."
                 });
             }
+            res.setHeader(PROPOSED_CHANGES_MEMORY_KEY, requestId);
             return proposedChanges;
         }
         else {
