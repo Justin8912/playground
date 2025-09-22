@@ -115,6 +115,7 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
                 });
             }
             res.setHeader(PROPOSED_CHANGES_MEMORY_KEY, requestId);
+            res.json(proposedChanges);
             return proposedChanges;
         }
         else {
@@ -130,6 +131,35 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
             details: err instanceof Error ? err.message : String(err)
         });
     }
+}
+
+export const updateProposedUpdatesController = async (req: Request, res: Response) => {
+    console.log("Updating update proposals")
+    let requestBody;
+    if (typeof req.body === "string") {
+        requestBody = JSON.parse(req.body)
+    } else {
+        requestBody = req.body;
+    }
+
+    const proposedChangesId = requestBody.proposedChangesId;
+    const sourceSongId = requestBody.sourceSongId;
+    const targetSong = requestBody.targetSong;
+
+    const didUpdatePass = proposedChangesMemoryObjectUpdate(
+        getObjectFromMemory(
+            PROPOSED_CHANGES_MEMORY_KEY,
+            proposedChangesId,
+            req
+        ),
+        proposedChangesId,
+        sourceSongId,
+        targetSong
+    );
+
+    res.json({
+        message: `Update ${didUpdatePass ? "succeeded" : "failed"}`
+    });
 }
 
 // Helper functions
@@ -182,4 +212,28 @@ const createMemoryObject = (key: string, requestDetails, memoryObject): string =
     memory[key][requestId] = memoryObject;
     memory[key][requestId].requestDetails = requestDetails;
     return requestId;
+}
+
+const proposedChangesMemoryObjectUpdate = (
+    proposedChanges: ProposedChanges,
+    requestId: string,
+    sourceSongId: string,
+    targetSong: Song
+): boolean => {
+    if (!proposedChanges) return false;
+
+    const updateInArray = (arr: { sourceSong: Song; targetSong: Song }[]) => {
+        for (const obj of arr) {
+            if (obj.sourceSong.videoId === sourceSongId) {
+                Object.assign(obj.targetSong, targetSong);
+                return true;
+            }
+        }
+        return false;
+    };
+
+    return (
+        updateInArray(proposedChanges.confidentProposedChanges) ||
+        updateInArray(proposedChanges.uncertainProposedChanges)
+    );
 }

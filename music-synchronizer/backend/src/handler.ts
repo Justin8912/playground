@@ -1,11 +1,11 @@
 import express, {Request, Response} from "express";
 import {
     synchronizeDiscographyController,
-    getPlaylistDifferencesController,
-    synchronizePlaylistController, getProposedUpdatesController
+    synchronizePlaylistController, getProposedUpdatesController, updateProposedUpdatesController
 } from "./Controller/SynchronizationController.js";
 
 export const app = express();
+app.use(express.json());
 const PORT = process.env.PORT;
 
 
@@ -41,3 +41,7 @@ app.get(
         await getProposedUpdatesController(req, res);
     }
 )
+
+app.post("/updates/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
+    await updateProposedUpdatesController(req, res);
+})

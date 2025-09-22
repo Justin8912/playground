@@ -184,14 +184,15 @@ export class SpotifyService implements MusicServiceInterface {
             });
             
             if (songUris.length === 0) {
-                throw new Error(`No songs could be found on Spotify for the provided list`);
+                console.error(`No songs could be found on Spotify for the provided list`);
+                return [];
+            } else {
+                // Add all found songs to the playlist
+                await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
+
+                console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
+                return failedSongAdds;
             }
-            
-            // Add all found songs to the playlist
-            await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
-            
-            console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
-            return failedSongAdds;
         } catch (err) {
             throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
         }
