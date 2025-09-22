@@ -164,7 +164,7 @@ export class SpotifyService implements MusicServiceInterface {
                     failedSongAdds.push(song);
                 } else {
                     if (doSongsMatch(song, searchResult)) {
-                        songUriResults.push(searchResult);
+                        songUriResults.push(searchResult.videoId);
                     } else {
                         console.warn(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                         failedSongAdds.push(song);

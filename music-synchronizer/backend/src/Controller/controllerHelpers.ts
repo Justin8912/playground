@@ -11,7 +11,6 @@ export const serviceTypeToClientMap = {
     "youtube": getYoutubeMusicService
 }
 
-export const SYNCHRONIZE_DIFFERENCES_HEADER = "differences-request-id";
 export const SYNCHRONIZE_DIFFERENCES_MEMORY_KEY = "SYNCHRONIZE_DIFFERENCES";
 
 export const PROPOSED_CHANGES_HEADER = "proposed-changes-id";
