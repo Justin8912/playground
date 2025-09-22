@@ -126,9 +126,20 @@ export class SpotifyService implements MusicServiceInterface {
         }
     }
 
-    public getSong = async (song: Song): Promise<Track | null> => {
+    public getSong = async (song: Song): Promise<Song | null> => {
         const query = `${song.title} ${song.artists.join(' ')}`;
-        return this.getSongByQuery(query);
+        const spotifyTrack: Track = (await this.getSongByQuery(query)) as Track;
+
+        if (!spotifyTrack) {
+            console.error(`No track found for query ${query}`);
+            return null;
+        } else {
+            return {
+                title: spotifyTrack.name,
+                artists: spotifyTrack.artists.map(artist => artist.name),
+                videoId: spotifyTrack.uri
+            }
+        }
     }
 
     public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<Song[]> => {
@@ -148,13 +159,13 @@ export class SpotifyService implements MusicServiceInterface {
             let songUriResults = []
             // Get song uris sequentially to avoid rate limiting
             for (const song of songs) {
-                const searchResult = (await this.getSong(song))?.uri
+                const searchResult = await this.getSong(song)
                 if (!searchResult) {
                     failedSongAdds.push(song);
                 } else {
                     if (isSongMatch(
                         {title: song.title, artist: song.artists.join(" ")},
-                        {title: searchResult.name, artist: searchResult.artists.map(a=>a.name).join(" ")}
+                        {title: searchResult.title, artist: searchResult.artists.join(" ")}
                     )) {
                         songUriResults.push(searchResult);
                     } else {
