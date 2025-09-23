@@ -26,7 +26,7 @@ export const extractParamsFromReq = (requiredParams: string[], req: Request): an
             throw new InvalidRequest(`Parameter ${param} is required and must be non-empty.`);
         }
         // @ts-ignore
-        res[param] = paramVal
+        res[param] = paramVal.toLowerCase()
     }
     return res;
 }

@@ -1,8 +1,10 @@
 import express, {Request, Response} from "express";
+import cors from "cors";
 import {
     synchronizeDiscographyController,
     synchronizePlaylistController, getProposedUpdatesController, updateProposedUpdatesController
 } from "./Controller/SynchronizationController.js";
+import {PROPOSED_CHANGES_HEADER} from "./Controller/controllerHelpers.js";
 
 export const app = express();
 app.use(express.json());
@@ -15,6 +17,20 @@ app.listen(PORT, () => {
   }
   console.log(`Server listening on port ${PORT}`);
 });
+
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', `Content-Type, Authorization, Origin`);
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+app.use(cors({
+    exposedHeaders: [PROPOSED_CHANGES_HEADER]
+}))
 
 app.get("/", async (req: Request, res: Response) => {
   res.json({
