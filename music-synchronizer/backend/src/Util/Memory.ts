@@ -37,7 +37,7 @@ export class Memory {
         }
 
         for (const key of Object.keys(memoryObjectRequestDetails)) {
-            if (requestInputParameters[key] !== memoryObjectRequestDetails[key]) {
+            if (requestInputParameters[key]?.toLowerCase() !== memoryObjectRequestDetails[key].toLowerCase()) {
                 console.error(`requestInputParameter ${key} with value ${requestInputParameters[key]} does not match the stored requestDetails value of ${memoryObjectRequestDetails[key]}`);
                 return null;
             }

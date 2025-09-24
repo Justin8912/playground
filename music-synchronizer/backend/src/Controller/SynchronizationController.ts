@@ -12,7 +12,9 @@ import {
     extractParamsFromReq,
     isSupportedService,
     PROPOSED_CHANGES_HEADER,
-    PROPOSED_CHANGES_MEMORY_KEY, proposedChangesMemoryObjectUpdate,
+    PROPOSED_CHANGES_MEMORY_KEY,
+    proposedChangesMemoryObjectUpdate,
+    removeProposedChangeBySongIds,
     serviceTypeToClientMap,
     SupportedService,
 } from "./controllerHelpers.js";
@@ -138,23 +140,43 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
             requestBody = req.body;
         }
 
+        const {
+            targetService,
+            targetUser
+        } = extractParamsFromReq(["targetService", "targetUser"], req);
+
         const proposedChangesId = requestBody.proposedChangesId;
         const sourceSongId = requestBody.sourceSongId;
-        const targetSong = requestBody.targetSong;
+        const targetSongId = requestBody.targetSongId;
+        const operation = requestBody.operation;
 
-        if (proposedChangesId.trim() === "" || sourceSongId.trim() === "" || Object.keys(targetSong).length === 0) {
-            throw new InvalidRequest(`${proposedChangesId ? "" : "Proposed changes cannot be empty "}${sourceSongId ? "" : "Source Song ID cannot be empty "}${targetSong ? "" : "Target song must be provided"}`);
+        if (proposedChangesId.trim() === "" || sourceSongId.trim() === "" || targetSongId.trim() === "" || operation.trim() === "") {
+            throw new InvalidRequest(`The required body parameters are: proposedChangesId, operation, sourceSongId, targetSong`);
         }
 
-        const didUpdatePass = proposedChangesMemoryObjectUpdate(
-            memory.getObjectFromMemory(
-                PROPOSED_CHANGES_MEMORY_KEY,
-                proposedChangesId,
-                req
-            ),
-            sourceSongId,
-            targetSong
-        );
+        let didUpdatePass;
+        if (operation === "update") {
+            didUpdatePass = await proposedChangesMemoryObjectUpdate(
+                await (serviceTypeToClientMap[targetService as SupportedService])(targetUser, hcpVaultService),
+                memory.getObjectFromMemory(
+                    PROPOSED_CHANGES_MEMORY_KEY,
+                    proposedChangesId,
+                    req
+                ),
+                sourceSongId,
+                targetSongId
+            );
+        } else if (operation === "remove") {
+            didUpdatePass = removeProposedChangeBySongIds(
+                memory.getObjectFromMemory(
+                    PROPOSED_CHANGES_MEMORY_KEY,
+                    proposedChangesId,
+                    req
+                ),
+                sourceSongId,
+                targetSongId
+            );
+        }
 
         res.json({
             message: `Update ${didUpdatePass ? "succeeded" : "failed"}`

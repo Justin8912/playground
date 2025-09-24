@@ -1,5 +1,5 @@
-import {getSpotifyService} from "../Services/SpotifyService.js";
-import {getYoutubeMusicService} from "../Services/YoutubeMusicClientService.js";
+import {getSpotifyService, SpotifyService} from "../Services/SpotifyService.js";
+import {getYoutubeMusicService, YoutubeMusicClientService} from "../Services/YoutubeMusicClientService.js";
 import {Request} from "express";
 import {InvalidRequest} from "../Errors/InvalidRequest.js";
 import {ProposedChanges} from "../Model/Controller.js";
@@ -31,13 +31,15 @@ export const extractParamsFromReq = (requiredParams: string[], req: Request): an
     return res;
 }
 
-export const proposedChangesMemoryObjectUpdate = (
+export const proposedChangesMemoryObjectUpdate = async (
+    targetClient: SpotifyService | YoutubeMusicClientService,
     proposedChanges: ProposedChanges,
     sourceSongId: string,
-    targetSong: Song
-): boolean => {
+    targetSongId: string
+): Promise<boolean> => {
+    const targetSong: Song | null = await targetClient.getSongById(targetSongId);
     if (!proposedChanges) return false;
-
+    if (!targetSong) return false;
     const updateInArray = (arr: { sourceSong: Song; targetSong: Song }[]) => {
         for (const obj of arr) {
             if (obj.sourceSong.videoId === sourceSongId) {
@@ -52,4 +54,32 @@ export const proposedChangesMemoryObjectUpdate = (
         updateInArray(proposedChanges.confidentProposedChanges) ||
         updateInArray(proposedChanges.uncertainProposedChanges)
     );
+
+}
+
+export const removeProposedChangeBySongIds = (
+    memoryObject: ProposedChanges,
+    sourceSongId: string,
+    targetSongId: string
+): boolean => {
+    if (!memoryObject) return false;
+    const removeFromArray = (arr: any[]) => {
+        const idx = arr.findIndex(
+            (change) =>
+                change.sourceSong?.videoId === sourceSongId &&
+                change.targetSong?.videoId === targetSongId
+        );
+        if (idx !== -1) {
+            arr.splice(idx, 1);
+            return true;
+        }
+        return false;
+    };
+    if (Array.isArray(memoryObject.confidentProposedChanges) && removeFromArray(memoryObject.confidentProposedChanges)) {
+        return true;
+    }
+    if (Array.isArray(memoryObject.uncertainProposedChanges) && removeFromArray(memoryObject.uncertainProposedChanges)) {
+        return true;
+    }
+    return false;
 }

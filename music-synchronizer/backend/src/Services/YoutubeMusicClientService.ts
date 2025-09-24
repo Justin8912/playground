@@ -347,6 +347,31 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             throw new Error('Failed to remove song from YouTube Music playlist: ' + error);
         }
     }
+
+    public async getSongById(videoId: string): Promise<Song | null> {
+        try {
+            const response: any = await this.youtube.videos.list({
+                id: [videoId],
+                part: ["snippet"]
+            });
+
+            if (!response.data?.items || response.data.items.length === 0) {
+                console.log(`No video found for ID: "${videoId}"`);
+                return null;
+            }
+
+            const video = response.data.items[0];
+            return {
+                title: normalizeSongTitle(video.snippet.title),
+                artists: [video.snippet.channelTitle],
+                description: video.snippet.description,
+                videoId: video.id
+            }
+        } catch (error) {
+            console.error('Failed to get YouTube video by ID: ' + error);
+            return null;
+        }
+    }
 }
 
 export const getYoutubeMusicService = async (

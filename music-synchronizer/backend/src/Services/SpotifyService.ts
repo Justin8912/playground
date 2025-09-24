@@ -61,10 +61,7 @@ export class SpotifyService implements MusicServiceInterface {
             const playlistItems = await this.spotifyApi.playlists.getPlaylistItems(playlistId);
             await this.sleep();
             return playlistItems.items.map((song: PlaylistedTrack<Track>) => {
-                return {
-                    title: song?.track?.name || 'Unknown Title',
-                    artists: song?.track?.artists?.map(artist => artist.name) || []
-                };
+                return this.mapTrackToSong(song.track);
             });
         } catch (err) {
             throw new Error(`Failed to retrieve songs for playlist ${playlistId}`, { cause: err });
@@ -225,6 +222,26 @@ export class SpotifyService implements MusicServiceInterface {
     }
 
     public removeSongFromPlaylist = async () => {}
+
+    public getSongById = async (songId: string): Promise<Song | null> => {
+        try {
+            if (!songId) return null;
+            const track: Track = await this.spotifyApi.tracks.get(songId);
+            if (track) return this.mapTrackToSong(track);
+            return null;
+        } catch(err) {
+            console.error("There was an error retrieving song by ID from Spotify", err);
+            return null;
+        }
+    }
+
+    public mapTrackToSong = (track: Track): Song => {
+        return {
+            title: track.name,
+            artists: track.artists.map(artist => artist.name),
+            videoId: track.uri
+        }
+    }
 }
 
 export const getSpotifyService = async (
