@@ -71,12 +71,11 @@ export const synchronizePlaylist = async (
 
 export const synchronizePlaylistWithDifferencesProvided = async (
     playlistName: string,
-    sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService,
     differences: Song[]
 ): Promise<Song[] | null> => {
     try {
-        return await targetClient.addSongsToPlaylist(playlistName, differences);
+        return await targetClient.addUserApprovedSongsToPlaylist(playlistName, differences);
     } catch (error) {
         console.error("Something went wrong", {cause: error});
         return null;

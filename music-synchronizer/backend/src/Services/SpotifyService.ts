@@ -143,18 +143,13 @@ export class SpotifyService implements MusicServiceInterface {
         try {
             const failedSongAdds = [];
             console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
-            
-            // First find the playlist by name
+
             const playlist = await this.getPlaylistByName(playlistName);
             if (!playlist) {
                 throw new Error(`Playlist with name "${playlistName}" not found`);
             }
-            
-            // Get song URIs for all songs in parallel
-            // const songUriPromises = songs.map(song => this.getSongUriByQuery(song));
-            // const songUriResults = await Promise.all(songUriPromises);
+
             let songUriResults = []
-            // Get song uris sequentially to avoid rate limiting
             for (const song of songs) {
                 const searchResult = await this.getSong(song)
                 if (!searchResult) {
@@ -183,6 +178,33 @@ export class SpotifyService implements MusicServiceInterface {
             if (songUris.length === 0) {
                 console.error(`No songs could be found on Spotify for the provided list`);
                 return [];
+            } else {
+                // Add all found songs to the playlist
+                await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
+
+                console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
+                return failedSongAdds;
+            }
+        } catch (err) {
+            throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
+        }
+    }
+
+    public async addUserApprovedSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
+        try {
+            const failedSongAdds: Song[] = [];
+            console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
+
+            const playlist = await this.getPlaylistByName(playlistName);
+            if (!playlist) {
+                throw new Error(`Playlist with name "${playlistName}" not found`);
+            }
+
+            let songUris: string[] = songs.map(song => song.videoId) as string[];
+
+            if (songUris.length === 0) {
+                console.error(`No songs could be found on Spotify for the provided list`);
+                return [] as Song[];
             } else {
                 // Add all found songs to the playlist
                 await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);

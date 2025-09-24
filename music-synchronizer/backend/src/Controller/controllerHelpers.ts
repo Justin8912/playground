@@ -40,14 +40,16 @@ export const proposedChangesMemoryObjectUpdate = async (
     const targetSong: Song | null = await targetClient.getSongById(targetSongId);
     if (!proposedChanges) return false;
     if (!targetSong) return false;
+
     const updateInArray = (arr: { sourceSong: Song; targetSong: Song }[]) => {
+        let hasMadeUpdate = false;
         for (const obj of arr) {
             if (obj.sourceSong.videoId === sourceSongId) {
                 Object.assign(obj.targetSong, targetSong);
-                return true;
+                hasMadeUpdate = true;
             }
         }
-        return false;
+        return hasMadeUpdate
     };
 
     return (
