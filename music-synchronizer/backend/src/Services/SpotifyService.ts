@@ -7,8 +7,9 @@ import {MusicServiceInterface} from "./MusicServiceInterface.js";
 import {
     GetPlaylistsResponse,
     Song,
-    GetPlaylistsWithoutSongs
+    PlaylistWithoutSongs
 } from "../Model/MusicService.js"
+import {sleep} from "../Util/sleep.js";
 
 export class SpotifyService implements MusicServiceInterface {
     private spotifyClient: SpotifyClient;
@@ -33,9 +34,6 @@ export class SpotifyService implements MusicServiceInterface {
         }
     }
 
-    private sleep = async () => {
-        return new Promise(resolve => setTimeout(resolve, 1000));
-    }
     private setSpotifyApi = (spotifyApi: SpotifyApi) => {
         this.spotifyApi = spotifyApi;
     }
@@ -44,12 +42,12 @@ export class SpotifyService implements MusicServiceInterface {
         try {
             console.info("Retrieving playlists from Spotify");
             const playlistIds = await this.getPlaylistsWithoutSongs();
-            await this.sleep();
-            const response = await Promise.all(playlistIds.map(async (playlist: GetPlaylistsWithoutSongs) => ({
+            await sleep();
+            const response = await Promise.all(playlistIds.map(async (playlist: PlaylistWithoutSongs) => ({
                 ...playlist,
                 songs: await this.getSongs(playlist.id)
             })));
-            await this.sleep();
+            await sleep();
             return response;
         } catch (err) {
             throw new Error("Failed to retrieve playlists from Spotify", { cause: err });
@@ -59,7 +57,7 @@ export class SpotifyService implements MusicServiceInterface {
     private getSongs = async (playlistId: string): Promise<Song[]> => {
         try {
             const playlistItems = await this.spotifyApi.playlists.getPlaylistItems(playlistId);
-            await this.sleep();
+            await sleep();
             return playlistItems.items.map((song: PlaylistedTrack<Track>) => {
                 return this.mapTrackToSong(song.track);
             });
@@ -68,7 +66,7 @@ export class SpotifyService implements MusicServiceInterface {
         }
     }
 
-    public getPlaylistsWithoutSongs = async (): Promise<GetPlaylistsWithoutSongs[]> => {
+    public getPlaylistsWithoutSongs = async (): Promise<PlaylistWithoutSongs[]> => {
         try {
             const playlists = await this.spotifyApi.currentUser.playlists.playlists(50);
             return playlists.items.map((playlist: SimplifiedPlaylist) => {
@@ -109,7 +107,7 @@ export class SpotifyService implements MusicServiceInterface {
         try {
             console.info(`Searching for song: "${query}"`);
             const searchResults = await this.spotifyApi.search(query, ['track'], 'US', 1);
-            await this.sleep();
+            await sleep();
             if (searchResults?.tracks?.items?.length > 0) {
                 const track: Track = searchResults.tracks?.items[0] as Track;
                 console.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
@@ -162,7 +160,7 @@ export class SpotifyService implements MusicServiceInterface {
                         failedSongAdds.push(song);
                     }
                 }
-                await this.sleep();
+                await sleep();
             }
             // Filter out null results and collect valid URIs
             const songUris: string[] = [];
@@ -242,8 +240,6 @@ export class SpotifyService implements MusicServiceInterface {
             throw new Error(`Failed to find playlist by name '${name}'`, { cause: err });
         }
     }
-
-    public removeSongFromPlaylist = async () => {}
 
     public getSongById = async (songId: string): Promise<Song | null> => {
         try {

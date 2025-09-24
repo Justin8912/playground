@@ -18,10 +18,11 @@ export const serviceTypeToClientMap = {
 export const PROPOSED_CHANGES_HEADER = "proposed-changes-id";
 export const PROPOSED_CHANGES_MEMORY_KEY = "PROPOSED_CHANGES";
 
-export const extractParamsFromReq = (requiredParams: string[], req: Request): any => {
+export const extractParamsFromReq = (requiredParams: string[], req: any): any => {
     const res = {}
     for (const param of requiredParams) {
-        const paramVal = req.params[param];
+        // @ts-ignore
+        const paramVal = req[param];
         if (paramVal?.trim() === "" || paramVal === undefined) {
             throw new InvalidRequest(`Parameter ${param} is required and must be non-empty.`);
         }

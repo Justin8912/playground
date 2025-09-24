@@ -9,7 +9,7 @@ export interface PlaylistImage {
     url: string;
 }
 
-export interface GetPlaylistsWithoutSongs {
+export interface PlaylistWithoutSongs {
     id: string;
     title: string;
     description?: string;

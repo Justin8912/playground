@@ -38,7 +38,7 @@ export const synchronizeDiscographyController = async (req: Request, res: Respon
             targetUser,
             sourceService,
             targetService
-        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService"], req)
+        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService"], req.params)
         isSupportedService(sourceService, targetService);
 
         const sourceClient = await (serviceTypeToClientMap[sourceService as SupportedService])(sourceUser, hcpVaultService);
@@ -67,7 +67,7 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
             sourceService,
             targetService,
             playlist
-        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService", "playlist"], req);
+        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService", "playlist"], req.params);
         isSupportedService(sourceService, targetService);
 
         // const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
@@ -109,7 +109,7 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
             sourceService,
             targetService,
             playlist
-        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService", "playlist"], req);
+        } = extractParamsFromReq(["sourceUser", "targetUser", "sourceService", "targetService", "playlist"], req.params);
         isSupportedService(sourceService, targetService);
 
         const sourceClient = await (serviceTypeToClientMap[sourceService as SupportedService])(sourceUser, hcpVaultService);
@@ -139,23 +139,17 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
 
 export const updateProposedUpdatesController = async (req: Request, res: Response) => {
     try {
-        let requestBody;
-
-        if (typeof req.body === "string") {
-            requestBody = JSON.parse(req.body)
-        } else {
-            requestBody = req.body;
-        }
-
         const {
             targetService,
             targetUser
-        } = extractParamsFromReq(["targetService", "targetUser"], req);
+        } = extractParamsFromReq(["targetService", "targetUser"], req.params);
 
-        const proposedChangesId = requestBody.proposedChangesId;
-        const sourceSongId = requestBody.sourceSongId;
-        const targetSongId = requestBody.targetSongId;
-        const operation = requestBody.operation;
+        const {
+            proposedChangesId,
+            sourceSongId,
+            targetSongId,
+            operation
+        } = extractParamsFromReq(["proposedChangesId", "sourceSongId", "targetSongId", "operation"], req.body);
 
         if (proposedChangesId.trim() === "" || sourceSongId.trim() === "" || targetSongId.trim() === "" || operation.trim() === "") {
             throw new InvalidRequest(`The required body parameters are: proposedChangesId, operation, sourceSongId, targetSong`);
@@ -192,7 +186,6 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
                 memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, proposedChangesId, req)
             );
         }
-
     } catch (err) {
         handleError(err, res);
     }

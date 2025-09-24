@@ -4,15 +4,15 @@ import {MemoryObjectUpdateError} from "./MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "./PlaylistSynchronizationError.js";
 
 export const handleError = (error: any, res: Response) => {
-    if (error instanceof InvalidRequest) {
-        res.status(404).json({
-            message: `The request is missing required input parameters: ${error.message}`
+    if (error instanceof MemoryObjectUpdateError || PlaylistSynchronizationError) {
+        res.status(400).json({
+            message: error.message
         });
     }
 
-    if (error instanceof MemoryObjectUpdateError) {
+    if (error instanceof InvalidRequest) {
         res.status(400).json({
-            message: error.message
+            message: `The request is missing required input parameters: ${error.message}`
         });
     }
 
