@@ -2,7 +2,7 @@ import {LitElement, html, css} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import "./custom-components/form-view.js";
 import "./custom-components/song-comparison-view.js";
-import {getSynchronizationProposal, updateSynchronizationProposal} from "./controller/controller";
+import {getSynchronizationProposal, synchronizePlaylist, updateSynchronizationProposal} from "./controller/controller";
 import {SynchronizationProposal} from "./model/ControllerTypes";
 
 @customElement('music-synchronizer')
@@ -33,11 +33,12 @@ export class MusicSynchronizer extends LitElement {
         <song-comparison-view 
           .synchronizationProposal=${proposal}
           @remove-song-mapping=${this.handleRemoveSongMapping}
+          @update-song-mapping=${this.handleReplaceSong}
         ></song-comparison-view>
+      <button @click=${this.synchronizePlaylist}>Submit changes</button>
     </div>`
   }
   override render() {
-    console.log("Rendering MusicSynchronizer, proposal:", this.synchronizationProposal);
     const pageView = this.synchronizationProposal.data ?
         this.renderSongComparisonView(this.synchronizationProposal)
         :
@@ -55,28 +56,22 @@ export class MusicSynchronizer extends LitElement {
         payload.targetUser,
         payload.playlistName
     );
-    console.log(this.synchronizationProposal.proposedChangesId);
   }
 
   // TODO: Remove this
   async test() {
     this.synchronizationProposal = await getSynchronizationProposal(
-        "spotify",
         "youtube",
+        "spotify",
         "justin",
         "justin",
         "test",
-        "c075bb91-73bf-4d23-a53b-f526e7626781"
+        "f528ac1b-ff52-48c5-967e-9ce86db06a34"
     );
   }
 
-  /**
-   * Handles the remove-song-mapping event emitted from song-comparison-view.
-   * Removes the mapping from the current synchronizationProposal and updates the UI.
-   */
   async handleRemoveSongMapping(event: CustomEvent) {
     const { sourceSongId, targetSongId } = event.detail;
-    console.log("Got the event: ", sourceSongId, targetSongId);
     await updateSynchronizationProposal(
         this.synchronizationProposal.data.requestDetails.sourceService,
         this.synchronizationProposal.data.requestDetails.targetService,
@@ -86,8 +81,51 @@ export class MusicSynchronizer extends LitElement {
         this.synchronizationProposal.proposedChangesId,
         "remove",
         sourceSongId,
-        { videoId: targetSongId }
+        targetSongId
     )
+
+    await this.refreshProposal();
+  }
+
+  async handleReplaceSong(event: CustomEvent) {
+    const {sourceSongId, targetSongId} = event.detail;
+    await updateSynchronizationProposal(
+        this.synchronizationProposal.data.requestDetails.sourceService,
+        this.synchronizationProposal.data.requestDetails.targetService,
+        this.synchronizationProposal.data.requestDetails.sourceUser,
+        this.synchronizationProposal.data.requestDetails.targetUser,
+        this.synchronizationProposal.data.requestDetails.playlist,
+        this.synchronizationProposal.proposedChangesId,
+        "update",
+        sourceSongId,
+        targetSongId
+    )
+
+    await this.refreshProposal();
+  }
+
+  async refreshProposal() {
+    this.synchronizationProposal = await getSynchronizationProposal(
+        this.synchronizationProposal.data.requestDetails.sourceService,
+        this.synchronizationProposal.data.requestDetails.targetService,
+        this.synchronizationProposal.data.requestDetails.sourceUser,
+        this.synchronizationProposal.data.requestDetails.targetUser,
+        this.synchronizationProposal.data.requestDetails.playlist,
+        this.synchronizationProposal.proposedChangesId
+    );
+  }
+
+  async synchronizePlaylist() {
+    await synchronizePlaylist(
+        this.synchronizationProposal.data.requestDetails.sourceService,
+        this.synchronizationProposal.data.requestDetails.targetService,
+        this.synchronizationProposal.data.requestDetails.sourceUser,
+        this.synchronizationProposal.data.requestDetails.targetUser,
+        this.synchronizationProposal.data.requestDetails.playlist,
+        this.synchronizationProposal.proposedChangesId
+    )
+
+    this.synchronizationProposal = {} as SynchronizationProposal;
   }
 }
 

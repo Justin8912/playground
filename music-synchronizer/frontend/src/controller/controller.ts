@@ -42,7 +42,7 @@ export const updateSynchronizationProposal = async (
     proposedChangesId: string,
     operation: string,
     sourceSongId: string,
-    targetSong: Object
+    targetSongId: string
 ): Promise<void> => {
     const response: Response = await fetch(
         `${synchronizationApiEndpoint}/updates/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
@@ -55,7 +55,31 @@ export const updateSynchronizationProposal = async (
                 proposedChangesId,
                 operation,
                 sourceSongId,
-                targetSong
+                targetSongId
+            })
+        }
+    );
+
+    console.log(response);
+}
+
+export const synchronizePlaylist = async (
+    sourceService: string,
+    targetService: string,
+    sourceUser: string,
+    targetUser: string,
+    playlistName: string,
+    proposedChangesId: string
+): Promise<void> => {
+    const response: Response = await fetch(
+        `${synchronizationApiEndpoint}/synchronize/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                proposedChangesId: proposedChangesId
             })
         }
     );

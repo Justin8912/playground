@@ -161,17 +161,6 @@ export class SongCardView extends LitElement {
     }
   };
 
-  private handleSave = () => {
-    if (this.editValue.trim()) {
-      this.dispatchEvent(new CustomEvent('replace-song', {
-        detail: { newSongId: this.editValue.trim() },
-        bubbles: true,
-        composed: true
-      }));
-    }
-    this.isEditing = false;
-  };
-
   private handleCancel = () => {
     this.isEditing = false;
     this.editValue = '';
@@ -186,4 +175,15 @@ export class SongCardView extends LitElement {
       return `https://google.com/search?q=${song.title}${song.artists?.join(', ')}`;
     }
   }
+
+  private handleSave = () => {
+    if (this.editValue.trim()) {
+      this.dispatchEvent(new CustomEvent('replace-song', {
+        detail: { newSongId: this.editValue.trim() },
+        bubbles: true,
+        composed: true
+      }));
+    }
+    this.isEditing = false;
+  };
 }
