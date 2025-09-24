@@ -8,7 +8,7 @@ import {Song} from "../Model/MusicService.js";
 export type SupportedService = "spotify" | "youtube";
 export const isSupportedService = (sourceService: string, targetService: string) => {
     if (["spotify", "youtube"].includes(sourceService) && ["spotify", "youtube"].includes(targetService)) return true;
-    else throw new Error(`Unsupported service. Supported services are 'spotify' and 'youtube' received source: ${sourceService} target: ${targetService}.`);
+    else throw new InvalidRequest(`Unsupported service. Supported services are 'spotify' and 'youtube' received source: ${sourceService} target: ${targetService}.`);
 }
 export const serviceTypeToClientMap = {
     "spotify": getSpotifyService,
@@ -56,7 +56,6 @@ export const proposedChangesMemoryObjectUpdate = async (
         updateInArray(proposedChanges.confidentProposedChanges) ||
         updateInArray(proposedChanges.uncertainProposedChanges)
     );
-
 }
 
 export const removeProposedChangeBySongIds = (

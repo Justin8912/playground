@@ -1,10 +1,18 @@
 import {Response} from 'express';
 import {InvalidRequest} from "./InvalidRequest.js";
+import {MemoryObjectUpdateError} from "./MemoryObjectUpdateError.js";
+import {PlaylistSynchronizationError} from "./PlaylistSynchronizationError.js";
 
 export const handleError = (error: any, res: Response) => {
     if (error instanceof InvalidRequest) {
-        res.status(400).json({
+        res.status(404).json({
             message: `The request is missing required input parameters: ${error.message}`
+        });
+    }
+
+    if (error instanceof MemoryObjectUpdateError) {
+        res.status(400).json({
+            message: error.message
         });
     }
 
