@@ -71,8 +71,8 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
         const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response;
-        if (req.headers[PROPOSED_CHANGES_HEADER]) {
-            const proposedChanges: ProposedChanges = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.headers[PROPOSED_CHANGES_HEADER] as string, req)
+        if (req.body.proposedChangesId) {
+            const proposedChanges: ProposedChanges = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.body.proposedChangesId as string, req)
             if (!proposedChanges) {
                 res.status(404).json({
                     error: "Could not find differences in memory with provided request id and matching request parameters."
@@ -80,11 +80,17 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
             }
 
             // For now let's just add songs where the changes are confident.
-            const songsToAdd: Song[] = [...proposedChanges.confidentProposedChanges.map(song => song.targetSong)]
-            response = await synchronizePlaylistWithDifferencesProvided(playlist, sourceClient, targetClient, songsToAdd);
-        } else {
-            response = await synchronizePlaylist(playlist, sourceClient, targetClient);
+            const songsToAdd: Song[] = [
+                ...proposedChanges.confidentProposedChanges.map(song => song.targetSong),
+                ...proposedChanges.uncertainProposedChanges.map(song => song.targetSong),
+            ]
+            response = await synchronizePlaylistWithDifferencesProvided(playlist, targetClient, songsToAdd);
         }
+        // TODO: Determine if I want to allow this endpoint to work WITHOUT a proposedChangesId. For now, I am going to
+        //   leave this out so we can focus on the web application first.
+        // else {
+        //     response = await synchronizePlaylist(playlist, sourceClient, targetClient);
+        // }
 
         res.json(response ? response : "Synchronization Failed.");
     } catch (err) {

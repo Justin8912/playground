@@ -279,6 +279,34 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
         }
     }
 
+    public async addUserApprovedSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
+        try {
+            const failedSongAdds: Song[] = [];
+            const responses = [];
+            const playlistId = (await this.getPlaylistByName(playlistName))?.id;
+
+            if (!playlistId) {
+                throw new Error(`Playlist with name "${playlistName}" not found`);
+            }
+
+            for (const song of songs) {
+                try {
+                    const response = await this.addSongToPlaylist(playlistId, song.videoId as string);
+                    responses.push(response);
+                } catch (error) {
+                    // Continue with other songs rather than failing completely
+                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
+                    failedSongAdds.push(song);
+                }
+            }
+
+            console.log(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
+            return failedSongAdds;
+        } catch (error) {
+            throw new Error('Failed to add songs to YouTube Music playlist: ' + error);
+        }
+    }
+
     public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse | null> {
         try {
             console.log(`Searching for playlist by name: "${name}"`);
