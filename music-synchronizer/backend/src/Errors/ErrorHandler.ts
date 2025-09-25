@@ -9,6 +9,7 @@ export const handleError = (error: any, res: Response) => {
         case 'MemoryObjectUpdateError':
         case 'PlaylistSynchronizationError':
         case 'PlaylistRetrievalError':
+        case 'HCPVaultError':
             res.status(400).json({
                 message: error.message,
                 cause: error.cause
@@ -26,13 +27,6 @@ export const handleError = (error: any, res: Response) => {
             res.status(404).json({
                 message: error.message,
                 cause: error.cause
-            });
-            return;
-
-        case 'HCPVaultError':
-            res.status(502).json({
-                message: "There was an error communicating with the HCP Vault service.",
-                details: error instanceof Error ? error.message : String(error)
             });
             return;
 
