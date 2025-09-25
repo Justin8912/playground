@@ -4,6 +4,10 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "target": "es2022",
+    "lib": [
+      "dom",
+      "es2022"
+    ],
     "sourceMap": true,
     "strict": true,
     "outDir": "dist",
@@ -15,9 +19,5 @@
   },
   "include": [
     "src"
-  ],
-  "lib": [
-    "dom",
-    "es2017"
   ]
 }

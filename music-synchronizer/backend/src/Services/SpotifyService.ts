@@ -10,6 +10,10 @@ import {
     PlaylistWithoutSongs
 } from "../Model/MusicService.js"
 import {sleep} from "../Util/sleep.js";
+import {PlaylistRetrievalError} from "../Errors/PlaylistRetrievalError.js";
+import {PlaylistNotFoundError} from "../Errors/PlaylistNotFoundError.js";
+import {SongRetrievalError} from "../Errors/SongRetrievalError.js";
+import {AddSongError} from "../Errors/AddSongError.js";
 
 export class SpotifyService implements MusicServiceInterface {
     private spotifyClient: SpotifyClient;
@@ -40,8 +44,8 @@ export class SpotifyService implements MusicServiceInterface {
 
     public getPlaylists = async (): Promise<GetPlaylistsResponse[]> => {
         try {
-            console.info("Retrieving playlists from Spotify");
-            const playlistIds = await this.getPlaylistsWithoutSongs();
+            logger.info("Retrieving playlists from Spotify");
+            const playlistIds: PlaylistWithoutSongs[] = await this.getPlaylistsWithoutSongs();
             await sleep();
             const response = await Promise.all(playlistIds.map(async (playlist: PlaylistWithoutSongs) => ({
                 ...playlist,
@@ -50,7 +54,7 @@ export class SpotifyService implements MusicServiceInterface {
             await sleep();
             return response;
         } catch (err) {
-            throw new Error("Failed to retrieve playlists from Spotify", { cause: err });
+            throw new PlaylistRetrievalError("Failed to retrieve populated Spotify playlists", { cause: err });
         }
     }
 
@@ -62,7 +66,7 @@ export class SpotifyService implements MusicServiceInterface {
                 return this.mapTrackToSong(song.track);
             });
         } catch (err) {
-            throw new Error(`Failed to retrieve songs for playlist ${playlistId}`, { cause: err });
+            throw new SongRetrievalError(`Failed to retrieve songs for playlist ${playlistId}`, { cause: err });
         }
     }
 
@@ -78,46 +82,46 @@ export class SpotifyService implements MusicServiceInterface {
                 };
             });
         } catch (err) {
-            throw new Error("Failed to retrieve playlist IDs from Spotify", { cause: err });
+            throw new PlaylistRetrievalError("Failed to retrieve playlist IDs from Spotify", { cause: err });
         }
     }
 
-    public createPlaylist = async (name: string, description?: string): Promise<string> => {
-        try {
-            console.info(`Creating new playlist: ${name}`);
-            
-            // Get the current user's ID
-            const user = await this.spotifyApi.currentUser.profile();
-            
-            // Create the playlist
-            const playlist = await this.spotifyApi.playlists.createPlaylist(user.id, {
-                name: name,
-                description: description || "",
-                public: false
-            });
-            
-            console.info(`Successfully created playlist: ${name} with ID: ${playlist.id}`);
-            return playlist.id;
-        } catch (err) {
-            throw new Error(`Failed to create playlist '${name}'`, { cause: err });
-        }
-    }
+    // Note: May come back to this, but for now users must have the playlist created ahead of time.
+    // public createPlaylist = async (name: string, description?: string): Promise<string> => {
+    //     try {
+    //         console.info(`Creating new playlist: ${name}`);
+    //
+    //         // Get the current user's ID
+    //         const user = await this.spotifyApi.currentUser.profile();
+    //
+    //         // Create the playlist
+    //         const playlist = await this.spotifyApi.playlists.createPlaylist(user.id, {
+    //             name: name,
+    //             description: description || "",
+    //             public: false
+    //         });
+    //
+    //         console.info(`Successfully created playlist: ${name} with ID: ${playlist.id}`);
+    //         return playlist.id;
+    //     } catch (err) {
+    //         throw new Error(`Failed to create playlist '${name}'`, { cause: err });
+    //     }
+    // }
 
     public getSongByQuery = async (query: string): Promise<Track | null> => {
         try {
-            console.info(`Searching for song: "${query}"`);
             const searchResults = await this.spotifyApi.search(query, ['track'], 'US', 1);
             await sleep();
             if (searchResults?.tracks?.items?.length > 0) {
                 const track: Track = searchResults.tracks?.items[0] as Track;
-                console.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
+                logger.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
                 return track
             } else {
-                console.info(`No song found for query: "${query}"`);
+                logger.info(`No valid spotify song found for query: "${query}"`);
                 return null;
             }
         } catch (err) {
-            throw new Error(`Failed to search for song '${query}'`, { cause: err });
+            throw new SongRetrievalError(`An error occured when searching for song '${query}' on spotify`, { cause: err });
         }
     }
 
@@ -138,16 +142,11 @@ export class SpotifyService implements MusicServiceInterface {
     }
 
     public addSongsToPlaylist = async (playlistName: string, songs: Song[]): Promise<Song[]> => {
+        const failedSongAdds = [];
+        let songUriResults = []
+        const playlist = await this.getPlaylistByName(playlistName);
+
         try {
-            const failedSongAdds = [];
-            console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
-
-            const playlist = await this.getPlaylistByName(playlistName);
-            if (!playlist) {
-                throw new Error(`Playlist with name "${playlistName}" not found`);
-            }
-
-            let songUriResults = []
             for (const song of songs) {
                 const searchResult = await this.getSong(song)
                 if (!searchResult) {
@@ -156,7 +155,7 @@ export class SpotifyService implements MusicServiceInterface {
                     if (doSongsMatch(song, searchResult)) {
                         songUriResults.push(searchResult.videoId);
                     } else {
-                        console.warn(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        logger.info(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                         failedSongAdds.push(song);
                     }
                 }
@@ -167,41 +166,35 @@ export class SpotifyService implements MusicServiceInterface {
             songUriResults.forEach((songUri, index) => {
                 if (songUri) {
                     songUris.push(songUri);
-                    console.info(`Found URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}: ${songUri}`);
+                    logger.info(`Found URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}: ${songUri}`);
                 } else {
-                    console.warn(`Could not find URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}, skipping...`);
+                    logger.warn(`Could not find URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}, skipping...`);
                 }
             });
             
             if (songUris.length === 0) {
-                console.error(`No songs could be found on Spotify for the provided list`);
+                logger.error(`No songs could be found on Spotify for the provided list`);
                 return [];
             } else {
                 // Add all found songs to the playlist
                 await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
 
-                console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
+                logger.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}" on spotify`);
                 return failedSongAdds;
             }
         } catch (err) {
-            throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
+            throw new AddSongError(`Failed to add songs to spotify playlist '${playlistName}'`, { cause: err });
         }
     }
 
     public async addUserApprovedSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
+        const failedSongAdds: Song[] = [];
+        const playlist = await this.getPlaylistByName(playlistName);
         try {
-            const failedSongAdds: Song[] = [];
-            console.info(`Adding ${songs.length} songs to playlist "${playlistName}"`);
-
-            const playlist = await this.getPlaylistByName(playlistName);
-            if (!playlist) {
-                throw new Error(`Playlist with name "${playlistName}" not found`);
-            }
-
             let songUris: string[] = songs.map(song => song.videoId) as string[];
 
             if (songUris.length === 0) {
-                console.error(`No songs could be found on Spotify for the provided list`);
+                logger.error(`No songs could be found on Spotify for the provided list`);
                 return [] as Song[];
             } else {
                 // Add all found songs to the playlist
@@ -211,33 +204,25 @@ export class SpotifyService implements MusicServiceInterface {
                 return failedSongAdds;
             }
         } catch (err) {
-            throw new Error(`Failed to add songs to playlist '${playlistName}'`, { cause: err });
+            throw new AddSongError(`Failed to add songs to Spotify playlist '${playlistName}'`, { cause: err });
         }
     }
 
-    public getPlaylistByName = async (name: string): Promise<GetPlaylistsResponse | null> => {
-        try {
-            console.info(`Searching for playlist with name: ${name}`);
+    public getPlaylistByName = async (name: string): Promise<GetPlaylistsResponse> => {
+        if (this.playlists.length === 0) {
+            logger.debug('Playlists cache is empty, loading playlists...');
+            this.playlists = await this.getPlaylists();
+        }
 
-            let matchingPlaylist;
-            if (this.playlists.length === 0) {
-                this.playlists = await this.getPlaylists();
-            }
-            console.log("Playlists: ", this.playlists.map(p=>p.title));
-            matchingPlaylist = this.playlists.find(playlist =>
-                playlist.title.toLowerCase() === name.toLowerCase()
-            );
+        const matchingPlaylist = this.playlists.find(playlist =>
+            playlist.title.toLowerCase() === name.toLowerCase()
+        );
 
-
-            if (matchingPlaylist) {
-                console.info(`Found playlist: ${matchingPlaylist.title} with ID: ${matchingPlaylist.id}`);
-                return matchingPlaylist;
-            } else {
-                console.info(`No playlist found with name: ${name}`);
-                return null;
-            }
-        } catch (err) {
-            throw new Error(`Failed to find playlist by name '${name}'`, { cause: err });
+        if (matchingPlaylist) {
+            logger.debug(`Found playlist: ${matchingPlaylist.title} with ID: ${matchingPlaylist.id}`);
+            return matchingPlaylist;
+        } else {
+            throw new PlaylistNotFoundError(`No playlist found with name "${name}"`);
         }
     }
 
@@ -248,7 +233,8 @@ export class SpotifyService implements MusicServiceInterface {
             if (track) return this.mapTrackToSong(track);
             return null;
         } catch(err) {
-            console.error("There was an error retrieving song by ID from Spotify", err);
+            // Silently handle when a song cannot be found
+            logger.error("There was an error retrieving song by ID from Spotify", {cause: err});
             return null;
         }
     }

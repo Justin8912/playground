@@ -24,6 +24,7 @@ import {handleError} from "../Errors/ErrorHandler.js";
 import {Memory} from "../Util/Memory.js";
 import {MemoryObjectUpdateError} from "../Errors/MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "../Errors/PlaylistSynchronizationError.js";
+import {PlaylistRetrievalError} from "../Errors/PlaylistRetrievalError.js";
 dotenv.config();
 
 const appConfig: AppConfig = new AppConfig();

@@ -4,25 +4,21 @@ import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
 import {findDifferences} from "../Util/findDifferences.js";
 import {doSongsMatch} from "../Util/titleMatcher.js";
 import {ProposedChanges} from "../Model/Controller.js";
+import logger from "../Util/logger.js";
 
 export const synchronizeMusicSources = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService
 ): Promise<boolean> => {
-    try {
-        const sourcePlaylists: GetPlaylistsResponse[] = await sourceClient.getPlaylists();
+    const sourcePlaylists: GetPlaylistsResponse[] = await sourceClient.getPlaylists();
 
-        for (const sourcePlaylist of sourcePlaylists) {
-            const targetPlaylist = await targetClient.getPlaylistByName(sourcePlaylist.title)
-            if (targetPlaylist) {
-                await targetClient.addSongsToPlaylist(sourcePlaylist.title, sourcePlaylist.songs);
-            }
+    for (const sourcePlaylist of sourcePlaylists) {
+        const targetPlaylist = await targetClient.getPlaylistByName(sourcePlaylist.title)
+        if (targetPlaylist) {
+            await targetClient.addSongsToPlaylist(sourcePlaylist.title, sourcePlaylist.songs);
         }
-        return true;
-    } catch (error) {
-        console.error("Something went wrong", {cause: error});
-        return false
     }
+    return true;
 }
 
 export const getPlaylistDifferences = async (
@@ -30,25 +26,20 @@ export const getPlaylistDifferences = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService
 ): Promise<Song[] | null> => {
-    try {
-        const sourcePlaylist: GetPlaylistsResponse | null = await sourceClient.getPlaylistByName(playlistName);
-        const targetPlaylist: GetPlaylistsResponse | null = await targetClient.getPlaylistByName(playlistName);
+    const sourcePlaylist: GetPlaylistsResponse | null = await sourceClient.getPlaylistByName(playlistName);
+    const targetPlaylist: GetPlaylistsResponse | null = await targetClient.getPlaylistByName(playlistName);
 
-        if (!sourcePlaylist || !targetPlaylist) {
-            console.error(`${!sourcePlaylist ? "Source playlist not found": "Source playlist found"}\n${!targetPlaylist ? "target playlist not found": "target playlist found"}`);
-            return null;
-        }
-
-        const differentSongs = findDifferences(
-            sourcePlaylist as any as GetPlaylistsResponse,
-            targetPlaylist as any as GetPlaylistsResponse
-        )
-
-        return differentSongs;
-    } catch (error) {
-        console.error("Something went wrong", {cause: error});
+    if (!sourcePlaylist || !targetPlaylist) {
+        logger.error(`${!sourcePlaylist ? "Source playlist not found": "Source playlist found"}\n${!targetPlaylist ? "target playlist not found": "target playlist found"}`);
         return null;
     }
+
+    const differentSongs = findDifferences(
+        sourcePlaylist as any as GetPlaylistsResponse,
+        targetPlaylist as any as GetPlaylistsResponse
+    )
+
+    return differentSongs;
 }
 
 export const synchronizePlaylist = async (
@@ -56,15 +47,10 @@ export const synchronizePlaylist = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService
 ): Promise<Song[] | null> => {
-    try {
-        let differentSongs = await getPlaylistDifferences(playlistName, sourceClient, targetClient);
-        if (differentSongs) {
-            return await targetClient.addSongsToPlaylist(playlistName, differentSongs);
-        } else {
-            return null;
-        }
-    } catch (error) {
-        console.error("Something went wrong", {cause: error});
+    let differentSongs = await getPlaylistDifferences(playlistName, sourceClient, targetClient);
+    if (differentSongs) {
+        return await targetClient.addSongsToPlaylist(playlistName, differentSongs);
+    } else {
         return null;
     }
 }
@@ -74,12 +60,7 @@ export const synchronizePlaylistWithDifferencesProvided = async (
     targetClient: YoutubeMusicClientService | SpotifyService,
     differences: Song[]
 ): Promise<Song[] | null> => {
-    try {
-        return await targetClient.addUserApprovedSongsToPlaylist(playlistName, differences);
-    } catch (error) {
-        console.error("Something went wrong", {cause: error});
-        return null;
-    }
+    return await targetClient.addUserApprovedSongsToPlaylist(playlistName, differences);
 }
 
 export const getProposedUpdates = async (
@@ -88,28 +69,23 @@ export const getProposedUpdates = async (
     targetClient: YoutubeMusicClientService | SpotifyService,
     differences?: Song[]
 ): Promise<ProposedChanges | null> => {
-    try {
-        if (!differences) {
-            differences = await getPlaylistDifferences(playlistName, sourceClient, targetClient) as Song[];
-        }
+    if (!differences) {
+        differences = await getPlaylistDifferences(playlistName, sourceClient, targetClient) as Song[];
+    }
 
-        let proposedChanges: ProposedChanges = {
-            confidentProposedChanges: [],
-            uncertainProposedChanges: []
-        };
-        for (const song of differences) {
-            const proposedSong = await targetClient.getSong(song) as Song
-            if (proposedSong) {
-                if (doSongsMatch(song, proposedSong)) proposedChanges.confidentProposedChanges.push({sourceSong: song, targetSong: proposedSong});
-                else {
-                    proposedChanges.uncertainProposedChanges.push({sourceSong: song, targetSong: proposedSong});
-                }
+    let proposedChanges: ProposedChanges = {
+        confidentProposedChanges: [],
+        uncertainProposedChanges: []
+    };
+    for (const song of differences) {
+        const proposedSong = await targetClient.getSong(song) as Song
+        if (proposedSong) {
+            if (doSongsMatch(song, proposedSong)) proposedChanges.confidentProposedChanges.push({sourceSong: song, targetSong: proposedSong});
+            else {
+                proposedChanges.uncertainProposedChanges.push({sourceSong: song, targetSong: proposedSong});
             }
         }
-
-        return proposedChanges;
-    } catch (err) {
-        console.error("Something went wrong", {cause: err});
-        return null;
     }
+
+    return proposedChanges;
 }

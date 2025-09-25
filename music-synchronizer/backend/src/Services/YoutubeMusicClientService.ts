@@ -1,7 +1,7 @@
 import { youtube_v3, google } from "googleapis";
 import {
     GetPlaylistsResponse, 
-    GetPlaylistsWithoutSongs,
+    PlaylistWithoutSongs,
     Song
 } from "../Model/MusicService.js"
 import {getGoogleUserClient, GoogleUserClient} from "./GoogleClientFactory.js";
@@ -9,6 +9,11 @@ import {HCPVaultService} from "./VaultService.js";
 import logger from "../Util/logger.js";
 import {doSongsMatch, normalizeSongTitle} from "../Util/titleMatcher.js";
 import {MusicServiceInterface} from "./MusicServiceInterface.js";
+import {sleep} from "../Util/sleep.js";
+import {PlaylistRetrievalError} from "../Errors/PlaylistRetrievalError.js";
+import {SongRetrievalError} from "../Errors/SongRetrievalError.js";
+import {AddSongError} from "../Errors/AddSongError.js";
+import {PlaylistNotFoundError} from "../Errors/PlaylistNotFoundError.js";
 
 export class YoutubeMusicClientService implements MusicServiceInterface {
     private googleUserClient: GoogleUserClient;
@@ -31,50 +36,47 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
         }
     }
 
-    private sleep = async () => {
-        return new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
     public async getPlaylists(): Promise<GetPlaylistsResponse[]> {
         try {
+            logger.info("Retrieving playlists from YouTube Music");
             const playlistIds = await this.getPlaylistIds();
-            const playlistPromises = playlistIds.map((playlist: GetPlaylistsWithoutSongs) => {
+            const playlistPromises = playlistIds.map((playlist: PlaylistWithoutSongs) => {
                 if (!playlist.description?.toLowerCase().includes("music")) return
-                return this.getSongs(playlist.id).then(songs => ({
+                return this.getSongs(playlist.id).then((songs: Song[]) => ({
                     id: playlist.id,
                     title: playlist.title,
                     description: playlist.description,
                     image: playlist.image,
                     songs: songs
-                })).catch(error => {
-                    console.warn(`Failed to get songs for playlist "${playlist.title}":`, error);
-                    // Return playlist without songs rather than failing completely
-                    return {
-                        id: playlist.id,
-                        title: playlist.title,
-                        description: playlist.description,
-                        image: playlist.image,
-                        songs: []
-                    };
+                }))
+                    // It looks like if the playlist is empty then getSongs will not error, so this catch should not be needed.
+                    // .catch(error => {
+                    //     console.warn(`Failed to get songs for playlist "${playlist.title}":`, error);
+                    //     // Return playlist without songs rather than failing completely
+                    //     return {
+                    //         id: playlist.id,
+                    //         title: playlist.title,
+                    //         description: playlist.description,
+                    //         image: playlist.image,
+                    //         songs: []
+                    //     };
+                    // })
                 })
-            }).filter(playlist => !!playlist);
+                .filter(playlist => !!playlist);
 
             const populatedPlaylists = await Promise.all(playlistPromises);
-            const validPlaylists = populatedPlaylists.filter(playlist => !!playlist);
-            
-            console.log(`Retrieved ${validPlaylists.length} populated playlists`);
-            return validPlaylists;
+            return populatedPlaylists.filter(playlist => !!playlist);
         } catch (error) {
-            throw new Error('Failed to get populated YouTube Music playlists: ' + error);
+            throw new PlaylistRetrievalError('Failed to get populated YouTube Music playlists: ', {cause: error});
         }
     }
 
-    public async getPlaylistIds(): Promise<GetPlaylistsWithoutSongs[]> {
+    public async getPlaylistIds(): Promise<PlaylistWithoutSongs[]> {
         try {            
             let nextPageToken: string | undefined = undefined;
-            let result: GetPlaylistsWithoutSongs[] = [];
+            let result: PlaylistWithoutSongs[] = [];
             
-            while (nextPageToken !== null) {
+            do {
                 const response: any = await this.youtube.playlists.list({
                     part: ["id", "snippet"],
                     mine: true,
@@ -91,17 +93,16 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                             ? { url: playlist.snippet.thumbnails.default.url }
                             : undefined
                     })).filter((playlist: any) => playlist.description.includes("music"));
-                    
+
                     result = result.concat(playlistData);
                 }
 
-                nextPageToken = response.data?.nextPageToken || null;
-            }
+                nextPageToken = response.data?.nextPageToken;
+            } while (nextPageToken);
 
-            console.log(`Retrieved ${result.length} playlist IDs`);
             return result;
         } catch (error) {
-            throw new Error('Failed to get YouTube Music playlist IDs: ' + error);
+            throw new PlaylistRetrievalError('Failed to get YouTube Music playlist IDs: ', {cause: error});
         }
     }
 
@@ -110,7 +111,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             let nextPageToken: string | undefined = undefined;
             let result: Song[] = [];
             
-            while (nextPageToken !== null) {
+            do {
                 const playlistItemsOptions = {
                     playlistId: playlistId,
                     part: ["snippet"],
@@ -137,13 +138,12 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                     result = result.concat(songs);
                 }
 
-                nextPageToken = response.data?.nextPageToken || null;
-            }
+                nextPageToken = response.data?.nextPageToken;
+            } while (nextPageToken);
 
-            console.log(`Retrieved ${result.length} songs from playlist ${playlistId}`);
             return result;
         } catch (error) {
-            throw new Error('Failed to get songs from YouTube Music playlist: ' + error);
+            throw new SongRetrievalError('Failed to get songs from YouTube Music playlist: ', {cause: error});
         }
     }
 
@@ -161,17 +161,17 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 maxResults: 1
             });
 
-            await this.sleep();
+            await sleep();
 
             if (!searchResult?.data?.items || searchResult.data.items.length === 0) {
-                console.log(`No videos found for query: "${query}"`);
+                logger.info(`No videos found for query: "${query}"`);
                 return null;
             }
 
             for (const video of searchResult.data.items) {
                 if (video?.id?.kind?.toLowerCase() === "youtube#video") {
                     const videoId = video.id.videoId;
-                    console.log(`Found video "${video.snippet?.title}" with ID: ${videoId} for query: "${query}"`);
+                    logger.info(`Found video "${video.snippet?.title}" with ID: ${videoId} for query: "${query}"`);
                     return {
                         title: video.snippet.title,
                         artists: [video.snippet.channelTitle],
@@ -181,39 +181,40 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 }
             }
 
-            console.log(`No valid YouTube videos found for query: "${query}"`);
+            logger.info(`No valid YouTube videos found for query: "${query}"`);
             return null;
         } catch (error) {
-            throw new Error('Failed to search for YouTube Music video: ' + error);
+            throw new SongRetrievalError(`An error occurred when searching for '${query}' on YouTube Music`, {cause: error});
         }
     }
 
-    public async createPlaylist(title: string, description?: string): Promise<string> {
-        try {            
-            const response: any = await this.youtube.playlists.insert({
-                part: ["snippet", "status"],
-                requestBody: {
-                    snippet: {
-                        title: title,
-                        description: description || `Created by YouTube Music Client on ${new Date().toISOString()}`
-                    },
-                    status: {
-                        privacyStatus: "private" // Default to private, can be changed later
-                    }
-                }
-            });
-
-            const playlistId = response.data?.id;
-            if (!playlistId) {
-                throw new Error('No playlist ID returned from YouTube API');
-            }
-
-            console.log(`Created playlist "${title}" with ID: ${playlistId}`);
-            return playlistId;
-        } catch (error) {
-            throw new Error('Failed to create YouTube Music playlist: ' + error);
-        }
-    }
+    // Note: May come back to this but for now users must have the playlist created ahead of time
+    // public async createPlaylist(title: string, description?: string): Promise<string> {
+    //     try {
+    //         const response: any = await this.youtube.playlists.insert({
+    //             part: ["snippet", "status"],
+    //             requestBody: {
+    //                 snippet: {
+    //                     title: title,
+    //                     description: description || `Created by YouTube Music Client on ${new Date().toISOString()}`
+    //                 },
+    //                 status: {
+    //                     privacyStatus: "private" // Default to private, can be changed later
+    //                 }
+    //             }
+    //         });
+    //
+    //         const playlistId = response.data?.id;
+    //         if (!playlistId) {
+    //             throw new Error('No playlist ID returned from YouTube API');
+    //         }
+    //
+    //         console.log(`Created playlist "${title}" with ID: ${playlistId}`);
+    //         return playlistId;
+    //     } catch (error) {
+    //         throw new Error('Failed to create YouTube Music playlist: ' + error);
+    //     }
+    // }
 
     private async addSongToPlaylist(playlistId: string, videoId: string): Promise<any> {
         try {
@@ -230,26 +231,19 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 }
             });
 
-            await this.sleep();
-
-            console.log(`Added video ${videoId} to playlist ${playlistId}`);
+            await sleep();
             return response;
         } catch (error) {
-            throw new Error('Failed to add song to YouTube Music playlist: ' + error);
+            throw new AddSongError(`Failed to add song ${videoId} to YouTube Music playlist ${playlistId}`, {cause: error});
         }
     }
 
-    // Maybe have a public facing method that allows adding multiple songs by name at once
     public async addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
+        const failedSongAdds: Song[] = [];
+        const responses = [];
+        const playlistId = (await this.getPlaylistByName(playlistName)).id;
+
         try {
-            const failedSongAdds: Song[] = [];
-            const responses = [];
-            const playlistId = (await this.getPlaylistByName(playlistName))?.id;
-
-            if (!playlistId) {
-                throw new Error(`Playlist with name "${playlistName}" not found`);
-            }
-
             for (const song of songs) {
                 try {
                     const video = await this.getSong(song);
@@ -258,121 +252,64 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                             const response = await this.addSongToPlaylist(playlistId, video.videoId as string);
                             responses.push(response);
                         } else {
-                            console.warn(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                            logger.info(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                             failedSongAdds.push(song);
                         }
                     } else {
-                        console.warn(`The following song was not found in youtube:\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        logger.info(`The following song was not found in youtube:\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                         failedSongAdds.push(song);
                     }
                 } catch (error) {
                     // Continue with other songs rather than failing completely
-                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
+                    logger.info(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
                     failedSongAdds.push(song);
                 }
             }
 
-            console.log(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
+            logger.info(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistName} on youtube`);
             return failedSongAdds;
         } catch (error) {
-            throw new Error('Failed to add songs to YouTube Music playlist: ' + error);
+            throw new AddSongError('Failed to add songs to YouTube Music playlist', {cause: error});
         }
     }
 
     public async addUserApprovedSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
+        const failedSongAdds: Song[] = [];
+        const responses = [];
+        const playlistId = (await this.getPlaylistByName(playlistName)).id;
+
         try {
-            const failedSongAdds: Song[] = [];
-            const responses = [];
-            const playlistId = (await this.getPlaylistByName(playlistName))?.id;
-
-            if (!playlistId) {
-                throw new Error(`Playlist with name "${playlistName}" not found`);
-            }
-
             for (const song of songs) {
                 try {
                     const response = await this.addSongToPlaylist(playlistId, song.videoId as string);
                     responses.push(response);
                 } catch (error) {
                     // Continue with other songs rather than failing completely
-                    console.warn(`Failed to add video for ${song.title} to playlist ${playlistId}:`, error);
+                    logger.info(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
                     failedSongAdds.push(song);
                 }
             }
 
-            console.log(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
+            logger.info(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
             return failedSongAdds;
         } catch (error) {
-            throw new Error('Failed to add songs to YouTube Music playlist: ' + error);
+            throw new AddSongError('Failed to add songs to YouTube Music playlist', {cause:error});
         }
     }
 
-    public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse | null> {
-        try {
-            console.log(`Searching for playlist by name: "${name}"`);
-            
-            if (this.playlists.length === 0) {
-                console.log('Playlists cache is empty, loading playlists...');
-                this.playlists = await this.getPlaylists();
-            }
-            const foundPlaylist = this.playlists.find(
-                playlist => playlist.title.toLowerCase() === name.toLowerCase()
-            );
-            if (foundPlaylist) {
-                console.log(`Found playlist "${name}" with ID: ${foundPlaylist.id}`);
-                return foundPlaylist;
-            } else {
-                console.log(`No playlist found with name: "${name}"`);
-                return null;
-            }
-        } catch (error) {
-            throw new Error('Failed to get YouTube Music playlist by name: ' + error);
+    public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse> {
+        if (this.playlists.length === 0) {
+            logger.debug('Playlists cache is empty, loading playlists...');
+            this.playlists = await this.getPlaylists();
         }
-    }
-
-    // Update to remove a song from a playlist based on the song title instead maybe?
-    public async removeSongFromPlaylist(playlistId: string, videoId: string): Promise<void> {
-        try {            
-            // First, we need to find the playlist item ID for this video in the playlist
-            let nextPageToken: string | undefined = undefined;
-            let playlistItemId: string | undefined = undefined;
-            
-            while (nextPageToken !== null && !playlistItemId) {
-                const response: any = await this.youtube.playlistItems.list({
-                    playlistId: playlistId,
-                    part: ["id", "snippet"],
-                    pageToken: nextPageToken,
-                    maxResults: 50
-                });
-
-                if (response.data?.items) {
-                    console.log(response.data.snippet);
-                    const foundItem = response.data.items.find((item: any) => 
-                        item.snippet?.resourceId?.videoId === videoId
-                    );
-                    
-                    if (foundItem) {
-                        playlistItemId = foundItem.id;
-                        break;
-                    }
-                }
-
-                nextPageToken = response.data?.nextPageToken || null;
-            }
-
-            if (!playlistItemId) {
-                console.log(`Video ${videoId} not found in playlist ${playlistId}`);
-                return;
-            }
-
-            // Remove the playlist item
-            await this.youtube.playlistItems.delete({
-                id: playlistItemId
-            });
-
-            console.log(`Removed video ${videoId} from playlist ${playlistId}`);
-        } catch (error) {
-            throw new Error('Failed to remove song from YouTube Music playlist: ' + error);
+        const foundPlaylist = this.playlists.find(
+            playlist => playlist.title.toLowerCase() === name.toLowerCase()
+        );
+        if (foundPlaylist) {
+            logger.debug(`Found playlist "${name}" with ID: ${foundPlaylist.id}`);
+            return foundPlaylist;
+        } else {
+            throw new PlaylistNotFoundError(`No playlist with name "${name}"`);
         }
     }
 
@@ -384,7 +321,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             });
 
             if (!response.data?.items || response.data.items.length === 0) {
-                console.log(`No video found for ID: "${videoId}"`);
+                logger.info(`No video found for ID: "${videoId}"`);
                 return null;
             }
 
@@ -396,7 +333,8 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 videoId: video.id
             }
         } catch (error) {
-            console.error('Failed to get YouTube video by ID: ' + error);
+            // Silently handle when a song cannot be found
+            logger.info('Failed to get YouTube video by ID.', {cause:error});
             return null;
         }
     }

@@ -5,10 +5,9 @@ import {
 
 export interface MusicServiceInterface {
     getPlaylists(): Promise<GetPlaylistsResponse[]>
-    createPlaylist(name: string, description?: string): Promise<string>
     addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]>
     addUserApprovedSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]>
-    getPlaylistByName(name: string): Promise<GetPlaylistsResponse | null>
+    getPlaylistByName(name: string): Promise<GetPlaylistsResponse>
     getSong(song: Song): Promise<Song | null>
     getSongById(songId: string): Promise<Song | null>
 }
