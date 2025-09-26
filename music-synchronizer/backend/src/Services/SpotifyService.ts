@@ -248,7 +248,7 @@ export class SpotifyService implements MusicServiceInterface {
     }
 
     private logInfoMessage(message: string, options: any = {}) {
-        logger.info(message, { ...options, service: "Spotify" });
+        logger.info(message, { ...options, source: "Spotify" });
     }
 }
 

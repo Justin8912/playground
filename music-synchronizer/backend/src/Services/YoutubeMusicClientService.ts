@@ -321,7 +321,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             });
 
             if (!response.data?.items || response.data.items.length === 0) {
-                this.logInfoMessage(`No video found for ID: "${videoId}"`);
+                this.logInfoMessage(`No video found for ID: "${videoId}"`, {details: response});
                 return null;
             }
 
@@ -340,7 +340,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
     }
 
     private logInfoMessage(message: string, options: any = {}) {
-        logger.info(message, {...options, service: "YouTube Music"});
+        logger.info(message, {...options, source: "YouTube Music"});
     }
 
     private throwError(ErrorType: new (...args: any[]) => Error, ...args: any[]): never {

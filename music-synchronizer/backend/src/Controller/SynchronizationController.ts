@@ -124,8 +124,7 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
                 throw new MemoryObjectRetrievalError();
             }
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
-        }
-        else {
+        } else {
             response = await getProposedUpdates(playlist, sourceClient, targetClient);
             const requestId = memory.createMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, req.params, response);
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
@@ -149,7 +148,8 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
             sourceSongId,
             targetSongId,
             operation
-        } = extractParamsFromReq(["proposedChangesId", "sourceSongId", "targetSongId", "operation"], req.body);
+        } = extractParamsFromReq(["proposedChangesId", "sourceSongId", "targetSongId", "operation"], req.body, false);
+
 
         if (proposedChangesId.trim() === "" || sourceSongId.trim() === "" || targetSongId.trim() === "" || operation.trim() === "") {
             throw new InvalidRequest(`The required body parameters are: proposedChangesId, operation, sourceSongId, targetSong`);
