@@ -44,7 +44,7 @@ export class SpotifyService implements MusicServiceInterface {
 
     public getPlaylists = async (): Promise<GetPlaylistsResponse[]> => {
         try {
-            logger.info("Retrieving playlists from Spotify");
+            this.logInfoMessage("Retrieving playlists");
             const playlistIds: PlaylistWithoutSongs[] = await this.getPlaylistsWithoutSongs();
             await sleep();
             const response = await Promise.all(playlistIds.map(async (playlist: PlaylistWithoutSongs) => ({
@@ -114,10 +114,10 @@ export class SpotifyService implements MusicServiceInterface {
             await sleep();
             if (searchResults?.tracks?.items?.length > 0) {
                 const track: Track = searchResults.tracks?.items[0] as Track;
-                logger.info(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
+                this.logInfoMessage(`Found song: "${track.name}" by ${track.artists.map(artist => artist.name).join(', ')} with URI: ${track.uri}`);
                 return track
             } else {
-                logger.info(`No valid spotify song found for query: "${query}"`);
+                this.logInfoMessage(`No valid song found for query: "${query}"`);
                 return null;
             }
         } catch (err) {
@@ -155,7 +155,7 @@ export class SpotifyService implements MusicServiceInterface {
                     if (doSongsMatch(song, searchResult)) {
                         songUriResults.push(searchResult.videoId);
                     } else {
-                        logger.info(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        this.logInfoMessage(`Song found does not strongly match the query\n\tFound song: ${searchResult.title} ${searchResult.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                         failedSongAdds.push(song);
                     }
                 }
@@ -166,20 +166,20 @@ export class SpotifyService implements MusicServiceInterface {
             songUriResults.forEach((songUri, index) => {
                 if (songUri) {
                     songUris.push(songUri);
-                    logger.info(`Found URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}: ${songUri}`);
+                    this.logInfoMessage(`Found URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}: ${songUri}`);
                 } else {
-                    logger.warn(`Could not find URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}, skipping...`);
+                    this.logInfoMessage(`Could not find URI for "${songs[index].title}" by ${songs[index].artists.join(', ')}, skipping...`);
                 }
             });
             
             if (songUris.length === 0) {
-                logger.error(`No songs could be found on Spotify for the provided list`);
+                this.logInfoMessage(`No songs could be found for the provided list`);
                 return [];
             } else {
                 // Add all found songs to the playlist
                 await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
 
-                logger.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}" on spotify`);
+                this.logInfoMessage(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
                 return failedSongAdds;
             }
         } catch (err) {
@@ -194,7 +194,7 @@ export class SpotifyService implements MusicServiceInterface {
             let songUris: string[] = songs.map(song => song.videoId) as string[];
 
             if (songUris.length === 0) {
-                logger.error(`No songs could be found on Spotify for the provided list`);
+                this.logInfoMessage(`No songs could be found for the provided list`);
                 return [] as Song[];
             } else {
                 // Add all found songs to the playlist
@@ -234,7 +234,7 @@ export class SpotifyService implements MusicServiceInterface {
             return null;
         } catch(err) {
             // Silently handle when a song cannot be found
-            logger.error("There was an error retrieving song by ID from Spotify", {cause: err});
+            this.logInfoMessage("There was an error retrieving song by ID", {cause: err});
             return null;
         }
     }
@@ -245,6 +245,10 @@ export class SpotifyService implements MusicServiceInterface {
             artists: track.artists.map(artist => artist.name),
             videoId: track.uri
         }
+    }
+
+    private logInfoMessage(message: string, options: any = {}) {
+        logger.info(message, { ...options, service: "Spotify" });
     }
 }
 

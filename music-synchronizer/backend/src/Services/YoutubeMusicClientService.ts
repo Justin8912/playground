@@ -38,7 +38,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
     public async getPlaylists(): Promise<GetPlaylistsResponse[]> {
         try {
-            logger.info("Retrieving playlists from YouTube Music");
+            this.logInfoMessage("Retrieving playlists");
             const playlistIds = await this.getPlaylistIds();
             const playlistPromises = playlistIds.map((playlist: PlaylistWithoutSongs) => {
                 if (!playlist.description?.toLowerCase().includes("music")) return
@@ -164,14 +164,14 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             await sleep();
 
             if (!searchResult?.data?.items || searchResult.data.items.length === 0) {
-                logger.info(`No videos found for query: "${query}"`);
+                this.logInfoMessage(`No videos found for query: "${query}"`);
                 return null;
             }
 
             for (const video of searchResult.data.items) {
                 if (video?.id?.kind?.toLowerCase() === "youtube#video") {
                     const videoId = video.id.videoId;
-                    logger.info(`Found video "${video.snippet?.title}" with ID: ${videoId} for query: "${query}"`);
+                    this.logInfoMessage(`Found video "${video.snippet?.title}" with ID: ${videoId} for query: "${query}"`);
                     return {
                         title: video.snippet.title,
                         artists: [video.snippet.channelTitle],
@@ -181,7 +181,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                 }
             }
 
-            logger.info(`No valid YouTube videos found for query: "${query}"`);
+            this.logInfoMessage(`No valid songs found for query: "${query}"`);
             return null;
         } catch (error) {
             throw new SongRetrievalError(`An error occurred when searching for '${query}' on YouTube Music`, {cause: error});
@@ -252,21 +252,21 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                             const response = await this.addSongToPlaylist(playlistId, video.videoId as string);
                             responses.push(response);
                         } else {
-                            logger.info(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                            this.logInfoMessage(`Song found does not strongly match the query\n\tFound song: ${video.title} ${video.artists.join(", ")}\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                             failedSongAdds.push(song);
                         }
                     } else {
-                        logger.info(`The following song was not found in youtube:\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
+                        this.logInfoMessage(`The following song was not found in youtube:\n\tRequested song: ${song.title} ${song.artists.join(", ")}`);
                         failedSongAdds.push(song);
                     }
                 } catch (error) {
                     // Continue with other songs rather than failing completely
-                    logger.info(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
+                    this.logInfoMessage(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
                     failedSongAdds.push(song);
                 }
             }
 
-            logger.info(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistName} on youtube`);
+            this.logInfoMessage(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistName}`);
             return failedSongAdds;
         } catch (error) {
             throw new AddSongError('Failed to add songs to YouTube Music playlist', {cause: error});
@@ -285,12 +285,12 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                     responses.push(response);
                 } catch (error) {
                     // Continue with other songs rather than failing completely
-                    logger.info(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
+                    this.logInfoMessage(`Failed to add video for ${song.title} to playlist ${playlistName}:`, {cause: error});
                     failedSongAdds.push(song);
                 }
             }
 
-            logger.info(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
+            this.logInfoMessage(`Successfully added ${responses.length} out of ${songs.length} songs to playlist ${playlistId}`);
             return failedSongAdds;
         } catch (error) {
             throw new AddSongError('Failed to add songs to YouTube Music playlist', {cause:error});
@@ -321,7 +321,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             });
 
             if (!response.data?.items || response.data.items.length === 0) {
-                logger.info(`No video found for ID: "${videoId}"`);
+                this.logInfoMessage(`No video found for ID: "${videoId}"`);
                 return null;
             }
 
@@ -334,9 +334,17 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             }
         } catch (error) {
             // Silently handle when a song cannot be found
-            logger.info('Failed to get YouTube video by ID.', {cause:error});
+            this.logInfoMessage('Failed to get video by ID.', {cause:error})
             return null;
         }
+    }
+
+    private logInfoMessage(message: string, options: any = {}) {
+        logger.info(message, {...options, service: "YouTube Music"});
+    }
+
+    private throwError(ErrorType: new (...args: any[]) => Error, ...args: any[]): never {
+        throw new ErrorType(...args);
     }
 }
 
