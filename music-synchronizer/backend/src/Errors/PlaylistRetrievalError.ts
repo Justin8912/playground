@@ -2,5 +2,6 @@ export class PlaylistRetrievalError extends Error {
     constructor(message: string, options?: ErrorOptions) {
         super(message, options);
         this.name = "PlaylistRetrievalError";
+        this.cause = options;
     }
 }

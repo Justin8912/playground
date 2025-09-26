@@ -67,7 +67,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             const populatedPlaylists = await Promise.all(playlistPromises);
             return populatedPlaylists.filter(playlist => !!playlist);
         } catch (error) {
-            throw new PlaylistRetrievalError('Failed to get populated YouTube Music playlists: ', {cause: error});
+            throw new PlaylistRetrievalError('Failed to get populated YouTube Music playlists', {cause: error});
         }
     }
 
@@ -102,7 +102,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
             return result;
         } catch (error) {
-            throw new PlaylistRetrievalError('Failed to get YouTube Music playlist IDs: ', {cause: error});
+            throw new PlaylistRetrievalError('Failed to get YouTube Music playlist IDs', {cause: error});
         }
     }
 
@@ -143,7 +143,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
             return result;
         } catch (error) {
-            throw new SongRetrievalError('Failed to get songs from YouTube Music playlist: ', {cause: error});
+            throw new SongRetrievalError('Failed to get songs from YouTube Music playlist', {cause: error});
         }
     }
 

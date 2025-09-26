@@ -25,6 +25,7 @@ import {Memory} from "../Util/Memory.js";
 import {MemoryObjectUpdateError} from "../Errors/MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "../Errors/PlaylistSynchronizationError.js";
 import {PlaylistRetrievalError} from "../Errors/PlaylistRetrievalError.js";
+import {MemoryObjectRetrievalError} from "../Errors/MemoryObjectRetrievalError.js";
 dotenv.config();
 
 const appConfig: AppConfig = new AppConfig();
@@ -118,11 +119,9 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
         let response;
         if (req.headers[PROPOSED_CHANGES_HEADER]) {
             const requestId = req.headers[PROPOSED_CHANGES_HEADER] as string;
-            const response: ProposedChanges = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
+            response = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
             if (!response) {
-                res.status(404).json({
-                    error: "Could not find differences in memory with provided request id and matching request parameters."
-                });
+                throw new MemoryObjectRetrievalError();
             }
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
         }
