@@ -2,7 +2,6 @@ import {Request, Response} from "express";
 import {
     getProposedUpdates,
     synchronizeMusicSources,
-    synchronizePlaylist,
     synchronizePlaylistWithDifferencesProvided
 } from "../Services/Synchronization.js";
 import {AppConfig} from "../Config/AppConfig.js";
@@ -24,14 +23,17 @@ import {handleError} from "../Errors/ErrorHandler.js";
 import {Memory} from "../Util/Memory.js";
 import {MemoryObjectUpdateError} from "../Errors/MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "../Errors/PlaylistSynchronizationError.js";
-import {PlaylistRetrievalError} from "../Errors/PlaylistRetrievalError.js";
 import {MemoryObjectRetrievalError} from "../Errors/MemoryObjectRetrievalError.js";
+import {dummyMemoryObject} from "./dummy.js";
 dotenv.config();
 
 const appConfig: AppConfig = new AppConfig();
 const hcpVaultService = appConfig.getHcpVaultService();
 
 let memory = new Memory(PROPOSED_CHANGES_MEMORY_KEY)
+
+// TODO: Remove me:
+memory.injectMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, "test", JSON.parse(dummyMemoryObject))
 
 export const synchronizeDiscographyController = async (req: Request, res: Response) => {
     try {
@@ -47,17 +49,9 @@ export const synchronizeDiscographyController = async (req: Request, res: Respon
         const targetClient = await (serviceTypeToClientMap[targetService as SupportedService])(targetUser, hcpVaultService);
         let response = await synchronizeMusicSources(sourceClient, targetClient);
 
-        res.json({ message: `Synchronization ${response ? "Succeeded" : "Failed"}` });
+        res.json(response);
     } catch (err) {
-        if (err instanceof InvalidRequest) {
-            res.status(400).json({
-                message: `The request is missing required input parameters: ${err.message}`
-            })
-        }
-        res.status(500).json({
-            error: "Failed to synchronize playlists.",
-            details: err instanceof Error ? err.message : String(err)
-        });
+        handleError(err, res);
     }
 }
 
@@ -74,14 +68,9 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
 
         // const sourceClient = await serviceTypeToClientMap[sourceService as SupportedService](sourceUser, hcpVaultService);
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
-        let response;
+        let response: Song[];
         if (req.body.proposedChangesId) {
             const proposedChanges: ProposedChanges = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.body.proposedChangesId as string, req)
-            if (!proposedChanges) {
-                res.status(404).json({
-                    error: "Could not find differences in memory with provided request id and matching request parameters."
-                });
-            }
             const songsToAdd: Song[] = [
                 ...proposedChanges.confidentProposedChanges.map(song => song.targetSong),
                 ...proposedChanges.uncertainProposedChanges.map(song => song.targetSong),
@@ -95,7 +84,7 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
         // }
 
         if (!response) {
-            throw new PlaylistSynchronizationError();
+            throw new PlaylistSynchronizationError("The changesRequestId must be provided.");
         }
         res.status(200).json(response);
     } catch (err) {
@@ -120,9 +109,6 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
         if (req.headers[PROPOSED_CHANGES_HEADER]) {
             const requestId = req.headers[PROPOSED_CHANGES_HEADER] as string;
             response = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
-            if (!response) {
-                throw new MemoryObjectRetrievalError();
-            }
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
         } else {
             response = await getProposedUpdates(playlist, sourceClient, targetClient);

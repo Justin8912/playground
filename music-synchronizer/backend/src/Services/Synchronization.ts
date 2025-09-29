@@ -3,22 +3,38 @@ import {SpotifyService} from "./SpotifyService.js";
 import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
 import {findDifferences} from "../Util/findDifferences.js";
 import {doSongsMatch} from "../Util/titleMatcher.js";
-import {ProposedChanges} from "../Model/Controller.js";
+import {ProposedChanges, SongMapping, SynchronizeMusicSources} from "../Model/Controller.js";
 import logger from "../Util/logger.js";
+import {PlaylistNotFoundError} from "../Errors/PlaylistNotFoundError.js";
+
+
 
 export const synchronizeMusicSources = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService
-): Promise<boolean> => {
+): Promise<SynchronizeMusicSources> => {
+    let response: SynchronizeMusicSources =  {};
     const sourcePlaylists: GetPlaylistsResponse[] = await sourceClient.getPlaylists();
 
     for (const sourcePlaylist of sourcePlaylists) {
-        const targetPlaylist = await targetClient.getPlaylistByName(sourcePlaylist.title)
-        if (targetPlaylist) {
-            await targetClient.addSongsToPlaylist(sourcePlaylist.title, sourcePlaylist.songs);
+        const proposedUpdates: ProposedChanges = await getProposedUpdates(sourcePlaylist.title, sourceClient, targetClient);
+
+        // @ts-ignore
+        response[sourcePlaylist.title] = {}
+        if (proposedUpdates) {
+            const failedSongAdds = await targetClient.addUserApprovedSongsToPlaylist(
+                sourcePlaylist.title,
+                proposedUpdates.confidentProposedChanges.map(mapping => mapping.targetSong)
+            );
+
+            // @ts-ignore
+            response[sourcePlaylist.title] = {
+                failedSongs: failedSongAdds,
+                unconfidentSongs: proposedUpdates.uncertainProposedChanges
+            }
         }
     }
-    return true;
+    return response;
 }
 
 export const getPlaylistDifferences = async (
@@ -30,8 +46,7 @@ export const getPlaylistDifferences = async (
     const targetPlaylist: GetPlaylistsResponse | null = await targetClient.getPlaylistByName(playlistName);
 
     if (!sourcePlaylist || !targetPlaylist) {
-        logger.error(`${!sourcePlaylist ? "Source playlist not found": "Source playlist found"}\n${!targetPlaylist ? "target playlist not found": "target playlist found"}`);
-        return null;
+        throw new PlaylistNotFoundError(`${playlistName}: ${!sourcePlaylist ? "Source playlist not found": ""}\n${!targetPlaylist ? "target playlist not found": ""}`)
     }
 
     const differentSongs = findDifferences(
@@ -42,25 +57,12 @@ export const getPlaylistDifferences = async (
     return differentSongs;
 }
 
-export const synchronizePlaylist = async (
-    playlistName: string,
-    sourceClient: YoutubeMusicClientService | SpotifyService,
-    targetClient: YoutubeMusicClientService | SpotifyService
-): Promise<Song[] | null> => {
-    let differentSongs = await getPlaylistDifferences(playlistName, sourceClient, targetClient);
-    if (differentSongs) {
-        return await targetClient.addSongsToPlaylist(playlistName, differentSongs);
-    } else {
-        return null;
-    }
-}
-
 export const synchronizePlaylistWithDifferencesProvided = async (
     playlistName: string,
     targetClient: YoutubeMusicClientService | SpotifyService,
-    differences: Song[]
+    songsToAdd: Song[]
 ): Promise<Song[] | null> => {
-    return await targetClient.addUserApprovedSongsToPlaylist(playlistName, differences);
+    return await targetClient.addUserApprovedSongsToPlaylist(playlistName, songsToAdd);
 }
 
 export const getProposedUpdates = async (
@@ -68,7 +70,7 @@ export const getProposedUpdates = async (
     sourceClient: YoutubeMusicClientService | SpotifyService,
     targetClient: YoutubeMusicClientService | SpotifyService,
     differences?: Song[]
-): Promise<ProposedChanges | null> => {
+): Promise<ProposedChanges> => {
     if (!differences) {
         differences = await getPlaylistDifferences(playlistName, sourceClient, targetClient) as Song[];
     }

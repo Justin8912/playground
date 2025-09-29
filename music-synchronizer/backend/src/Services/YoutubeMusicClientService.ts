@@ -238,6 +238,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
         }
     }
 
+    // TODO Refactor these two methods, this has business logic in it and should be separated
     public async addSongsToPlaylist(playlistName: string, songs: Song[]): Promise<Song[]> {
         const failedSongAdds: Song[] = [];
         const responses = [];

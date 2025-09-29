@@ -1,4 +1,5 @@
 import {Request} from "express";
+import {MemoryObjectRetrievalError} from "../Errors/MemoryObjectRetrievalError.js";
 
 export class Memory {
     private memory: { [key: string]: { [requestId: string]: any } } = {};
@@ -18,15 +19,13 @@ export class Memory {
 
     getObjectFromMemory = (key: string, requestId: string, req: Request): any => {
         if (key.trim() === "" || requestId.trim() === "") {
-            console.error("Cannot retrieve object from memory without key and requestId");
-            return null;
+            throw new MemoryObjectRetrievalError("Cannot retrieve object from memory without key and requestId")
         }
 
         const memoryObject = this.memory[key][requestId];
 
         if (!memoryObject) {
-            console.log("Could not find object in memory with provided key and requestId");
-            return null;
+            throw new MemoryObjectRetrievalError("Could not find object in memory with provided key and requestId");
         }
 
         const memoryObjectRequestDetails = memoryObject.requestDetails || {};
@@ -38,11 +37,14 @@ export class Memory {
 
         for (const key of Object.keys(memoryObjectRequestDetails)) {
             if (requestInputParameters[key]?.toLowerCase() !== memoryObjectRequestDetails[key].toLowerCase()) {
-                console.error(`requestInputParameter ${key} with value ${requestInputParameters[key]} does not match the stored requestDetails value of ${memoryObjectRequestDetails[key]}`);
-                return null;
+                throw new MemoryObjectRetrievalError(`requestInputParameter ${key} with value ${requestInputParameters[key]} does not match the stored requestDetails value of ${memoryObjectRequestDetails[key]}`);
             }
         }
 
         return memoryObject;
+    }
+
+    public injectMemoryObject(key: string, requestId: string, memoryObject: any) {{}
+        this.memory[key][requestId] = memoryObject;
     }
 }

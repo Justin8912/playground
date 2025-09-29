@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Music Synchronizer API
+  version: 1.0.0
+  description: |
+    API for synchronizing music playlists and discographies between services.
+
+    ## Usage:
+    1. The playlist you wish to synchronize must already exist in both services. It is okay if it is empty in one of the services.
+    2. For YouTube updates, playlists must have the word 'music' in the description to be marked for potential synchronization.
+
+    ### The `proposedChangesId` Value
+    The proposedChangesId is the way that we can track what songs should be added from the sourcePlaylist to the targetPlaylist. It is generated using the route:
+
+    `GET /updates/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}`
+
+    This value can be used with requests to limit the number of requests to the youtube or spotify api. For now, it MUST also be used in the body of the `POST /synchronize/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}` request.
+servers:
+  - url: http://localhost:{port}
+    variables:
+      port:
+        default: '60000'
+paths:
+  /synchronize/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}:
+    post:
+      summary: Synchronize a specific playlist from source to target
+      parameters:
+        - $ref: '#/components/parameters/sourceUser'
+        - $ref: '#/components/parameters/targetUser'
+        - $ref: '#/components/parameters/sourceService'
+        - $ref: '#/components/parameters/targetService'
+        - $ref: '#/components/parameters/playlist'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proposedChangesId:
+                  type: string
+      responses:
+        '200':
+          description: A list of songs that failed to be added to the target playlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+        '404':
+          description: Proposed changes not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /updates/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}:
+    get:
+      summary: Get proposed updates for a specific playlist
+      parameters:
+        - $ref: '#/components/parameters/sourceUser'
+        - $ref: '#/components/parameters/targetUser'
+        - $ref: '#/components/parameters/sourceService'
+        - $ref: '#/components/parameters/targetService'
+        - $ref: '#/components/parameters/playlist'
+        - $ref: '#/components/parameters/proposedChangesIdHeader'
+      responses:
+        '200':
+          description: Proposed changes for playlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposedChanges'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    post:
+      summary: Update or remove a proposed change in memory for a specific playlist
+      parameters:
+        - $ref: '#/components/parameters/sourceUser'
+        - $ref: '#/components/parameters/targetUser'
+        - $ref: '#/components/parameters/sourceService'
+        - $ref: '#/components/parameters/targetService'
+        - $ref: '#/components/parameters/playlist'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - proposedChangesId
+                - sourceSongId
+                - targetSongId
+                - operation
+              properties:
+                proposedChangesId:
+                  type: string
+                  description: The ID of the proposed changes memory object to update.
+                sourceSongId:
+                  type: string
+                  description: The ID of the source song.
+                targetSongId:
+                  type: string
+                  description: The ID of the target song.
+                operation:
+                  type: string
+                  enum: [update, remove]
+                  description: The operation to perform ("update" or "remove").
+      responses:
+        '200':
+          description: Updated ProposedChanges object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposedChanges'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+components:
+  parameters:
+    sourceUser:
+      name: sourceUser
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Username for the source user. This is generated by the API and stored in the HCPVault. It may not correlate to your service's username.
+    targetUser:
+      name: targetUser
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Username for the target user. This is generated by the API and stored in the HCPVault. It may not correlate to your service's username.
+    sourceService:
+      name: sourceService
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The source music service (e.g., 'spotify', 'youtube').
+    targetService:
+      name: targetService
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The target music service (e.g., 'spotify', 'youtube').
+    playlist:
+      name: playlist
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The name of the playlist to synchronize or update.
+    proposedChangesIdHeader:
+      name: proposed-changes-id
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Optional header for tracking the ID of proposed changes. Used for playlist synchronization and update endpoints.
+  schemas:
+    Song:
+      type: object
+      required:
+        - title
+        - artists
+      properties:
+        title:
+          type: string
+        artists:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        videoId:
+          type: string
+    SongMapping:
+      type: object
+      required:
+        - sourceSong
+        - targetSong
+      properties:
+        sourceSong:
+          $ref: '#/components/schemas/Song'
+        targetSong:
+          $ref: '#/components/schemas/Song'
+    ProposedChanges:
+      type: object
+      required:
+        - confidentProposedChanges
+        - uncertainProposedChanges
+      properties:
+        confidentProposedChanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/SongMapping'
+        uncertainProposedChanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/SongMapping'

@@ -5,6 +5,7 @@ import {
     synchronizePlaylistController, getProposedUpdatesController, updateProposedUpdatesController
 } from "./Controller/SynchronizationController.js";
 import {PROPOSED_CHANGES_HEADER} from "./Controller/controllerHelpers.js";
+import {dummy} from "./Controller/dummy.js";
 
 export const app = express();
 const PORT = process.env.PORT;
@@ -25,9 +26,7 @@ app.listen(PORT, () => {
 });
 
 app.get("/", async (req: Request, res: Response) => {
-  res.json({
-      response: "Server is up and running."
-  })
+  await dummy(req, res);
 })
 
 app.get(
