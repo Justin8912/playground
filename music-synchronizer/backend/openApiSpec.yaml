@@ -21,6 +21,43 @@ servers:
       port:
         default: '60000'
 paths:
+  /authorize/{username}/{service}:
+    get:
+      summary: Authorize a new user for a specific music service
+      description: Initiates the authorization flow for a user to connect their account to either Spotify or YouTube Music service
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The username to associate with the authorization. This will be stored in HCPVault.
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [spotify, youtube]
+          description: The music service to authorize ('spotify' or 'youtube').
+      responses:
+        '200':
+          description: Authorization URL for the specified service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorizationUrl:
+                    type: string
+                    format: uri
+                    description: The URL to redirect the user to for authorization
+                  state:
+                    type: string
+                    description: State parameter for OAuth flow security
+        '400':
+          description: Invalid service specified
+        '500':
+          description: Internal server error
   /synchronize/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}:
     post:
       summary: Synchronize a specific playlist from source to target

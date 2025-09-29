@@ -15,9 +15,6 @@ export const serviceTypeToClientMap = {
     "youtube": getYoutubeMusicService
 }
 
-export const PROPOSED_CHANGES_HEADER = "proposed-changes-id";
-export const PROPOSED_CHANGES_MEMORY_KEY = "PROPOSED_CHANGES";
-
 export const extractParamsFromReq = (requiredParams: string[], req: any, shouldConvertToLowerCase: boolean = true): any => {
     const res = {}
     for (const param of requiredParams) {

@@ -4,36 +4,22 @@ import {
     synchronizeMusicSources,
     synchronizePlaylistWithDifferencesProvided
 } from "../Services/Synchronization.js";
-import {AppConfig} from "../Config/AppConfig.js";
 import {ProposedChanges} from "../Model/Controller.js";
 import {Song} from "../Model/MusicService.js";
 import {
     extractParamsFromReq,
     isSupportedService,
-    PROPOSED_CHANGES_HEADER,
-    PROPOSED_CHANGES_MEMORY_KEY,
     proposedChangesMemoryObjectUpdate,
     removeProposedChangeBySongIds,
     serviceTypeToClientMap,
     SupportedService,
 } from "./controllerHelpers.js";
-import dotenv from "dotenv";
 import {InvalidRequest} from "../Errors/InvalidRequest.js";
 import {handleError} from "../Errors/ErrorHandler.js";
-import {Memory} from "../Util/Memory.js";
 import {MemoryObjectUpdateError} from "../Errors/MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "../Errors/PlaylistSynchronizationError.js";
-import {MemoryObjectRetrievalError} from "../Errors/MemoryObjectRetrievalError.js";
-import {dummyMemoryObject} from "./dummy.js";
-dotenv.config();
-
-const appConfig: AppConfig = new AppConfig();
-const hcpVaultService = appConfig.getHcpVaultService();
-
-let memory = new Memory(PROPOSED_CHANGES_MEMORY_KEY)
-
-// TODO: Remove me:
-memory.injectMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, "test", JSON.parse(dummyMemoryObject))
+import {hcpVaultService, memory} from "../handler.js";
+import {PROPOSED_CHANGES_HEADER, PROPOSED_CHANGES_MEMORY_KEY} from "../Util/Memory.js";
 
 export const synchronizeDiscographyController = async (req: Request, res: Response) => {
     try {
@@ -70,7 +56,7 @@ export const synchronizePlaylistController = async (req: Request, res: Response)
         const targetClient = await serviceTypeToClientMap[targetService as SupportedService](targetUser, hcpVaultService);
         let response: Song[];
         if (req.body.proposedChangesId) {
-            const proposedChanges: ProposedChanges = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.body.proposedChangesId as string, req)
+            const proposedChanges: ProposedChanges = memory.safeGetObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, req.body.proposedChangesId as string, req)
             const songsToAdd: Song[] = [
                 ...proposedChanges.confidentProposedChanges.map(song => song.targetSong),
                 ...proposedChanges.uncertainProposedChanges.map(song => song.targetSong),
@@ -108,11 +94,11 @@ export const getProposedUpdatesController = async (req: Request, res: Response) 
         let response;
         if (req.headers[PROPOSED_CHANGES_HEADER]) {
             const requestId = req.headers[PROPOSED_CHANGES_HEADER] as string;
-            response = memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
+            response = memory.safeGetObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, requestId, req)
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
         } else {
             response = await getProposedUpdates(playlist, sourceClient, targetClient);
-            const requestId = memory.createMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, req.params, response);
+            const requestId = memory.createMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, crypto.randomUUID(), req.params, response);
             res.setHeader(PROPOSED_CHANGES_HEADER, requestId);
         }
 
@@ -145,7 +131,7 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
         if (operation === "update") {
             didUpdatePass = await proposedChangesMemoryObjectUpdate(
                 await (serviceTypeToClientMap[targetService as SupportedService])(targetUser, hcpVaultService),
-                memory.getObjectFromMemory(
+                memory.safeGetObjectFromMemory(
                     PROPOSED_CHANGES_MEMORY_KEY,
                     proposedChangesId,
                     req
@@ -155,7 +141,7 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
             );
         } else if (operation === "remove") {
             didUpdatePass = removeProposedChangeBySongIds(
-                memory.getObjectFromMemory(
+                memory.safeGetObjectFromMemory(
                     PROPOSED_CHANGES_MEMORY_KEY,
                     proposedChangesId,
                     req
@@ -169,7 +155,7 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
             throw new MemoryObjectUpdateError();
         } else {
             res.status(200).json(
-                memory.getObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, proposedChangesId, req)
+                memory.safeGetObjectFromMemory(PROPOSED_CHANGES_MEMORY_KEY, proposedChangesId, req)
             );
         }
     } catch (err) {

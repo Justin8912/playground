@@ -4,11 +4,23 @@ import {
     synchronizeDiscographyController,
     synchronizePlaylistController, getProposedUpdatesController, updateProposedUpdatesController
 } from "./Controller/SynchronizationController.js";
-import {PROPOSED_CHANGES_HEADER} from "./Controller/controllerHelpers.js";
-import {dummy} from "./Controller/dummy.js";
+import {dummy, dummyMemoryObject} from "./Controller/dummy.js";
+import {getAuthorizationUriController, handleRedirectController} from "./Controller/authorization.js";
+import {AppConfig} from "./Config/AppConfig.js";
+import {Memory, PROPOSED_CHANGES_HEADER, PROPOSED_CHANGES_MEMORY_KEY} from "./Util/Memory.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-export const app = express();
 const PORT = process.env.PORT;
+export const app = express();
+export const appConfig: AppConfig = new AppConfig();
+await appConfig.initialize();
+
+export const hcpVaultService = appConfig.getHcpVaultService();
+export const memory = new Memory()
+
+// TODO: Remove me:
+memory.injectMemoryObject(PROPOSED_CHANGES_MEMORY_KEY, "test", JSON.parse(dummyMemoryObject))
 
 app.use(cors({
     origin: "*",
@@ -24,10 +36,6 @@ app.listen(PORT, () => {
   }
   console.log(`Server listening on port ${PORT}`);
 });
-
-app.get("/", async (req: Request, res: Response) => {
-  await dummy(req, res);
-})
 
 app.get(
     "/synchronize/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService", async (req: Request, res: Response) => {
@@ -51,4 +59,12 @@ app.get(
 
 app.post("/updates/sourceUser/:sourceUser/targetUser/:targetUser/sourceService/:sourceService/targetService/:targetService/playlist/:playlist", async (req: Request, res: Response) => {
     await updateProposedUpdatesController(req, res);
+})
+
+app.get("/authorize/user/:user/service/:service", async (req, res) => {
+    await getAuthorizationUriController(req, res);
+})
+
+app.get("/authorize/service/:service/redirect", async (req, res) => {
+    await handleRedirectController(req, res);
 })
