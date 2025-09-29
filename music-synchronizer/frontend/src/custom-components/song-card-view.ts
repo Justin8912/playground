@@ -179,7 +179,7 @@ export class SongCardView extends LitElement {
   private handleSave = () => {
     if (this.editValue.trim()) {
       this.dispatchEvent(new CustomEvent('replace-song', {
-        detail: { newSongId: this.editValue.trim() },
+        detail: { targetSongId: this.editValue.trim() },
         bubbles: true,
         composed: true
       }));
