@@ -1,10 +1,5 @@
 import {PROPOSED_CHANGES_ID_HEADER, synchronizationApiEndpoint} from "../util/constants";
-import {
-    ProposedChanges,
-    ProposedChangesRequestDetails,
-    Song,
-    type SynchronizationProposal
-} from "../model/ControllerTypes";
+import { type SynchronizationProposal } from "../model/ControllerTypes";
 
 export const getSynchronizationProposal = async (
     sourceService: string,
@@ -19,6 +14,7 @@ export const getSynchronizationProposal = async (
         // @ts-ignore
         headers[PROPOSED_CHANGES_ID_HEADER] = changeRequestId;
     }
+    console.log("Sending headers: ", headers);
     const response: Response = await fetch(`${synchronizationApiEndpoint}/updates/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`, {
         method: "GET",
         headers: headers
@@ -28,7 +24,7 @@ export const getSynchronizationProposal = async (
     let data = await response.json();
 
     if (response.status !== 200) {
-        throw new Error("Failed to fetch proposed changes from server: " + JSON.stringify(data));
+        throw new Error("Failed to fetch proposed changes from server: " + data);
     }
 
     return {
@@ -47,7 +43,7 @@ export const updateSynchronizationProposal = async (
     operation: string,
     sourceSongId: string,
     targetSongId: string
-): Promise<ProposedChanges<ProposedChangesRequestDetails>> => {
+): Promise<void> => {
     const response: Response = await fetch(
         `${synchronizationApiEndpoint}/updates/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
         {
@@ -63,7 +59,8 @@ export const updateSynchronizationProposal = async (
             })
         }
     );
-    return await response.json();
+
+    console.log(response);
 }
 
 export const synchronizePlaylist = async (
@@ -73,7 +70,7 @@ export const synchronizePlaylist = async (
     targetUser: string,
     playlistName: string,
     proposedChangesId: string
-): Promise<Song[]> => {
+): Promise<void> => {
     const response: Response = await fetch(
         `${synchronizationApiEndpoint}/synchronize/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
         {
@@ -87,5 +84,5 @@ export const synchronizePlaylist = async (
         }
     );
 
-    return await response.json();
+    console.log(response);
 }

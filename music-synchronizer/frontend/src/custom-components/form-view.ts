@@ -57,21 +57,35 @@ export class FormView extends LitElement {
     @state()
     playlistName: string = "";
 
-    private handleInputChange(e: Event) {
-        const target = e.target as HTMLInputElement | HTMLSelectElement;
-        const { name, value } = target;
-        // @ts-ignore
-        this[name] = value;
+    private handleSourceServiceChange(e: Event) {
+        const value = (e.target as HTMLSelectElement).value as "Spotify" | "Youtube";
+        this.sourceService = value;
     }
 
-    private renderServiceDropdown(label: string, value: "Spotify" | "Youtube", name: string) {
+    private handleTargetServiceChange(e: Event) {
+        const value = (e.target as HTMLSelectElement).value as "Spotify" | "Youtube";
+        this.targetService = value;
+    }
+
+    private handleSourceUserInput(e: Event) {
+        this.sourceUser = (e.target as HTMLInputElement).value;
+    }
+
+    private handleTargetUserInput(e: Event) {
+        this.targetUser = (e.target as HTMLInputElement).value;
+    }
+
+    private handlePlaylistNameInput(e: Event) {
+        this.playlistName = (e.target as HTMLInputElement).value;
+    }
+
+    private renderServiceDropdown(label: string, value: "Spotify" | "Youtube", onChange: (e: Event) => void) {
         return html`
           <div class="input-row">
             <label>${label}</label>
             <select
               .value=${value}
-              name=${name}
-              @change=${this.handleInputChange}
+              @change=${onChange}
             >
               <option value="Spotify">Spotify</option>
               <option value="Youtube">Youtube</option>
@@ -80,15 +94,14 @@ export class FormView extends LitElement {
         `;
     }
 
-    private renderUserInput(label: string, value: string, name: string) {
+    private renderUserInput(label: string, value: string, onInput: (e: Event) => void) {
         return html`
           <div class="input-row">
             <label>${label}</label>
             <input
               type="text"
               .value=${value}
-              name=${name}
-              @input=${this.handleInputChange}
+              @input=${onInput}
             />
           </div>
         `;
@@ -96,12 +109,12 @@ export class FormView extends LitElement {
 
     override render() {
         return html`
-      <div class="input-section">
-        ${this.renderServiceDropdown("Source Service:", this.sourceService, "sourceService")}
-        ${this.renderServiceDropdown("Target Service:", this.targetService, "targetService")}
-        ${this.renderUserInput("Source User:", this.sourceUser, "sourceUser")}
-        ${this.renderUserInput("Target User:", this.targetUser, "targetUser")}
-        ${this.renderUserInput("Playlist Name:", this.playlistName, "playlistName")}
+      <div class="input-sestatection">
+        ${this.renderServiceDropdown("Source Service:", this.sourceService, this.handleSourceServiceChange)}
+        ${this.renderServiceDropdown("Target Service:", this.targetService, this.handleTargetServiceChange)}
+        ${this.renderUserInput("Source User:", this.sourceUser, this.handleSourceUserInput)}
+        ${this.renderUserInput("Target User:", this.targetUser, this.handleTargetUserInput)}
+        ${this.renderUserInput("Playlist Name:", this.playlistName, this.handlePlaylistNameInput)}
         <button class="submit-btn" @click=${this.handleSubmit}>Submit</button>
       </div>
     `;

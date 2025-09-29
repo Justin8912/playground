@@ -1,10 +1,7 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import {ProposedChanges, ProposedChangesRequestDetails, Song} from "../model/ControllerTypes";
+import {Song} from "../model/ControllerTypes";
 import './song-card-view';
-import {updateSynchronizationProposal} from "../controller/controller";
-import { consume } from '@lit/context';
-import {requestDetails, proposedChangesId} from "../util/context";
 
 @customElement('song-row-view')
 export class SongRowView extends LitElement {
@@ -50,66 +47,26 @@ export class SongRowView extends LitElement {
     @property({type: String})
     targetService!: string;
 
-    @consume({context: requestDetails})
-    details?: ProposedChangesRequestDetails
-
-    @consume({context: proposedChangesId})
-    proposedChangesId?: string
-
-    private dispatchProposalUpdate(proposedChanges: ProposedChanges<ProposedChangesRequestDetails>) {
-        this.dispatchEvent(new CustomEvent('update-proposal', {
-            detail: {proposedChanges},
+    private handleRemoveMapping() {
+        this.dispatchEvent(new CustomEvent('remove-song-mapping', {
+            detail: {
+                sourceSongId: this.synchronizationProposalRow.sourceSong.videoId,
+                targetSongId: this.synchronizationProposalRow.targetSong.videoId
+            },
             bubbles: true,
             composed: true
         }));
     }
 
-    async handleSongUpdate(event: CustomEvent) {
-        const {targetSongId} = event.detail;
-        try {
-            if (this.details && this.proposedChangesId) {
-                console.log("Updating synchronization proposal...");
-                const proposalUpdate = await updateSynchronizationProposal(
-                    this.details.sourceService,
-                    this.details.targetService,
-                    this.details.sourceUser,
-                    this.details.targetUser,
-                    this.details.playlist,
-                    this.proposedChangesId,
-                    "update",
-                    this.synchronizationProposalRow.sourceSong.videoId,
-                    targetSongId
-                )
-
-                this.dispatchProposalUpdate(proposalUpdate);
-            } else {
-                console.error("Details and/or proposedChangesId is undefined.");
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    async handleRemoveMapping(){
-        try {
-            if (this.details && this.proposedChangesId) {
-                const proposedChanges = await updateSynchronizationProposal(
-                    this.details.sourceService,
-                    this.details.targetService,
-                    this.details.sourceUser,
-                    this.details.targetUser,
-                    this.details.playlist,
-                    this.proposedChangesId,
-                    "remove",
-                    this.synchronizationProposalRow.sourceSong.videoId,
-                    this.synchronizationProposalRow.targetSong.videoId,
-                )
-
-                this.dispatchProposalUpdate(proposedChanges)
-            }
-        } catch (err) {
-            console.log(err);
-        }
+    private handleSongUpdate(event: CustomEvent) {
+        this.dispatchEvent(new CustomEvent('update-song-mapping', {
+            detail: {
+                sourceSongId: this.synchronizationProposalRow.sourceSong.videoId,
+                targetSongId: event.detail.newSongId
+            },
+            bubbles: true,
+            composed: true
+        }));
     }
 
     renderSongComparisonView() {
@@ -137,6 +94,7 @@ export class SongRowView extends LitElement {
     }
 
     override render() {
+        console.log(this.synchronizationProposalRow)
         return this.renderSongComparisonView();
     }
 }
