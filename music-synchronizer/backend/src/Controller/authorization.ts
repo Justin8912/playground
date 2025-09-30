@@ -16,7 +16,10 @@ export const getAuthorizationUriController = async (req: Request, res: Response)
     const { user, service } = extractParamsFromReq(["user", "service"], req.params);
 
     if (service === "youtube") {
-        const { authorizationUrl, state } = getGoogleAuthorizationUri(appConfig.getGoogleOauth2Client());
+        const { authorizationUrl, state } = getGoogleAuthorizationUri(
+            appConfig.getEnvironmentConfig().getGoogleScopes(),
+            appConfig.getGoogleOauth2Client()
+        );
 
         memory.createMemoryObject(AUTH_STATE_MEMORY_KEY, state, req.params, {user});
         res.json({authorizationUrl});
@@ -43,10 +46,12 @@ export const handleRedirectController = async (req: Request, res: Response) => {
 
         // This is the check of the state. If the user tries to use a different state, then this method will throw an error.
         const memoryObject = memory.getObjectFromMemory(AUTH_STATE_MEMORY_KEY, state);
+        const {user} = memoryObject;
+        memory.deleteMemoryObject(AUTH_STATE_MEMORY_KEY, state);
 
         if (service === "youtube") {
             await handleGoogleAuthorizationRedirect(
-                memoryObject.user,
+                user,
                 appConfig.getGoogleOauth2Client(),
                 code,
                 appConfig.getHcpVaultService().setParameter
@@ -55,7 +60,7 @@ export const handleRedirectController = async (req: Request, res: Response) => {
             const { client_id, client_secret, redirect_uri } = await appConfig.getSpotifyServerCredentials();
 
             await handleSpotifyAuthorizationRedirect(
-                memoryObject.user,
+                user,
                 code,
                 client_id,
                 client_secret,

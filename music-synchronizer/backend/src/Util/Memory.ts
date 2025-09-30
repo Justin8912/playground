@@ -25,6 +25,11 @@ export class Memory {
         return key;
     }
 
+    deleteMemoryObject = (classificationKey: string, key: string): void => {
+        delete this.memory[classificationKey][key];
+    }
+
+    // TODO: Refactor this, dont like that there is request validation logic in here.
     safeGetObjectFromMemory = (classificationKey: string, requestId: string, req: Request): any => {
         if (classificationKey.trim() === "" || requestId.trim() === "") {
             throw new MemoryObjectRetrievalError("Cannot retrieve object from memory without key and requestId")

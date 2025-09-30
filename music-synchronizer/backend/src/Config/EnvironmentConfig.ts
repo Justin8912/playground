@@ -13,6 +13,14 @@ export class EnvironmentConfig {
         return this.getEnvironmentVariable("VAULT_TOKEN");
     }
 
+    public getGoogleScopes = (): string[] => {
+        return [
+            "https://www.googleapis.com/auth/youtube.readonly",
+            "https://www.googleapis.com/auth/youtube.upload",
+            "https://www.googleapis.com/auth/youtube.force-ssl"
+        ]
+    }
+
     public getSpotifyScopes = (): string[] => {
         // For scopes look here: https://developer.spotify.com/documentation/web-api/concepts/scopes
         return [

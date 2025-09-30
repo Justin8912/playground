@@ -1,14 +1,10 @@
 import crypto from "crypto";
 
-export const getGoogleAuthorizationUri = (googleOAuthClient: any) => {
+export const getGoogleAuthorizationUri = (scopes: string[], googleOAuthClient: any) => {
     const state = crypto.randomBytes(32).toString('hex');
     const authorizationUrl = googleOAuthClient.generateAuthUrl({
         access_type: "offline",
-        scope: [
-            "https://www.googleapis.com/auth/youtube.readonly",
-            "https://www.googleapis.com/auth/youtube.upload",
-            "https://www.googleapis.com/auth/youtube.force-ssl"
-        ],
+        scope: scopes,
         include_granted_scopes: true,
         state
     });
