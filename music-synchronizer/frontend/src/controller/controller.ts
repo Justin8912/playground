@@ -28,7 +28,7 @@ export const getSynchronizationProposal = async (
     let data = await response.json();
 
     if (response.status !== 200) {
-        throw new Error("Failed to fetch proposed changes from server: " + JSON.stringify(data));
+        throw new Error("Failed to fetch proposed changes from server: " + data.message);
     }
 
     return {

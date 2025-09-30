@@ -11,7 +11,7 @@
     "build:watch": "tsc --watch",
     "build:css": "postcss build/styles/shared-styles.js -o build/styles/shared-styles.js",
     "build:css:watch": "postcss build/styles/shared-styles.js -o build/styles/shared-styles.js --watch",
-    "build:all": "npm run build && npm run build:css",
+    "build:all": "rm -rf build/ && npm run build && npm run build:css",
     "clean": "rimraf my-element.{d.ts,d.ts.map,js,js.map} test/my-element.{d.ts,d.ts.map,js,js.map} test/my-element_test.{d.ts,d.ts.map,js,js.map}",
     "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
     "lint:eslint": "eslint 'src/**/*.ts'",

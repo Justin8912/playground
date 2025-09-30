@@ -1,46 +1,16 @@
-import {LitElement, html, css} from 'lit';
+import {LitElement, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {ProposedChanges, ProposedChangesRequestDetails, Song} from "../model/ControllerTypes";
 import './song-card-view';
 import {updateSynchronizationProposal} from "../controller/controller";
 import { consume } from '@lit/context';
 import {requestDetails, proposedChangesId} from "../util/context";
+import { tailwindStyles } from '../styles/shared-styles';
 
 @customElement('song-row-view')
 export class SongRowView extends LitElement {
-    static override styles = css`
-      .comparison-row {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        margin: 1rem 0;
-        position: relative;
-      }
-      .arrow {
-        font-size: 2rem;
-        color: #1976d2;
-        font-weight: bold;
-      }
-      .trash-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-      }
-      .trash-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-        fill: #d32f2f;
-        transition: fill 0.2s;
-      }
-      .trash-btn:hover .trash-icon {
-        fill: #b71c1c;
-      }
-    `;
-
+    static override styles = [tailwindStyles];
+    
     @property({type: Object})
     synchronizationProposalRow!: { sourceSong: Song; targetSong: Song };
 
@@ -114,24 +84,30 @@ export class SongRowView extends LitElement {
 
     renderSongComparisonView() {
         return html`
-            <div class="comparison-row">
-                <song-card-view 
-                    .song=${this.synchronizationProposalRow.sourceSong} 
-                    .source=${this.sourceService}
-                    .isTargetCard=${false}
-                ></song-card-view>
-                <span class="arrow">→</span>
-                <song-card-view 
-                    .song=${this.synchronizationProposalRow.targetSong} 
-                    .source=${this.targetService}
-                    .isTargetCard=${true}
-                    @replace-song=${this.handleSongUpdate}
-                ></song-card-view>
-                <button class="trash-btn" @click=${this.handleRemoveMapping} title="Remove mapping">
-                  <svg class="trash-icon" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5c-.1.8-.8 1.5-1.6 1.5H8.1c-.8 0-1.5-.7-1.6-1.5L5 9zm5 2v8h2v-8h-2zm-4 0v8h2v-8H6zm8 0v8h2v-8h-2z"/>
-                  </svg>
-                </button>
+            <div class="flex flex-row items-center w-full my-4">
+                <div class="flex-1 flex items-center justify-center">
+                    <song-card-view 
+                        .song=${this.synchronizationProposalRow.sourceSong} 
+                        .source=${this.sourceService}
+                        .isTargetCard=${false}
+                    ></song-card-view>
+                </div>
+                <div class="w-16 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-blue-700">→</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center">
+                    <song-card-view 
+                        .song=${this.synchronizationProposalRow.targetSong} 
+                        .source=${this.targetService}
+                        .isTargetCard=${true}
+                        @replace-song=${this.handleSongUpdate}
+                    ></song-card-view>
+                    <button class="ml-2 bg-transparent border-none cursor-pointer flex items-center" @click=${this.handleRemoveMapping} title="Remove mapping">
+                      <svg class="w-6 h-6 fill-red-600 transition-colors hover:fill-red-800" viewBox="0 0 24 24">
+                        <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5c-.1.8-.8 1.5-1.6 1.5H8.1c-.8 0-1.5-.7-1.6-1.5L5 9zm5 2v8h2v-8h-2zm-4 0v8h2v-8H6zm8 0v8h2v-8h-2z"/>
+                      </svg>
+                    </button>
+                </div>
             </div>
         `
     }

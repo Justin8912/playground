@@ -1,88 +1,17 @@
-import {LitElement, html, css} from 'lit';
+// Utility to decode HTML entities
+function decodeHtmlEntities(str: string): string {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = str;
+  return txt.value;
+}
+import {LitElement, html} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {Song} from "../model/ControllerTypes";
+import { tailwindStyles } from '../styles/shared-styles';
 
 @customElement('song-card-view')
 export class SongCardView extends LitElement {
-  static override styles = css`
-    .card {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1rem;
-      background: #f9f9f9;
-      min-width: 180px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-      position: relative;
-    }
-    .title {
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    .artists {
-      color: #555;
-      font-size: 0.95rem;
-      margin-bottom: 0.5rem;
-    }
-    .description {
-      font-size: 0.9rem;
-      color: #888;
-    }
-    .video-id {
-      font-size: 0.85rem;
-      color: #aaa;
-      margin-top: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .edit-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 2px;
-      color: #666;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-    }
-    .edit-btn:hover {
-      opacity: 1;
-    }
-    .edit-input {
-      flex: 1;
-      padding: 4px 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      min-width: 0;
-    }
-    .edit-actions {
-      display: flex;
-      gap: 4px;
-    }
-    .save-btn, .cancel-btn {
-      padding: 2px 6px;
-      border: none;
-      border-radius: 3px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-    .save-btn {
-      background: #4CAF50;
-      color: white;
-    }
-    .cancel-btn {
-      background: #f44336;
-      color: white;
-    }
-    .save-btn:hover {
-      background: #45a049;
-    }
-    .cancel-btn:hover {
-      background: #da190b;
-    }
-  `;
-
+  static override styles = [tailwindStyles];
   @property({type: Object})
   song: Song = { title: '', artists: [], videoId: '', description: '' };
 
@@ -101,9 +30,22 @@ export class SongCardView extends LitElement {
   override render() {
     if (!this.song) return html`<div class="card">No song data</div>`;
     return html`
-      <div class="card">
-        <div class="title"><a href=${this.getSongLink(this.song)}>${this.song.title}</a></div>
-        <div class="artists">${this.song.artists?.join(', ')}</div>
+      <div class="card flex flex-col gap-2 p-4 rounded-lg shadow border bg-white dark:bg-gray-800 dark:border-gray-700 transition">
+        <div class="flex items-center mb-1">
+          <span class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <a
+              href=${this.getSongLink(this.song)}
+              target="_blank"
+              rel="noopener"
+              class="hover:text-blue-400 hover:underline transition-colors"
+            >${decodeHtmlEntities(this.song.title)}</a>
+          </span>
+        </div>
+        <div class="flex flex-wrap gap-1 mb-1">
+          ${this.song.artists?.map(artist => html`
+            <span class="px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs dark:bg-gray-700 dark:text-gray-200">${decodeHtmlEntities(artist)}</span>
+          `)}
+        </div>
         ${this.renderVideoId()}
       </div>
     `;
@@ -114,28 +56,29 @@ export class SongCardView extends LitElement {
 
     if (this.isTargetCard && this.isEditing) {
       return html`
-        <div class="video-id">
-          ID: 
+        <div class="flex items-center gap-2 mt-2 text-xs text-gray-400 dark:text-gray-500">
+          <span>ID:</span>
           <input 
-            class="edit-input" 
+            class="px-2 py-1 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             .value=${this.editValue}
             @input=${this.handleInputChange}
             @keydown=${this.handleKeyDown}
             placeholder="Enter new video ID"
+            style="width: 8rem;"
           />
-          <div class="edit-actions">
-            <button class="save-btn" @click=${this.handleSave}>✓</button>
-            <button class="cancel-btn" @click=${this.handleCancel}>✗</button>
+          <div class="flex gap-1">
+            <button class="px-2 py-1 rounded bg-green-500 text-white text-xs hover:bg-green-600" @click=${this.handleSave}>✓</button>
+            <button class="px-2 py-1 rounded bg-red-500 text-white text-xs hover:bg-red-600" @click=${this.handleCancel}>✗</button>
           </div>
         </div>
       `;
     }
 
     return html`
-      <div class="video-id">
-        ID: ${this.song.videoId}
+      <div class="flex items-center gap-2 mt-2 text-xs text-gray-400 dark:text-gray-500">
+        <span>ID: ${this.song.videoId}</span>
         ${this.isTargetCard ? html`
-          <button class="edit-btn" @click=${this.handleEditClick} title="Edit Song ID">
+          <button class="ml-2 px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition edit-btn" @click=${this.handleEditClick} title="Edit Song ID">
             ✎
           </button>
         ` : ''}
