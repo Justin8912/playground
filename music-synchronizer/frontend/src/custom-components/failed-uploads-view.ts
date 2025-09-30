@@ -21,7 +21,7 @@ export class FailedUploadsView extends LitElement {
   override render() {
     return html`
       <div class="p-6 rounded-lg shadow bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
-        <h2 class="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">Status Report</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Status Report</h2>
         ${this.failedSongs.length === 0
           ? html`<p class="text-green-600 dark:text-green-400 font-semibold">All songs were added successfully!</p>`
           : html`
@@ -48,4 +48,3 @@ declare global {
     'failed-uploads-view': FailedUploadsView;
   }
 }
-
