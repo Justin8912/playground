@@ -10,7 +10,6 @@ import {proposedChangesId, requestDetails} from "./util/context";
 import { provide } from '@lit/context';
 import { tailwindStyles } from './styles/shared-styles.js';
 import {res} from "./controller/dummy";
-import {renderButton} from "./custom-components/button";
 
 // Page type for explicit view switching
 export type Page = "form" | "comparison" | "results";
@@ -129,7 +128,6 @@ export class MusicSynchronizer extends LitElement {
           @form-submit=${this.handleFormSubmission}
           @form-error=${this.handleError}
         ></form-view>
-        ${renderButton("Test", this.test.bind(this))}
       </div>`
   }
 
