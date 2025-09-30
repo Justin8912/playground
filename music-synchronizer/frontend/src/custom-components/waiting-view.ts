@@ -1,53 +1,34 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
+import { tailwindStyles } from '../styles/shared-styles.js';
 
 @customElement('waiting-view')
 export class WaitingView extends LitElement {
-  static override styles = css`
-    :host {
-      display: block;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .waiting-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .message {
-      font-size: 1.1rem;
-      color: #555;
-      max-width: 300px;
-      line-height: 1.4;
-    }
-  `;
+  static override styles = [
+    tailwindStyles,
+    css`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+    `
+  ];
 
   @property({type: String})
-  message = 'Please wait while the api hits the youtube quota...';
+  message = 'Getting the list of proposed changes...';
 
   override render() {
     return html`
-      <div class="waiting-container">
-        <div class="spinner"></div>
-        <div class="message">
-          ${this.message}
+      <div class="block text-center p-8">
+        <div class="flex flex-col items-center gap-6">
+          <div class="spinner w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full"></div>
+          <div class="text-lg text-gray-600 dark:text-gray-400 max-w-sm leading-relaxed">
+            ${this.message}
+          </div>
         </div>
       </div>
     `;
