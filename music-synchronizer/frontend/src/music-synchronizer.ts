@@ -16,6 +16,9 @@ export type Page = "form" | "comparison" | "results";
 @customElement('music-synchronizer')
 export class MusicSynchronizer extends LitElement {
   static override styles = css`
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
     :host {
       display: block;
       border: solid 0.1rem gray;
@@ -43,58 +46,6 @@ export class MusicSynchronizer extends LitElement {
   currentPage: Page = "form";
   @state()
   failedSongs: Song[] = [];
-
-  renderFormView() {
-    return html`
-      <div>
-        <form-view @form-submit=${this.handleFormSubmission}></form-view>
-        <button @click=${this.test}>test</button>
-      </div>`
-  }
-
-  renderSongComparisonView(proposal: SynchronizationProposal = this.synchronizationProposal) {
-    return html`
-    <div>
-        <song-comparison-view 
-          .synchronizationProposal=${proposal}
-          @update-proposal=${this.handleProposalUpdate}
-        ></song-comparison-view>
-        <button @click=${this.synchronizePlaylist}>Submit changes</button>
-    </div>`
-  }
-
-  renderWaitingView() {
-    return html`
-      <waiting-view></waiting-view>
-    `
-  }
-
-  override render() {
-    let pageContent: unknown;
-    switch (this.currentPage) {
-      case "form":
-        pageContent = this.renderFormView();
-        break;
-      case "comparison":
-        pageContent = this.renderSongComparisonView(this.synchronizationProposal);
-        break;
-      case "results":
-        pageContent = html`
-          <failed-uploads-view
-            .failedSongs=${this.failedSongs}
-            @restart=${this.handleRestart}
-          ></failed-uploads-view>
-        `;
-        break;
-      default:
-        pageContent = html`<p>Unknown page</p>`;
-    }
-    return html`
-      ${this.isLoading ? this.renderWaitingView() : html``}
-      <p>${this.errorMessage}</p>
-      ${!this.isLoading ? pageContent : html``}
-    `;
-  }
 
   async handleFormSubmission(event: CustomEvent) {
     const payload = event.detail;
@@ -185,6 +136,59 @@ export class MusicSynchronizer extends LitElement {
     this.errorMessage = "";
     this.isLoading = false;
     this.currentPage = "form";
+  }
+
+  renderFormView() {
+    return html`
+      <div>
+        <p class="bg-red-500">asdfasdf</p>
+        <form-view @form-submit=${this.handleFormSubmission}></form-view>
+        <button @click=${this.test}>test</button>
+      </div>`
+  }
+
+  renderSongComparisonView(proposal: SynchronizationProposal = this.synchronizationProposal) {
+    return html`
+    <div>
+        <song-comparison-view 
+          .synchronizationProposal=${proposal}
+          @update-proposal=${this.handleProposalUpdate}
+        ></song-comparison-view>
+        <button @click=${this.synchronizePlaylist}>Submit changes</button>
+    </div>`
+  }
+
+  renderWaitingView() {
+    return html`
+      <waiting-view></waiting-view>
+    `
+  }
+
+  override render() {
+    let pageContent: unknown;
+    switch (this.currentPage) {
+      case "form":
+        pageContent = this.renderFormView();
+        break;
+      case "comparison":
+        pageContent = this.renderSongComparisonView(this.synchronizationProposal);
+        break;
+      case "results":
+        pageContent = html`
+          <failed-uploads-view
+            .failedSongs=${this.failedSongs}
+            @restart=${this.handleRestart}
+          ></failed-uploads-view>
+        `;
+        break;
+      default:
+        pageContent = html`<p>Unknown page</p>`;
+    }
+    return html`
+      ${this.isLoading ? this.renderWaitingView() : html``}
+      <p>${this.errorMessage}</p>
+      ${!this.isLoading ? pageContent : html``}
+    `;
   }
 }
 
