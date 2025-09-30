@@ -1,50 +1,10 @@
-import {LitElement, html, css} from 'lit';
+import {LitElement, html} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
+import { tailwindStyles } from '../styles/shared-styles.js';
 
 @customElement('form-view')
 export class FormView extends LitElement {
-    static override styles = css`
-    .input-section {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .input-row label {
-      font-weight: 500;
-      margin-bottom: 0;
-      min-width: 10rem;
-    }
-    .input-row select,
-    .input-row input {
-      padding: .8rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background: #fafafa;
-      flex: 1;
-    }
-    .submit-btn {
-      margin-top: 2rem;
-      padding: 0.8rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      background: #1976d2;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .submit-btn:hover {
-      background: #1565c0;
-    }
-  `;
+    static override styles = [tailwindStyles];
 
     @state()
     sourceService: "Spotify" | "Youtube" = "Spotify";
@@ -96,15 +56,15 @@ export class FormView extends LitElement {
 
     override render() {
         return html`
-      <div class="input-section">
-        ${this.renderServiceDropdown("Source Service:", this.sourceService, "sourceService")}
-        ${this.renderServiceDropdown("Target Service:", this.targetService, "targetService")}
-        ${this.renderUserInput("Source User:", this.sourceUser, "sourceUser")}
-        ${this.renderUserInput("Target User:", this.targetUser, "targetUser")}
-        ${this.renderUserInput("Playlist Name:", this.playlistName, "playlistName")}
-        <button class="submit-btn" @click=${this.handleSubmit}>Submit</button>
-      </div>
-    `;
+          <div class="input-section">
+            ${this.renderServiceDropdown("Source Service:", this.sourceService, "sourceService")}
+            ${this.renderServiceDropdown("Target Service:", this.targetService, "targetService")}
+            ${this.renderUserInput("Source User:", this.sourceUser, "sourceUser")}
+            ${this.renderUserInput("Target User:", this.targetUser, "targetUser")}
+            ${this.renderUserInput("Playlist Name:", this.playlistName, "playlistName")}
+            <button class="submit-btn" @click=${this.handleSubmit}>Submit</button>
+          </div>
+        `;
     }
 
     private handleSubmit(e: Event) {

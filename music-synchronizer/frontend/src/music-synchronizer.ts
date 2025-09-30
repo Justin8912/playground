@@ -8,6 +8,7 @@ import {getSynchronizationProposal, synchronizePlaylist} from "./controller/cont
 import {ProposedChangesRequestDetails, Song, SynchronizationProposal} from "./model/ControllerTypes";
 import {proposedChangesId, requestDetails} from "./util/context";
 import { provide } from '@lit/context';
+import { tailwindStyles } from './styles/shared-styles.js';
 
 
 // Page type for explicit view switching
@@ -15,17 +16,17 @@ export type Page = "form" | "comparison" | "results";
 
 @customElement('music-synchronizer')
 export class MusicSynchronizer extends LitElement {
-  static override styles = css`
-    @tailwind base;
-    @tailwind components;
-    @tailwind utilities;
-    :host {
-      display: block;
-      border: solid 0.1rem gray;
-      padding: 1rem;
-      max-width: 40rem;
-    }
-  `;
+  static override styles = [
+    tailwindStyles,
+    css`
+      :host {
+        display: block;
+        border: solid 0.1rem gray;
+        padding: 1rem;
+        max-width: 40rem;
+      }
+    `
+  ];
 
   @property()
   @state()
@@ -141,7 +142,6 @@ export class MusicSynchronizer extends LitElement {
   renderFormView() {
     return html`
       <div>
-        <p class="bg-red-500">asdfasdf</p>
         <form-view @form-submit=${this.handleFormSubmission}></form-view>
         <button @click=${this.test}>test</button>
       </div>`
