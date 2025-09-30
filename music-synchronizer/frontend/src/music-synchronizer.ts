@@ -4,14 +4,13 @@ import "./custom-components/form-view.js";
 import "./custom-components/song-comparison-view.js";
 import "./custom-components/waiting-view.js";
 import "./custom-components/failed-uploads-view.js";
-import {getSynchronizationProposal} from "./controller/controller";
+import {getSynchronizationProposal, synchronizePlaylist} from "./controller/controller";
 import {ProposedChangesRequestDetails, Song, SynchronizationProposal} from "./model/ControllerTypes";
 import {proposedChangesId, requestDetails} from "./util/context";
 import { provide } from '@lit/context';
 import { tailwindStyles } from './styles/shared-styles.js';
 import {res} from "./controller/dummy";
-import { renderButton } from './custom-components/button.js';
-
+import {renderButton} from "./custom-components/button";
 
 // Page type for explicit view switching
 export type Page = "form" | "comparison" | "results";
@@ -25,7 +24,9 @@ export class MusicSynchronizer extends LitElement {
         display: block;
         border: solid 0.1rem gray;
         padding: 1rem;
-        max-width: 40rem;
+        width: 100%;
+        max-width: 60rem;
+        min-width: 20rem;
         background-color: #fff;
         color: #222;
       }
@@ -58,17 +59,11 @@ export class MusicSynchronizer extends LitElement {
   failedSongs: Song[] = [];
 
   async handleFormSubmission(event: CustomEvent) {
-    const payload = event.detail;
+    const payload = event.detail as ProposedChangesRequestDetails;
     this.errorMessage = "";
     this.isLoading = true;
     try {
-      this.synchronizationProposal = await getSynchronizationProposal(
-          payload.sourceService,
-          payload.targetService,
-          payload.sourceUser,
-          payload.targetUser,
-          payload.playlistName
-      );
+      this.synchronizationProposal = await getSynchronizationProposal(payload);
       this.requestDetails = this.synchronizationProposal.data.requestDetails;
       this.proposedChangesId = this.synchronizationProposal.proposedChangesId;
       this.currentPage = "comparison";
@@ -78,7 +73,7 @@ export class MusicSynchronizer extends LitElement {
     this.isLoading = false;
   }
 
-  handleFormError(event: CustomEvent) {
+  handleError(event: CustomEvent) {
     this.errorMessage = event.detail.message;
   }
 
@@ -104,11 +99,7 @@ export class MusicSynchronizer extends LitElement {
     try {
       console.log("Synchronizing playlist...");
       this.failedSongs = await synchronizePlaylist(
-          this.synchronizationProposal.data.requestDetails.sourceService,
-          this.synchronizationProposal.data.requestDetails.targetService,
-          this.synchronizationProposal.data.requestDetails.sourceUser,
-          this.synchronizationProposal.data.requestDetails.targetUser,
-          this.synchronizationProposal.data.requestDetails.playlist,
+          this.requestDetails as ProposedChangesRequestDetails,
           this.synchronizationProposal.proposedChangesId
       );
       // this.failedSongs = res.data.uncertainProposedChanges.map(row=>row.targetSong);
@@ -116,6 +107,8 @@ export class MusicSynchronizer extends LitElement {
       this.currentPage = "results";
     } catch (err) {
       console.log(err);
+      // @ts-ignore
+      this.errorMessage = err.message;
     }
     this.synchronizationProposal = {} as SynchronizationProposal;
     this.isLoading = false;
@@ -134,9 +127,9 @@ export class MusicSynchronizer extends LitElement {
       <div>
         <form-view 
           @form-submit=${this.handleFormSubmission}
-          @form-error=${this.handleFormError}
+          @form-error=${this.handleError}
         ></form-view>
-        <button @click=${this.test}>test</button>
+        ${renderButton("Test", this.test.bind(this))}
       </div>`
   }
 
@@ -145,10 +138,21 @@ export class MusicSynchronizer extends LitElement {
     <div>
         <song-comparison-view 
           .synchronizationProposal=${proposal}
+          @error=${this.handleError}
           @update-proposal=${this.handleProposalUpdate}
+          @submit-proposal=${this.synchronizePlaylist}
         ></song-comparison-view>
-        ${renderButton("Submit Changes", this.synchronizePlaylist.bind(this))}
     </div>`
+  }
+
+  renderFailedUploadsView() {
+    return html`
+          <failed-uploads-view
+            .failedSongs=${this.failedSongs}
+            .source=${this.requestDetails?.targetService || ""}
+            @restart=${this.handleRestart}
+          ></failed-uploads-view>
+        `
   }
 
   renderWaitingView() {
@@ -167,13 +171,7 @@ export class MusicSynchronizer extends LitElement {
         pageContent = this.renderSongComparisonView(this.synchronizationProposal);
         break;
       case "results":
-        pageContent = html`
-          <failed-uploads-view
-            .failedSongs=${this.failedSongs}
-            .source=${this.requestDetails?.targetService || ""}
-            @restart=${this.handleRestart}
-          ></failed-uploads-view>
-        `;
+        pageContent = this.renderFailedUploadsView();
         break;
       default:
         pageContent = html`<p>Unknown page</p>`;

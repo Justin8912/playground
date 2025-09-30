@@ -97,7 +97,7 @@ export class FormView extends LitElement {
         targetService: this.targetService,
         sourceUser: this.sourceUser,
         targetUser: this.targetUser,
-        playlistName: this.playlistName
+        playlist: this.playlistName
       });
     }
 

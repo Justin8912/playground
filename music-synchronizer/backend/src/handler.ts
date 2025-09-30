@@ -2,7 +2,9 @@ import express, {Request, Response} from "express";
 import cors from "cors";
 import {
     synchronizeDiscographyController,
-    synchronizePlaylistController, getProposedUpdatesController, updateProposedUpdatesController
+    synchronizePlaylistController,
+    getProposedUpdatesController,
+    updateProposedUpdatesController
 } from "./Controller/SynchronizationController.js";
 import {dummy, dummyMemoryObject} from "./Controller/dummy.js";
 import {getAuthorizationUriController, handleRedirectController} from "./Controller/authorization.js";

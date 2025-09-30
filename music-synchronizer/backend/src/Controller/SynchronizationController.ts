@@ -122,11 +122,6 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
             operation
         } = extractParamsFromReq(["proposedChangesId", "sourceSongId", "targetSongId", "operation"], req.body, false);
 
-
-        if (proposedChangesId.trim() === "" || sourceSongId.trim() === "" || targetSongId.trim() === "" || operation.trim() === "") {
-            throw new InvalidRequest(`The required body parameters are: proposedChangesId, operation, sourceSongId, targetSong`);
-        }
-
         let didUpdatePass;
         if (operation === "update") {
             didUpdatePass = await proposedChangesMemoryObjectUpdate(

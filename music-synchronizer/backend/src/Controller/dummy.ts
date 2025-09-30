@@ -399,8 +399,10 @@ export const dummyMemoryObject = `
                 "description": "Subscribe to Shogun Audio: https://lnk.to/YTSubscribe This is the Pola & Bryson & Jelani Blackman's 'Stampede' - Out Now: ...",
                 "videoId": "4sPTv66bxvw"
             }
-        },
-        {
+        }
+    ],
+    "uncertainProposedChanges": [
+            {
             "sourceSong": {
                 "title": "BADDERS",
                 "artists": [
@@ -440,7 +442,6 @@ export const dummyMemoryObject = `
             }
         }
     ],
-    "uncertainProposedChanges": [],
     "requestDetails": {
         "sourceUser": "justin",
         "targetUser": "justin",

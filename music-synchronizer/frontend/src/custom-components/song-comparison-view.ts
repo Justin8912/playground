@@ -3,6 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {SynchronizationProposal} from "../model/ControllerTypes";
 import './song-row-view'
 import { tailwindStyles } from '../styles/shared-styles';
+import {renderButton} from "./button";
 
 @customElement('song-comparison-view')
 export class SongComparisonView extends LitElement {
@@ -10,6 +11,13 @@ export class SongComparisonView extends LitElement {
     
     @property({type: Object})
     synchronizationProposal: SynchronizationProposal = {} as SynchronizationProposal;
+
+    private dispatchSubmission() {
+        this.dispatchEvent(new CustomEvent("submit-proposal", {
+            bubbles: true,
+            composed: true
+        }));
+    }
 
     override render() {
         const confidentProposedChanges = this.synchronizationProposal.data.confidentProposedChanges;
@@ -48,6 +56,7 @@ export class SongComparisonView extends LitElement {
                         </div>
                     </div>
                 ` : ''}
+                ${(uncertainProposedChanges.length > 0 && confidentProposedChanges.length > 0) ? html`<hr class="my-6 border-t-2 border-gray-300 dark:border-gray-700" />` : ''}
                 ${confidentProposedChanges.length > 0 ? html`
                     <div class="mb-8">
                         <div class="text-lg font-semibold text-blue-700 dark:text-blue-400 text-center mb-4">
@@ -69,6 +78,7 @@ export class SongComparisonView extends LitElement {
                     </div>
                 ` : ''}
             </div>
+            ${renderButton("Submit Changes", this.dispatchSubmission.bind(this))}
         `;
     }
 }

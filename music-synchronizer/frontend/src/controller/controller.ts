@@ -7,11 +7,7 @@ import {
 } from "../model/ControllerTypes";
 
 export const getSynchronizationProposal = async (
-    sourceService: string,
-    targetService: string,
-    sourceUser: string,
-    targetUser: string,
-    playlistName: string,
+    requestDetails: ProposedChangesRequestDetails,
     changeRequestId?: string
 ): Promise<SynchronizationProposal> => {
     let headers = {}
@@ -19,7 +15,7 @@ export const getSynchronizationProposal = async (
         // @ts-ignore
         headers[PROPOSED_CHANGES_ID_HEADER] = changeRequestId;
     }
-    const response: Response = await fetch(`${synchronizationApiEndpoint}/updates/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`, {
+    const response: Response = await fetch(`${synchronizationApiEndpoint}/updates/sourceUser/${requestDetails.sourceUser}/targetUser/${requestDetails.targetUser}/sourceService/${requestDetails.sourceService}/targetService/${requestDetails.targetService}/playlist/${requestDetails.playlist}`, {
         method: "GET",
         headers: headers
     })
@@ -38,18 +34,14 @@ export const getSynchronizationProposal = async (
 }
 
 export const updateSynchronizationProposal = async (
-    sourceService: string,
-    targetService: string,
-    sourceUser: string,
-    targetUser: string,
-    playlistName: string,
+    requestDetails: ProposedChangesRequestDetails,
     proposedChangesId: string,
     operation: string,
     sourceSongId: string,
     targetSongId: string
 ): Promise<ProposedChanges<ProposedChangesRequestDetails>> => {
     const response: Response = await fetch(
-        `${synchronizationApiEndpoint}/updates/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
+        `${synchronizationApiEndpoint}/updates/sourceUser/${requestDetails.sourceUser}/targetUser/${requestDetails.targetUser}/sourceService/${requestDetails.sourceService}/targetService/${requestDetails.targetService}/playlist/${requestDetails.playlist}`,
         {
             method: "POST",
             headers: {
@@ -63,19 +55,21 @@ export const updateSynchronizationProposal = async (
             })
         }
     );
-    return await response.json();
+
+    let data = await response.json();
+    if (response.status !== 200) {
+        throw new Error("Failed to updated the proposed changes on the server: " + data.message);
+    }
+
+    return data;
 }
 
 export const synchronizePlaylist = async (
-    sourceService: string,
-    targetService: string,
-    sourceUser: string,
-    targetUser: string,
-    playlistName: string,
+    requestDetails: ProposedChangesRequestDetails,
     proposedChangesId: string
 ): Promise<Song[]> => {
     const response: Response = await fetch(
-        `${synchronizationApiEndpoint}/synchronize/sourceUser/${sourceUser}/targetUser/${targetUser}/sourceService/${sourceService}/targetService/${targetService}/playlist/${playlistName}`,
+        `${synchronizationApiEndpoint}/synchronize/sourceUser/${requestDetails.sourceUser}/targetUser/${requestDetails.targetUser}/sourceService/${requestDetails.sourceService}/targetService/${requestDetails.targetService}/playlist/${requestDetails.playlist}`,
         {
             method: "POST",
             headers: {
@@ -87,5 +81,11 @@ export const synchronizePlaylist = async (
         }
     );
 
-    return await response.json();
+    let data = await response.json();
+
+    if (response.status !== 200) {
+        throw new Error("Failed to synchronize the playlist on the server: " + data.message);
+    }
+
+    return data;
 }

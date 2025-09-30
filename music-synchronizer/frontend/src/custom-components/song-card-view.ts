@@ -56,7 +56,7 @@ export class SongCardView extends LitElement {
 
     if (this.isTargetCard && this.isEditing) {
       return html`
-        <div class="flex items-center gap-2 mt-2 text-xs text-gray-400 dark:text-gray-500">
+        <div class="flex items-center gap-2 mt-2 text-xs text-gray-400 dark:text-gray-500 w-full">
           <span>ID:</span>
           <input 
             class="px-2 py-1 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition"

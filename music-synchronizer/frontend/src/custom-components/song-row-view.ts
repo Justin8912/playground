@@ -34,17 +34,21 @@ export class SongRowView extends LitElement {
         }));
     }
 
+    private dispatchError(message: string) {
+        this.dispatchEvent(new CustomEvent('error', {
+            detail: {message},
+            bubbles: true,
+            composed: true
+        }))
+    }
+
     async handleSongUpdate(event: CustomEvent) {
         const {targetSongId} = event.detail;
         try {
             if (this.details && this.proposedChangesId) {
                 console.log("Updating synchronization proposal...");
                 const proposalUpdate = await updateSynchronizationProposal(
-                    this.details.sourceService,
-                    this.details.targetService,
-                    this.details.sourceUser,
-                    this.details.targetUser,
-                    this.details.playlist,
+                    this.details,
                     this.proposedChangesId,
                     "update",
                     this.synchronizationProposalRow.sourceSong.videoId,
@@ -56,7 +60,8 @@ export class SongRowView extends LitElement {
                 console.error("Details and/or proposedChangesId is undefined.");
             }
         } catch (err) {
-            console.log(err);
+            // @ts-ignore
+            this.dispatchError("Failed to update song: " + err.message as string);
         }
     }
 
@@ -64,11 +69,7 @@ export class SongRowView extends LitElement {
         try {
             if (this.details && this.proposedChangesId) {
                 const proposedChanges = await updateSynchronizationProposal(
-                    this.details.sourceService,
-                    this.details.targetService,
-                    this.details.sourceUser,
-                    this.details.targetUser,
-                    this.details.playlist,
+                    this.details,
                     this.proposedChangesId,
                     "remove",
                     this.synchronizationProposalRow.sourceSong.videoId,
@@ -78,13 +79,14 @@ export class SongRowView extends LitElement {
                 this.dispatchProposalUpdate(proposedChanges)
             }
         } catch (err) {
-            console.log(err);
+            // @ts-ignore
+            this.dispatchError("Failed to delete song: " + err.message as string);
         }
     }
 
     renderSongComparisonView() {
         return html`
-            <div class="flex flex-row items-center w-full my-4">
+            <div class="flex flex-row w-full my-4">
                 <div class="flex-1 flex items-center justify-center">
                     <song-card-view 
                         .song=${this.synchronizationProposalRow.sourceSong} 
@@ -95,7 +97,7 @@ export class SongRowView extends LitElement {
                 <div class="w-16 flex items-center justify-center">
                     <span class="text-2xl font-bold text-blue-700">→</span>
                 </div>
-                <div class="flex-1 flex items-center justify-center">
+                <div class="flex-1 flex justify-center">
                     <song-card-view 
                         .song=${this.synchronizationProposalRow.targetSong} 
                         .source=${this.targetService}
