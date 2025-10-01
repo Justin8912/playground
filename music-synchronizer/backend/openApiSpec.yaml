@@ -16,17 +16,17 @@ info:
 
     This value can be used with requests to limit the number of requests to the youtube or spotify api. For now, it MUST also be used in the body of the `POST /synchronize/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}` request.
 servers:
-  - url: http://localhost:{port}
+  - url: http://mainframe:{port}
     variables:
       port:
         default: '60000'
 paths:
-  /authorize/{username}/{service}:
+  /authorize/user/{user}/service/{service}:
     get:
       summary: Authorize a new user for a specific music service
       description: Initiates the authorization flow for a user to connect their account to either Spotify or YouTube Music service
       parameters:
-        - name: username
+        - name: user
           in: path
           required: true
           schema:
@@ -56,6 +56,49 @@ paths:
                     description: State parameter for OAuth flow security
         '400':
           description: Invalid service specified
+        '500':
+          description: Internal server error
+
+  /authorize/service/{service}/redirect:
+    get:
+      summary: Handle OAuth callback from music service. This might only work when hosted locally - as the redirect uri in spotify and google are currently setup to use local host and not the mainframe. In order to get this working I will need to setup https cert on the home server.
+      description: Handles the callback from the music service after user authorization
+      parameters:
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [spotify, youtube]
+          description: The music service handling the callback
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code from the service
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+          description: State parameter for security validation
+      responses:
+        '200':
+          description: Authorization successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message
+                  username:
+                    type: string
+                    description: The username that was authorized
+        '400':
+          description: Invalid callback parameters
         '500':
           description: Internal server error
   /synchronize/sourceUser/{sourceUser}/targetUser/{targetUser}/sourceService/{sourceService}/targetService/{targetService}/playlist/{playlist}:
