@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  backend:
+  music-synchronizer-backend:
     build: .
+    container_name: music-synchronizer-backend
     ports:
       - "60000:60000"
     environment:
