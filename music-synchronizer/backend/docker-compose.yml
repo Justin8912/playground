@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "60000:60000"
+    environment:
+      - PORT=60000
+      - VAULT_KEY=${VAULT_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
