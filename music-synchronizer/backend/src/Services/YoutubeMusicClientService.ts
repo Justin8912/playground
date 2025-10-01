@@ -30,7 +30,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
             await this.googleUserClient.validateToken();
             // TODO: We will want to implement caching at some point so that we can avoid hitting rate limits
             // this.playlists = await this.getPlaylists();
-            console.log(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
+            this.logInfoMessage(`YouTube Music Client initialized with ${this.playlists.length} playlists`);
         } catch (error) {
             throw new Error('Failed to initialize the YoutubeMusicClient: ' + error);
         }
@@ -49,23 +49,11 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                     image: playlist.image,
                     songs: songs
                 }))
-                    // It looks like if the playlist is empty then getSongs will not error, so this catch should not be needed.
-                    // .catch(error => {
-                    //     console.warn(`Failed to get songs for playlist "${playlist.title}":`, error);
-                    //     // Return playlist without songs rather than failing completely
-                    //     return {
-                    //         id: playlist.id,
-                    //         title: playlist.title,
-                    //         description: playlist.description,
-                    //         image: playlist.image,
-                    //         songs: []
-                    //     };
-                    // })
                 })
                 .filter(playlist => !!playlist);
-
             const populatedPlaylists = await Promise.all(playlistPromises);
-            return populatedPlaylists.filter(playlist => !!playlist);
+            this.logDebugMessage("Youtube playlists", {data: populatedPlaylists.map(p => p.title)})
+            return populatedPlaylists
         } catch (error) {
             throw new PlaylistRetrievalError('Failed to get populated YouTube Music playlists', {cause: error});
         }
@@ -92,7 +80,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
                         image: playlist.snippet?.thumbnails?.default?.url 
                             ? { url: playlist.snippet.thumbnails.default.url }
                             : undefined
-                    })).filter((playlist: any) => playlist.description.includes("music"));
+                    })).filter((playlist: any) => playlist.description.toLowerCase().includes("music"));
 
                     result = result.concat(playlistData);
                 }
@@ -300,14 +288,16 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
     public async getPlaylistByName(name: string): Promise<GetPlaylistsResponse> {
         if (this.playlists.length === 0) {
-            logger.debug('Playlists cache is empty, loading playlists...');
+            this.logDebugMessage('Playlists cache is empty, loading playlists...');
             this.playlists = await this.getPlaylists();
         }
         const foundPlaylist = this.playlists.find(
             playlist => playlist.title.toLowerCase() === name.toLowerCase()
         );
+
+        this.logDebugMessage("Youtube playlists: ", {data: this.playlists.map(p => p.title)});
         if (foundPlaylist) {
-            logger.debug(`Found playlist "${name}" with ID: ${foundPlaylist.id}`);
+            this.logInfoMessage(`Found playlist "${name}" with ID: ${foundPlaylist.id}`);
             return foundPlaylist;
         } else {
             throw new PlaylistNotFoundError(`No playlist with name "${name}"`);
@@ -342,6 +332,10 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
 
     private logInfoMessage(message: string, options: any = {}) {
         logger.info(message, {...options, source: "YouTube Music"});
+    }
+
+    private logDebugMessage(message: string, options: any = {}) {
+        logger.debug(message, {...options, source: "YouTube Music"})
     }
 
     private throwError(ErrorType: new (...args: any[]) => Error, ...args: any[]): never {

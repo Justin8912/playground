@@ -130,7 +130,7 @@ export class SpotifyService implements MusicServiceInterface {
         const spotifyTrack: Track = (await this.getSongByQuery(query)) as Track;
 
         if (!spotifyTrack) {
-            console.error(`No track found for query ${query}`);
+            this.logInfoMessage(`No track found for query ${query}`);
             return null;
         } else {
             return {
@@ -200,7 +200,7 @@ export class SpotifyService implements MusicServiceInterface {
                 // Add all found songs to the playlist
                 await this.spotifyApi.playlists.addItemsToPlaylist(playlist.id, songUris);
 
-                console.info(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
+                this.logInfoMessage(`Successfully added ${songUris.length} out of ${songs.length} songs to playlist "${playlistName}"`);
                 return failedSongAdds;
             }
         } catch (err) {
@@ -210,7 +210,7 @@ export class SpotifyService implements MusicServiceInterface {
 
     public getPlaylistByName = async (name: string): Promise<GetPlaylistsResponse> => {
         if (this.playlists.length === 0) {
-            logger.debug('Playlists cache is empty, loading playlists...');
+            this.logDebugMessage('Playlists cache is empty, loading playlists...');
             this.playlists = await this.getPlaylists();
         }
 
@@ -218,8 +218,10 @@ export class SpotifyService implements MusicServiceInterface {
             playlist.title.toLowerCase() === name.toLowerCase()
         );
 
+        this.logDebugMessage("Spotify playlists: ", {data: this.playlists.map(p => p.title)});
+
         if (matchingPlaylist) {
-            logger.debug(`Found playlist: ${matchingPlaylist.title} with ID: ${matchingPlaylist.id}`);
+            this.logDebugMessage(`Found playlist: ${matchingPlaylist.title} with ID: ${matchingPlaylist.id}`);
             return matchingPlaylist;
         } else {
             throw new PlaylistNotFoundError(`No playlist found with name "${name}"`);
@@ -249,6 +251,10 @@ export class SpotifyService implements MusicServiceInterface {
 
     private logInfoMessage(message: string, options: any = {}) {
         logger.info(message, { ...options, source: "Spotify" });
+    }
+
+    private logDebugMessage(message: string, options: any = {}) {
+        logger.debug(message, {...options, source: "Spotify"})
     }
 }
 
