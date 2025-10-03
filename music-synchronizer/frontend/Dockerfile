@@ -10,6 +10,7 @@ COPY web-dev-server.config.js ./
 COPY web-test-runner.config.js ./
 COPY index.html ./
 COPY rollup.config.js ./
+COPY favicon.png ./
 
 RUN npm ci
 
