@@ -11,6 +11,7 @@ COPY web-test-runner.config.js ./
 COPY index.html ./
 COPY rollup.config.js ./
 COPY favicon.png ./
+COPY favicon.ico ./
 
 RUN npm ci
 
