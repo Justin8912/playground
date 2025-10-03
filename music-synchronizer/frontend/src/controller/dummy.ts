@@ -406,31 +406,11 @@ export const res: SynchronizationProposal = {
                     "videoId": "spotify:track:4zbInBD4rY7tYPJ16LVxdh"
                 },
                 "targetSong": {
-                    "title": "Skrillex, PEEKABOO, Flowdan, &amp; G-Rex - Badders (Official Audio)",
+                    "title": "George Thorogood & The Destroyers - Bad To The Bone",
                     "artists": [
-                        "Skrillex"
+                        "George Thorogood & The Destroyers"
                     ],
-                    "description": "Skrillex, PEEKABOO, Flowdan, & G-Rex - Badders (Official Audio) Listen Now - https://skrillex.lnk.to/baddersID Subscribe for more ...",
-                    "videoId": "YfpV3al_Q3k"
-                }
-            },
-            {
-                "sourceSong": {
-                    "title": "Holidae In",
-                    "artists": [
-                        "Chingy",
-                        "Ludacris",
-                        "Snoop Dogg"
-                    ],
-                    "videoId": "spotify:track:5ACG7ngZo2Gq2O0clHBTMl"
-                },
-                "targetSong": {
-                    "title": "Chingy, Ludacris, Snoop Dogg - Holidae In (Official Music Video)",
-                    "artists": [
-                        "ChingyVEVO"
-                    ],
-                    "description": "REMASTERED IN HD! Official video of Chingy Featuring Ludacris And Snoop Dogg performing Holidae In from the album ...",
-                    "videoId": "GmKjTC8yDFM"
+                    "videoId": "IyhJ69mD7xI"
                 }
             }
         ],
