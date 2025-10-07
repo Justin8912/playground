@@ -86,18 +86,22 @@ export class SongRowView extends LitElement {
 
     renderSongComparisonView() {
         return html`
-            <div class="flex flex-row w-full my-4">
-                <div class="flex-1 flex items-center justify-center">
+            <div class="flex flex-col sm:flex-row w-full my-4 rounded-lg p-2 gap-2 sm:gap-0 items-center relative dark:bg-blue-950 sm:bg-none sm:dark:bg-transparent">
+                <div class="flex-1 flex items-center justify-center w-full">
                     <song-card-view 
                         .song=${this.synchronizationProposalRow.sourceSong} 
                         .source=${this.sourceService}
                         .isTargetCard=${false}
                     ></song-card-view>
                 </div>
-                <div class="w-16 flex items-center justify-center">
-                    <span class="text-2xl font-bold text-blue-700">→</span>
+                <!-- Arrow/Divider for mapping -->
+                <div class="flex sm:hidden w-full justify-center py-2">
+                  <span class="text-2xl font-bold text-blue-700">↓</span>
                 </div>
-                <div class="flex-1 flex justify-center">
+                <div class="hidden sm:flex w-16 items-center justify-center">
+                  <span class="text-2xl font-bold text-blue-700">→</span>
+                </div>
+                <div class="flex-1 flex justify-center w-full">
                     <song-card-view 
                         .song=${this.synchronizationProposalRow.targetSong} 
                         .source=${this.targetService}
@@ -115,6 +119,10 @@ export class SongRowView extends LitElement {
     }
 
     override render() {
-        return this.renderSongComparisonView();
+        return html`
+          <div class="w-full max-w-full">
+            ${this.renderSongComparisonView()}
+          </div>
+        `;
     }
 }

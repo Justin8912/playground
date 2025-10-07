@@ -5,11 +5,17 @@ import {
     Song,
     type SynchronizationProposal
 } from "../model/ControllerTypes";
+import {res} from "./dummy";
 
+const environment = "development";
 export const getSynchronizationProposal = async (
     requestDetails: ProposedChangesRequestDetails,
     changeRequestId?: string
 ): Promise<SynchronizationProposal> => {
+    if (environment === "development") {
+        return res
+    }
+
     let headers = {}
     if (changeRequestId) {
         // @ts-ignore
@@ -40,6 +46,9 @@ export const updateSynchronizationProposal = async (
     sourceSongId: string,
     targetSongId: string
 ): Promise<ProposedChanges<ProposedChangesRequestDetails>> => {
+    if (environment === "development") {
+        return res.data
+    }
     const response: Response = await fetch(
         `${synchronizationApiEndpoint}/updates/sourceUser/${requestDetails.sourceUser}/targetUser/${requestDetails.targetUser}/sourceService/${requestDetails.sourceService}/targetService/${requestDetails.targetService}/playlist/${requestDetails.playlist}`,
         {
@@ -68,6 +77,10 @@ export const synchronizePlaylist = async (
     requestDetails: ProposedChangesRequestDetails,
     proposedChangesId: string
 ): Promise<Song[]> => {
+    if (environment === "development") {
+        return res.data.uncertainProposedChanges.map(mapping => mapping.targetSong)
+    }
+
     const response: Response = await fetch(
         `${synchronizationApiEndpoint}/synchronize/sourceUser/${requestDetails.sourceUser}/targetUser/${requestDetails.targetUser}/sourceService/${requestDetails.sourceService}/targetService/${requestDetails.targetService}/playlist/${requestDetails.playlist}`,
         {

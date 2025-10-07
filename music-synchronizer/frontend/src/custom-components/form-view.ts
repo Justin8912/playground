@@ -27,10 +27,10 @@ export class FormView extends LitElement {
 
     private renderServiceDropdown(label: string, value: "Spotify" | "Youtube", name: string) {
         return html`
-          <div class="input-row flex flex-col gap-1 mb-4">
-            <label class="font-medium text-gray-700 dark:text-gray-100 mb-1">${label}</label>
+          <div class="input-row flex flex-col gap-1 mb-3 sm:mb-4">
+            <label class="font-medium text-base sm:text-lg text-gray-700 dark:text-gray-100 mb-1">${label}</label>
             <select
-              class="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition"
+              class="px-3 py-2 text-base sm:text-lg border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition"
               .value=${value}
               name=${name}
               @change=${this.handleInputChange}
@@ -44,11 +44,11 @@ export class FormView extends LitElement {
 
     private renderUserInput(label: string, value: string, name: string) {
         return html`
-          <div class="input-row flex flex-col gap-1 mb-4">
-            <label class="font-medium text-gray-700 dark:text-gray-100 mb-1">${label}</label>
+          <div class="input-row flex flex-col gap-1 mb-3 sm:mb-4">
+            <label class="font-medium text-base sm:text-lg text-gray-700 dark:text-gray-100 mb-1">${label}</label>
             <input
               type="text"
-              class="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition"
+              class="px-3 py-2 text-base sm:text-lg border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition"
               .value=${value}
               name=${name}
               @input=${this.handleInputChange}
@@ -59,13 +59,15 @@ export class FormView extends LitElement {
 
     override render() {
         return html`
-            <div class="input-section">
+            <div class="input-section p-2 sm:p-4">
                 ${this.renderServiceDropdown("Source Service", this.sourceService, "sourceService")}
                 ${this.renderServiceDropdown("Target Service", this.targetService, "targetService")}
                 ${this.renderUserInput("Source User", this.sourceUser, "sourceUser")}
                 ${this.renderUserInput("Target User", this.targetUser, "targetUser")}
                 ${this.renderUserInput("Playlist Name", this.playlistName, "playlistName")}
-                ${renderButton("submit", this.handleSubmit.bind(this))}
+                <div class="mt-4 flex justify-center">
+                  ${renderButton("Submit", this.handleSubmit.bind(this))}
+                </div>
             </div>
         `;
     }

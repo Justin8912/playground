@@ -30,7 +30,7 @@ export class SongCardView extends LitElement {
   override render() {
     if (!this.song) return html`<div class="card">No song data</div>`;
     return html`
-      <div class="card flex flex-col gap-2 p-4 rounded-lg shadow border bg-white dark:bg-gray-800 dark:border-gray-700 transition">
+      <div class="card flex flex-col gap-2 p-4 rounded-lg shadow border bg-white dark:bg-gray-800 dark:border-gray-700 transition w-full max-w-full box-border">
         <div class="flex items-center mb-1">
           <span class="text-lg font-bold text-gray-900 dark:text-gray-100">
             <a

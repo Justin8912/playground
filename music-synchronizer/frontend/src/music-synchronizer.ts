@@ -21,18 +21,15 @@ export class MusicSynchronizer extends LitElement {
     css`
       :host {
         display: block;
-        border: solid 0.1rem gray;
         padding: 1rem;
         width: 100%;
         max-width: 60rem;
         min-width: 20rem;
-        background-color: #fff;
         color: #222;
       }
       :host(.dark), :host([data-theme="dark"]) {
         background-color: #1a202c;
         color: #f3f3f3;
-        border-color: #2d3748;
       }
     `
   ];
@@ -76,14 +73,6 @@ export class MusicSynchronizer extends LitElement {
     this.errorMessage = event.detail.message;
   }
 
-  // TODO: Remove this
-  async test() {
-    this.synchronizationProposal = res
-    this.requestDetails = this.synchronizationProposal.data.requestDetails;
-    this.proposedChangesId = this.synchronizationProposal.proposedChangesId;
-    this.currentPage = "comparison";
-  }
-
   async handleProposalUpdate(event: CustomEvent) {
     const {proposedChanges} = event.detail;
     this.synchronizationProposal = {
@@ -96,12 +85,10 @@ export class MusicSynchronizer extends LitElement {
     this.isLoading = true;
     this.errorMessage = "";
     try {
-      console.log("Synchronizing playlist...");
       this.failedSongs = await synchronizePlaylist(
           this.requestDetails as ProposedChangesRequestDetails,
           this.synchronizationProposal.proposedChangesId
       );
-      // this.failedSongs = res.data.uncertainProposedChanges.map(row=>row.targetSong);
       this.requestDetails = this.synchronizationProposal.data.requestDetails;
       this.currentPage = "results";
     } catch (err) {
@@ -175,7 +162,7 @@ export class MusicSynchronizer extends LitElement {
         pageContent = html`<p>Unknown page</p>`;
     }
     return html`
-      <div class="rounded-md shadow p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <div class="w-full max-w-screen-2xl rounded-md shadow p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         ${this.isLoading ? this.renderWaitingView() : html``}
         ${this.errorMessage ? html`<p class="mb-4 text-red-600 dark:text-red-400">${this.errorMessage}</p>` : html``}
         ${!this.isLoading ? pageContent : html``}
