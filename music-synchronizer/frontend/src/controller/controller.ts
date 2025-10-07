@@ -7,12 +7,14 @@ import {
 } from "../model/ControllerTypes";
 import {res} from "./dummy";
 
-const environment = "development";
+const environment = "";
+// @ts-ignore
+const isDevelopment = environment === "development";
 export const getSynchronizationProposal = async (
     requestDetails: ProposedChangesRequestDetails,
     changeRequestId?: string
 ): Promise<SynchronizationProposal> => {
-    if (environment === "development") {
+    if (isDevelopment) {
         return res
     }
 
@@ -46,7 +48,7 @@ export const updateSynchronizationProposal = async (
     sourceSongId: string,
     targetSongId: string
 ): Promise<ProposedChanges<ProposedChangesRequestDetails>> => {
-    if (environment === "development") {
+    if (isDevelopment) {
         return res.data
     }
     const response: Response = await fetch(
@@ -77,7 +79,7 @@ export const synchronizePlaylist = async (
     requestDetails: ProposedChangesRequestDetails,
     proposedChangesId: string
 ): Promise<Song[]> => {
-    if (environment === "development") {
+    if (isDevelopment) {
         return res.data.uncertainProposedChanges.map(mapping => mapping.targetSong)
     }
 
