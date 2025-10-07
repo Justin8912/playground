@@ -9,7 +9,6 @@ import {ProposedChangesRequestDetails, Song, SynchronizationProposal} from "./mo
 import {proposedChangesId, requestDetails} from "./util/context";
 import { provide } from '@lit/context';
 import { tailwindStyles } from './styles/shared-styles.js';
-import {res} from "./controller/dummy";
 
 // Page type for explicit view switching
 export type Page = "form" | "comparison" | "results";
