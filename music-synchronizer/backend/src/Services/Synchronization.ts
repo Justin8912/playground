@@ -3,7 +3,7 @@ import {SpotifyService} from "./SpotifyService.js";
 import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
 import {findDifferences} from "../Util/findDifferences.js";
 import {doSongsMatch} from "../Util/titleMatcher.js";
-import {ProposedChanges, SongMapping, SynchronizeMusicSources} from "../Model/Controller.js";
+import {ProposedChanges, SynchronizeMusicSources} from "../Model/Controller.js";
 import {PlaylistNotFoundError} from "../Errors/PlaylistNotFoundError.js";
 
 
