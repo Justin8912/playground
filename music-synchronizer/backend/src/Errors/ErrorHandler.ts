@@ -13,7 +13,6 @@ const serializeError = (error: any): any => {
 };
 
 export const handleError = (error: any, res: Response) => {
-    console.log("In error handler")
     const getErrorType = (error: any): string => {
         return error?.name;
     };
