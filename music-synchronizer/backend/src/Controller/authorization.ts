@@ -13,32 +13,36 @@ import {
 import {handleError} from "../Errors/ErrorHandler.js";
 
 export const getAuthorizationUriController = async (req: Request, res: Response) => {
-    const { user, service } = extractParamsFromReq(["user", "service"], req.params);
+    try {
+        const { user, service } = extractParamsFromReq(["user", "service"], req.params);
+        if (service === "youtube") {
+            const {authorizationUrl, state} = getGoogleAuthorizationUri(
+                appConfig.getEnvironmentConfig().getGoogleScopes(),
+                appConfig.getGoogleOauth2Client()
+            );
 
-    if (service === "youtube") {
-        const { authorizationUrl, state } = getGoogleAuthorizationUri(
-            appConfig.getEnvironmentConfig().getGoogleScopes(),
-            appConfig.getGoogleOauth2Client()
-        );
+            memory.createMemoryObject(AUTH_STATE_MEMORY_KEY, state, req.params, {user});
+            res.json({authorizationUrl});
+        } else if (service === "spotify") {
+            const {
+                client_id,
+                redirect_uri
+            } = appConfig.getSpotifyServerCredentials();
 
-        memory.createMemoryObject(AUTH_STATE_MEMORY_KEY, state, req.params, {user});
-        res.json({authorizationUrl});
-    } else if (service === "spotify") {
-        const {
-            client_id,
-            redirect_uri
-        } = await appConfig.getSpotifyServerCredentials();
+            const {authorizationUrl, state} = getSpotifyAuthorizationUri(
+                appConfig.getEnvironmentConfig().getSpotifyScopes(),
+                client_id,
+                redirect_uri
+            );
 
-        const { authorizationUrl, state } = getSpotifyAuthorizationUri(
-            appConfig.getEnvironmentConfig().getSpotifyScopes(),
-            client_id,
-            redirect_uri
-        );
-
-        memory.createMemoryObject(AUTH_STATE_MEMORY_KEY, state, req.params, {user});
-        res.json({authorizationUrl});
+            memory.createMemoryObject(AUTH_STATE_MEMORY_KEY, state, req.params, {user});
+            res.json({authorizationUrl});
+        }
+    } catch (err) {
+        handleError(err, res);
     }
 }
+
 export const handleRedirectController = async (req: Request, res: Response) => {
     try {
         const { service } = extractParamsFromReq(["service"], req.params);
@@ -57,7 +61,7 @@ export const handleRedirectController = async (req: Request, res: Response) => {
                 appConfig.getHcpVaultService().setParameter
             );
         } else if (service === "spotify") {
-            const { client_id, client_secret, redirect_uri } = await appConfig.getSpotifyServerCredentials();
+            const { client_id, client_secret, redirect_uri } = appConfig.getSpotifyServerCredentials();
 
             await handleSpotifyAuthorizationRedirect(
                 user,

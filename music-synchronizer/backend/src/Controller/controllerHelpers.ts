@@ -1,9 +1,9 @@
 import {getSpotifyService, SpotifyService} from "../Services/SpotifyService.js";
 import {getYoutubeMusicService, YoutubeMusicClientService} from "../Services/YoutubeMusicClientService.js";
-import {Request} from "express";
 import {InvalidRequest} from "../Errors/InvalidRequest.js";
 import {ProposedChanges} from "../Model/Controller.js";
 import {Song} from "../Model/MusicService.js";
+import {SongRetrievalError} from "../Errors/SongRetrievalError.js";
 
 export type SupportedService = "spotify" | "youtube";
 export const isSupportedService = (sourceService: string, targetService: string) => {
@@ -16,18 +16,15 @@ export const serviceTypeToClientMap = {
 }
 
 export const extractParamsFromReq = (requiredParams: string[], req: any, shouldConvertToLowerCase: boolean = true): any => {
-    const res = {}
+    const res: {[index: string]: any} = {}
     for (const param of requiredParams) {
-        // @ts-ignore
         const paramVal = req[param];
         if (paramVal?.trim() === "" || paramVal === undefined) {
             throw new InvalidRequest(`Parameter ${param} is required and must be non-empty.`);
         }
-        // @ts-ignore
+
         if (shouldConvertToLowerCase) res[param] = paramVal.toLowerCase()
-        else { // @ts-ignore
-            res[param as string] = paramVal;
-        }
+        else res[param] = paramVal;
     }
     return res;
 }
@@ -39,8 +36,8 @@ export const proposedChangesMemoryObjectUpdate = async (
     targetSongId: string
 ): Promise<boolean> => {
     const targetSong: Song | null = await targetClient.getSongById(targetSongId);
-    if (!proposedChanges) return false;
-    if (!targetSong) return false;
+    if (!proposedChanges) throw new InvalidRequest(`No proposed changes provided. Check request and ensure that the proposed changes id is correct.`);
+    if (!targetSong) throw new SongRetrievalError(`Could not find song with id ${targetSongId} using ${targetClient.constructor.name}`);
 
     const updateInArray = (arr: { sourceSong: Song; targetSong: Song }[]) => {
         let hasMadeUpdate = false;
@@ -64,7 +61,7 @@ export const removeProposedChangeBySongIds = (
     sourceSongId: string,
     targetSongId: string
 ): boolean => {
-    if (!memoryObject) return false;
+    if (!memoryObject) throw new InvalidRequest(`No proposed changes provided. Check request and ensure that the proposed changes id is correct.`);
     const removeFromArray = (arr: any[]) => {
         const idx = arr.findIndex(
             (change) =>
@@ -80,8 +77,5 @@ export const removeProposedChangeBySongIds = (
     if (Array.isArray(memoryObject.confidentProposedChanges) && removeFromArray(memoryObject.confidentProposedChanges)) {
         return true;
     }
-    if (Array.isArray(memoryObject.uncertainProposedChanges) && removeFromArray(memoryObject.uncertainProposedChanges)) {
-        return true;
-    }
-    return false;
+    return Array.isArray(memoryObject.uncertainProposedChanges) && removeFromArray(memoryObject.uncertainProposedChanges);
 }

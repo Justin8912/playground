@@ -3,6 +3,7 @@ import {getYoutubeMusicService} from "../Services/YoutubeMusicClientService.js";
 
 export const dummy = async (req, res) => {
     let appConfig = new AppConfig();
+    await appConfig.initialize();
     let musicService = await getYoutubeMusicService("justin", appConfig.getHcpVaultService());
     let response = await musicService.getPlaylists();
     res.json(response);

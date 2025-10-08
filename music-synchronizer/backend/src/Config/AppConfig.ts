@@ -1,7 +1,8 @@
-import {HCPVaultService, ServerCredentials} from "../Services/VaultService.js";
+import {HCPVaultService} from "../Services/VaultService.js";
 import {EnvironmentConfig} from "./EnvironmentConfig.js";
 import {google} from 'googleapis';
 import {InitializationError} from "../Errors/InitializationError.js";
+import {ServerCredentials} from "../Model/VaultService.js";
 
 export class AppConfig {
     private environmentConfig: EnvironmentConfig;
@@ -9,16 +10,12 @@ export class AppConfig {
     private googleOauth2Client: any;
     private spotifyServerCreds: ServerCredentials;
 
-    constructor() {
-        this.initialize();
-    }
+    constructor() { }
 
     initialize = async (): Promise<void> => {
         this.environmentConfig = new EnvironmentConfig();
         this.hcpVaultService = this.getHcpVaultService();
-        this.initializeGoogleOauth2Client(
-            await this.getHcpVaultService().getServerGoogleCredentials()
-        );
+        await this.initializeGoogleOauth2Client();
         await this.initializeSpotifyServerCredentials();
     }
 
@@ -27,10 +24,12 @@ export class AppConfig {
     }
 
     getHcpVaultService = (): HCPVaultService => {
-        return new HCPVaultService(this.environmentConfig.getVaultToken());
+        if (!this.hcpVaultService) return new HCPVaultService(this.environmentConfig.getVaultToken());
+        else return this.hcpVaultService;
     }
 
-    initializeGoogleOauth2Client = ({client_id, client_secret, redirect_uri}: ServerCredentials) => {
+    initializeGoogleOauth2Client = async (): Promise<void> => {
+        const {client_id, client_secret, redirect_uri} = await this.getHcpVaultService().getServerGoogleCredentials()
         this.googleOauth2Client = new google.auth.OAuth2(
             client_id,
             client_secret,

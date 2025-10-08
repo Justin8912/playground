@@ -123,15 +123,18 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
 
         let didUpdatePass;
         if (operation === "update") {
+            let translatedSongId = targetSongId;
+            if (translatedSongId.includes("https://")) translatedSongId = getSongIdFromUrl(targetSongId, targetService);
+            const targetClientService = await (serviceTypeToClientMap[targetService as SupportedService])(targetUser, hcpVaultService)
             didUpdatePass = await proposedChangesMemoryObjectUpdate(
-                await (serviceTypeToClientMap[targetService as SupportedService])(targetUser, hcpVaultService),
+                targetClientService,
                 memory.safeGetObjectFromMemory(
                     PROPOSED_CHANGES_MEMORY_KEY,
                     proposedChangesId,
                     req
                 ),
                 sourceSongId,
-                targetSongId.includes("https://") ? getSongIdFromUrl(targetSongId, targetService) : targetSongId
+                translatedSongId
             );
         } else if (operation === "remove") {
             didUpdatePass = removeProposedChangeBySongIds(
