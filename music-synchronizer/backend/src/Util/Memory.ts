@@ -13,12 +13,6 @@ export class Memory {
         this.memory[AUTH_STATE_MEMORY_KEY] = {};
     }
 
-    initializeMemoryObject = (...args: string[]): void => {
-        for (let i = 0; i < args.length; i += 2) {
-            this.memory[args[i]] = {};
-        }
-    }
-
     createMemoryObject = (classificationKey: string, key: string, requestDetails: any, memoryObject: any): string => {
         this.memory[classificationKey][key] = memoryObject;
         this.memory[classificationKey][key].requestDetails = requestDetails;
@@ -49,7 +43,7 @@ export class Memory {
         }
 
         for (const key of Object.keys(memoryObjectRequestDetails)) {
-            if (requestInputParameters[key]?.toLowerCase() !== memoryObjectRequestDetails[key].toLowerCase()) {
+            if ((requestInputParameters[key] as string)?.toLowerCase() !== memoryObjectRequestDetails[key].toLowerCase()) {
                 throw new MemoryObjectRetrievalError(`requestInputParameter ${key} with value ${requestInputParameters[key]} does not match the stored requestDetails value of ${memoryObjectRequestDetails[key]}`);
             }
         }
@@ -65,6 +59,7 @@ export class Memory {
         return memoryObject;
     }
 
+    // Primarily used for testing, to inject mock objects into memory.
     public injectMemoryObject(key: string, requestId: string, memoryObject: any) {{}
         this.memory[key][requestId] = memoryObject;
     }

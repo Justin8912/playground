@@ -1,8 +1,6 @@
-/**
- * Normalizes a song title or artist for comparison.
- */
 import {pipe} from "./pipe.js";
 import {Song} from "../Model/MusicService.js";
+import logger from "./logger.js";
 
 export const normalizeSongTitle = (title:string): string => {
     let removeAfterPipe = (title: string) => title.split('|')[0].trim();
@@ -25,28 +23,17 @@ export const removeParenthesisContent = (title: string): string => {
     return title.replace(/ *\([^)]*\) */g, ' ').replace(/ +/g, ' ').trim();
 }
 
-/**
- * Returns a similarity score between 0 and 1 for two strings.
- * Uses Jaccard similarity on word sets.
- */
 const similarity = (a: string, b: string): number => {
     const setA = new Set(a.split(' '));
     const setB = new Set(b.split(' '));
 
-    // console.log("Here are the sets");
-    // console.log("SetA: ", setA);
-    // console.log("SetB: ", setB);
     const intersection = new Set([...setA].filter(x => setB.has(x)));
     const union = new Set([...setA, ...setB]);
     return union.size === 0 ? 0 : intersection.size / union.size;
 };
 
-/**
- * Determines if two songs are a strong match.
- * Returns true if they are, false otherwise.
- */
 export const doSongsMatch = (source: Song, target: Song): boolean => {
-    console.log(`Song comparison: \n\tsource: ${source.title} by ${source.artists}\n\ttarget: ${target.title} by ${target.artists}`);
+    logger.info(`Song comparison: \n\tsource: ${source.title} by ${source.artists}\n\ttarget: ${target.title} by ${target.artists}`);
     const sourceTitle = normalizeSongTitle(source.title);
     const targetTitle = normalizeSongTitle(target.title);
     const sourceArtist = source.artists.join(" ").toLowerCase();
