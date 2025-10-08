@@ -136,7 +136,7 @@ export class YoutubeMusicClientService implements MusicServiceInterface {
     }
 
     public async getSong(song: Song): Promise<Song | null> {
-        const query = `${song.title}`;
+        const query = `${song.title} ${song.artists.join(' ')}`;
         return await this.getSongByQuery(query);
     }
 

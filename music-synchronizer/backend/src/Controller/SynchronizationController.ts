@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {
-    getProposedUpdates,
+    getProposedUpdates, getSongIdFromUrl,
     synchronizeMusicSources,
     synchronizePlaylistWithDifferencesProvided
 } from "../Services/Synchronization.js";
@@ -14,7 +14,6 @@ import {
     serviceTypeToClientMap,
     SupportedService,
 } from "./controllerHelpers.js";
-import {InvalidRequest} from "../Errors/InvalidRequest.js";
 import {handleError} from "../Errors/ErrorHandler.js";
 import {MemoryObjectUpdateError} from "../Errors/MemoryObjectUpdateError.js";
 import {PlaylistSynchronizationError} from "../Errors/PlaylistSynchronizationError.js";
@@ -132,7 +131,7 @@ export const updateProposedUpdatesController = async (req: Request, res: Respons
                     req
                 ),
                 sourceSongId,
-                targetSongId
+                targetSongId.includes("https://") ? getSongIdFromUrl(targetSongId, targetService) : targetSongId
             );
         } else if (operation === "remove") {
             didUpdatePass = removeProposedChangeBySongIds(

@@ -4,9 +4,7 @@ import {GetPlaylistsResponse, Song} from "../Model/MusicService.js";
 import {findDifferences} from "../Util/findDifferences.js";
 import {doSongsMatch} from "../Util/titleMatcher.js";
 import {ProposedChanges, SongMapping, SynchronizeMusicSources} from "../Model/Controller.js";
-import logger from "../Util/logger.js";
 import {PlaylistNotFoundError} from "../Errors/PlaylistNotFoundError.js";
-
 
 
 export const synchronizeMusicSources = async (
@@ -90,4 +88,16 @@ export const getProposedUpdates = async (
     }
 
     return proposedChanges;
+}
+
+export const getSongIdFromUrl = (url: string, service: 'spotify' | 'youtube'): string | null => {
+    if (service.toLowerCase() === 'spotify') {
+        const match = url.match(/track\/([a-zA-Z0-9]+)/);
+        return match ? match[1] : null;
+    } else if (service.toLowerCase() === 'youtube') {
+        const match = url.match(/v=([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
+    } else {
+        throw new Error("Unsupported service type when converting url to song id");
+    }
 }

@@ -126,7 +126,7 @@ export class SpotifyService implements MusicServiceInterface {
     }
 
     public getSong = async (song: Song): Promise<Song | null> => {
-        const query = `${song.title} ${song.artists.join(' ')}`;
+        const query = `${song.title}`;
         const spotifyTrack: Track = (await this.getSongByQuery(query)) as Track;
 
         if (!spotifyTrack) {
