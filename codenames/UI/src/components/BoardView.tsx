@@ -7,7 +7,24 @@ interface BoardViewProps {
     cards: Card[][];
 }
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
-    console.log("Board asdfView: ", cards);
+
+    const renderGrid = (row: Card[]) => {
+        return (
+            <Grid container gap="15px">
+                {row.map(renderCard)}
+            </Grid>
+        );
+    }
+
+    const renderCard = (card: Card) => {
+        const classes = `card`
+        return (
+            <Grid className={classes} >
+                {card.word}
+            </Grid>
+        );
+    }
+
     return (
         <Grid 
             id={"BoardView"}
@@ -15,27 +32,7 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
             gap="15px"
             flexDirection="column"
         >
-            { 
-                cards.map((row) => {
-                    return (
-                    <Grid 
-                        container
-                        className="row"
-                        gap="15px"
-                    >
-                        {
-                            row.map((card) => (
-                                <Grid
-                                  className="card"
-                                >
-                                    {card.word}
-                                </Grid>
-                            ))
-                        }
-                    </Grid>
-                    )
-                })
-            }
+            { cards.map(renderGrid) }
         </Grid>
     ) 
 }

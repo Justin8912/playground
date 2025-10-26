@@ -1,4 +1,4 @@
-export type Team = "Team1" | "Team2";
+export type Team = "Blue" | "Red";
 export type CardState = "untouched" | "bystander" | "success";
 
 export type Card = {
