@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import {BoardView} from './components/BoardView';
-import {type Card} from './types';
-import {initializeCardArray} from './utility/initializer';
 import './App.css'
+import {getGameById} from "./backend/queries";
+import {LoadBoardView} from "./components/ApolloLoader";
 
-function App() {
-  const cards: Card[][] = initializeCardArray();
+const App = () => {
   return (
     <>
-      <BoardView cards={cards}/>
+      <LoadBoardView query={getGameById} variables={{"id": "68fe7aa02e5c160054c82517"}} />
     </>
   )
 }

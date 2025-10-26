@@ -1,10 +1,8 @@
-import { type Card, type Team } from "../types";
-
 const WORDS = [
   "wonderland","yellowstone","castle","diamond","eagle"
 ];
 
-const shuffle = <T>(array: T[]): T[] => {
+const shuffle = (array) => {
   const a = array.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -13,21 +11,21 @@ const shuffle = <T>(array: T[]): T[] => {
   return a;
 };
 
-const generateCard = (word = "", owner: Team = "Team1"): Card => {
+const generateCard = (word = "", owner = "Blue") => {
   return {
     word,
     owner,
-    teamLastSelected: "none",
-    state: "untouched"
+    teamLastSelected: "None",
+    classification: "bystander"
   };
 };
 
-export const initializeCardArray = (): Card[][] => {
+export const initializeCardArray = () => {
   const shuffled = shuffle(WORDS);
-  const cards: Card[][] = [];
+  const cards = [];
 
   for (let row = 0; row < 5; row++) {
-    const currentRow: Card[] = [];
+    const currentRow = [];
     for (let col = 0; col < 5; col++) {
       const idx = row * 5 + col;
       const word = shuffled[idx] ?? `Card ${idx + 1}`;
