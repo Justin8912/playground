@@ -1,3 +1,4 @@
+import React from 'react';
 import { type DocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import {type FC} from 'react';
@@ -8,17 +9,17 @@ export interface LoadBoardViewProps {
     variables?: {[key: string]: any};
 }
 
-export const LoadBoardView: FC<LoadBoardViewProps> = ({query, variables, children}) => {
-    const {loading, error, data} = useQuery(query, {variables});
+export const LoadBoardView: FC<LoadBoardViewProps> = ({query, variables}) => {
+    const {error, data, loading} = useQuery(query, {variables});
     
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <><p>Loading...</p></>;
     if (error) return <p>Error :{error.message}</p>;
 
-    console.log(data);
+    console.log(error);
 
     return (
-        <>
-            {<BoardView cards={data.getGame.cards} />}
-        </>
-    )
+        <div>
+            <BoardView cards={data.getGame.cards} />
+        </div>
+    );
 }

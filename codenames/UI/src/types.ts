@@ -2,8 +2,8 @@ export type Team = "Blue" | "Red";
 export type CardState = "untouched" | "bystander" | "success";
 
 export type Card = {
-  word: string 
+  classification: string
+  id: string
   owner: Team
-  teamLastSelected: Team | "none", 
-  state: string
+  word: string
 }

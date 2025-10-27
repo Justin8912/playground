@@ -44,14 +44,6 @@ export const resolvers = {
         blackCards: cards.filter(c => c.classification === "black"),
       };
     },
-    getCardsByGameId: async (_, { gameId }, { db }) => {
-        let cards = await db.collection("cards").find({ gameId: new ObjectId(gameId) });
-        console.log("Fetched card: ", cards.toArray())
-        if (!cards) {
-            throw new Error(`Card with id ${gameId} not found`);
-        }
-        return cards
-    }
   },
 
   Mutation: {

@@ -1,10 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
+import App from './App.js'
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
+import React from 'react';
 
+console.log("AHHHH")
 const httpLink = createHttpLink({
   uri: "http://localhost:4000/"
 });

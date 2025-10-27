@@ -7,7 +7,7 @@ interface BoardViewProps {
     cards: Card[][];
 }
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
-
+    console.log(cards)
     const renderGrid = (row: Card[]) => {
         return (
             <Grid container gap="15px">
@@ -19,7 +19,7 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
     const renderCard = (card: Card) => {
         const classes = `card`
         return (
-            <Grid className={classes} >
+            <Grid className={classes} key={card.id} >
                 {card.word}
             </Grid>
         );
