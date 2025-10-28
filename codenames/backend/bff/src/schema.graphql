@@ -9,13 +9,13 @@ type Card {
   word: String!
   owner: Team!
   classification: Classification!
-  teamLastSelected: Team
+  lastSelectedBy: Team
   gameId: ID!
 }
 
 input CardInput {
   id: ID!
-  teamLastSelected: Team
+  lastSelectedBy: Team
 }
 
 type OwnerInfo {

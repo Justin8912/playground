@@ -10,7 +10,7 @@ export const getGameById = gql`
                 classification
                 id
                 owner
-                teamLastSelected
+                lastSelectedBy
                 word
                 gameId
             }
@@ -26,7 +26,7 @@ export const getOwnerInfo = gql`
                 word
                 owner
                 classification
-                teamLastSelected
+                lastSelectedBy
                 gameId
             }
             blackCards {
@@ -34,7 +34,7 @@ export const getOwnerInfo = gql`
                 word
                 owner
                 classification
-                teamLastSelected
+                lastSelectedBy
                 gameId
             }
         }
@@ -51,7 +51,7 @@ export const createGame = gql`
                 classification 
                 id
                 owner 
-                teamLastSelected 
+                lastSelectedBy
                 word
                 gameId
             }
@@ -68,7 +68,7 @@ export const updateCard = gql`
                 classification
                 id
                 owner
-                teamLastSelected
+                lastSelectedBy
                 word
                 gameId
             }

@@ -1,13 +1,11 @@
 import React from 'react';
 import './App.css'
-import {getGameById} from "./backend/queries";
-import {LoadBoardView} from "./components/ApolloLoader";
+import {LoadBoardView} from "./components/LoadBoardView";
 
 const App = () => {
-  console.log("app")
     return (
     <>
-      <LoadBoardView query={getGameById} variables={{"id": "68ff7b2a1cb39ffff730c967"}} />
+      <LoadBoardView variables={{"id": "68ff7b2a1cb39ffff730c967"}} />
     </>
   )
 }

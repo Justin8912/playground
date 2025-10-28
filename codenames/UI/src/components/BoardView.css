@@ -16,3 +16,11 @@
     background-color: #ccba45;
     text-transform: capitalize;
 }
+
+.red {
+    background-color: red;
+}
+
+.blue {
+    background-color: blue;
+}

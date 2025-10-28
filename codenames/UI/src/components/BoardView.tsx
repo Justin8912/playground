@@ -1,25 +1,33 @@
-import react, {type FC} from 'react';
+import React, {type FC} from 'react';
 import { Grid } from '@mui/material';
 import {type Card} from '../types';
 import "./BoardView.css";
 
 interface BoardViewProps {
     cards: Card[][];
-}
+};
+
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
-    console.log(cards)
-    const renderGrid = (row: Card[]) => {
+    const handleCardSelect = (e) => {
+
+    }
+
+    const RenderGrid: FC<{row: Card[]}> = ({ row }) => {
         return (
             <Grid container gap="15px">
-                {row.map(renderCard)}
+                {row.map(card =>
+                    <RenderCard card={card} />
+                )}
             </Grid>
         );
     }
 
-    const renderCard = (card: Card) => {
-        const classes = `card`
+    const RenderCard: FC<{ card: Card }> = ({ card }) => {
+        let classes = `card`
+
+
         return (
-            <Grid className={classes} key={card.id} >
+            <Grid className={classes} id={card.id} onClick={handleCardSelect}>
                 {card.word}
             </Grid>
         );
@@ -32,7 +40,9 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
             gap="15px"
             flexDirection="column"
         >
-            { cards.map(renderGrid) }
+            { cards.map(row => (
+                <RenderGrid row={row}/>
+            )) }
         </Grid>
     ) 
 }
