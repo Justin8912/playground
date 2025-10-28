@@ -66,19 +66,18 @@ export const resolvers = {
     updateCard: async (_, { cardInput }, { db }) => {
       const { id, ...fields } = cardInput;
 
-      // update the one card
       const result = await db.collection("cards").findOneAndUpdate(
-        { _id: id },
+        { _id: new ObjectId(id) },
         { $set: fields },
         { returnDocument: "after" }
       );
 
-      if (!result.value) {
+      if (!result) {
         throw new Error(`Card with id ${id} not found`);
       }
 
       // Fetch the parent game and its cards
-      const gameId = result.value.gameId;
+      const gameId = result.gameId;
       const game = await db.collection("games").findOne({ _id: gameId });
       const cards = await db.collection("cards").find({ gameId }).toArray();
 
@@ -101,13 +100,13 @@ export const resolvers = {
 
   Game: {
     cards: async (parent, _, { db }) => {
-        console.log("Game.cards resolver is being called")
+        // console.log("Game.cards resolver is being called")
       const cards = await db
         .collection("cards")
         .find({ gameId: new ObjectId(parent.id) })
         .toArray();
 
-        console.log("Here are the cards fetched: ", cards)
+        // console.log("Here are the cards fetched: ", cards)
       const grid = [];
       cards.forEach((card) => {
         if (!card.position) return;
