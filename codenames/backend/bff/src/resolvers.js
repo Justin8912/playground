@@ -33,7 +33,6 @@ export const resolvers = {
         }
         return {
             id: game._id.toString(),
-            ruleset: game.ruleset
         };
     },
     ownerInfo: async (_, { team }, { db }) => {
@@ -54,46 +53,36 @@ export const resolvers = {
       });
 
       const id = result.insertedId.toString()
-      console.log("Here is the result: ",result.insertedId.toString(), result.insertedId )
       await createCards(db, id)
 
       return {
         id: id,
-        ruleset: ruleSet
       };
     },
 
     updateCard: async (_, { cardInput }, { db }) => {
-      const { id, ...fields } = cardInput;
+      const { ids, lastSelectedBy } = cardInput;
 
-      const result = await db.collection("cards").findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: fields },
-        { returnDocument: "after" }
+      const objectIds = ids.map(id => new ObjectId(id));
+      const result = await db.collection("cards").updateMany(
+        { _id: { $in: objectIds } },
+        { $set: { lastSelectedBy } }
       );
 
-      if (!result) {
-        throw new Error(`Card with id ${id} not found`);
+      if (result.matchedCount === 0) {
+        throw new Error(`No cards found with provided ids`);
       }
 
-      // Fetch the parent game and its cards
-      const gameId = result.gameId;
-      const game = await db.collection("games").findOne({ _id: gameId });
-      const cards = await db.collection("cards").find({ gameId }).toArray();
+      const sampleCard = await db.collection("cards").findOne({ _id: objectIds[0] });
+      if (!sampleCard) {
+        throw new Error(`Card not found after update`);
+      }
 
-      // Rebuild the 2D array if you’re storing positions
-      const grid = [];
-      cards.forEach((c) => {
-        if (!c.position) return;
-        const { row, col } = c.position;
-        if (!grid[row]) grid[row] = [];
-        grid[row][col] = c;
-      });
+      const gameId = sampleCard.gameId;
+      const game = await db.collection("games").findOne({ _id: gameId });
 
       return {
         id: game._id.toString(),
-        ruleset: game.ruleset,
-        cards: grid.length > 0 ? grid : [[]],
       };
     },
   },
@@ -117,5 +106,9 @@ export const resolvers = {
 
       return grid.length > 0 ? grid : [[]];
     },
+      ruleset: async (parent, _, { db }) => {
+        const game = await db.collection("games").findOne({ _id: new ObjectId(parent.id) });
+        return game.ruleset;
+      }
   },
 };

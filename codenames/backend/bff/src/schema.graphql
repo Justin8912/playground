@@ -14,8 +14,8 @@ type Card {
 }
 
 input CardInput {
-  id: ID!
-  lastSelectedBy: Team
+  ids: [ID!]!
+  lastSelectedBy: Team!
 }
 
 type OwnerInfo {
