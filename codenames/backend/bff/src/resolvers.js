@@ -6,11 +6,6 @@ const createCards = async (db, gameId) => {
 
     for (let row = 0 ; row < arrayOfCards.length; row++) {
         for (let col = 0; col < arrayOfCards[row].length; col++) {
-            console.log("Inserting the following card: ",{
-                    ...arrayOfCards[row][col], 
-                    position: {row, col},
-                    gameId: gameId
-                } )
             await db.collection("cards").insertOne(
                 { 
                     ...arrayOfCards[row][col], 
@@ -106,9 +101,10 @@ export const resolvers = {
 
       return grid.length > 0 ? grid : [[]];
     },
-      ruleset: async (parent, _, { db }) => {
-        const game = await db.collection("games").findOne({ _id: new ObjectId(parent.id) });
-        return game.ruleset;
-      }
+
+    ruleset: async (parent, _, { db }) => {
+      const game = await db.collection("games").findOne({ _id: new ObjectId(parent.id) });
+      return game.ruleset;
+    }
   },
 };
