@@ -1,26 +1,3 @@
 #BoardView {
     justify-content: center;
 }
-
-.card {
-    flex: flex;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    border: 1px solid #ccb20a;
-    padding: 0;
-    text-align: center;
-    aspect-ratio: 2.5 / 1;
-    width: 100px;
-    border-radius: 5px;
-    background-color: #ccba45;
-    text-transform: capitalize;
-}
-
-.red {
-    background-color: red;
-}
-
-.blue {
-    background-color: blue;
-}

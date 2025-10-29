@@ -1,0 +1,24 @@
+.card {
+    flex: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    border: 1px solid #ccb20a;
+    padding: 0;
+    text-align: center;
+    aspect-ratio: 2.5 / 1;
+    width: 100px;
+    border-radius: 5px;
+    background-color: #ccba45;
+    text-transform: capitalize;
+}
+
+.Red {
+    background-color: red !important;
+    border: 1px solid darkred;
+}
+
+.Blue {
+    background-color: blue;
+    border: 1px solid darkblue;
+}

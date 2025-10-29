@@ -27,8 +27,8 @@ export type Card = {
 };
 
 export type CardInput = {
-  id: Scalars['ID']['input'];
-  lastSelectedBy?: InputMaybe<Team>;
+  ids: Array<Scalars['ID']['input']>;
+  lastSelectedBy: Team;
 };
 
 export enum Classification {

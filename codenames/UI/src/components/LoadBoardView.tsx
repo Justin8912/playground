@@ -11,28 +11,13 @@ export interface LoadBoardViewProps {
 
 export const LoadBoardView: FC<LoadBoardViewProps> = ({variables}) => {
     const {error, data, loading} = useQuery(getGameById, {variables});
-    const [userSelection, setUserSelection] = useState([]);
 
     if (loading) return <><p>Loading...</p></>;
     if (error) return <p>Error :{error.message}</p>;
 
-    const handleCardSelect = (e) => {
-        const selectedCardId = e.target.id;
-        if (!userSelection.includes(selectedCardId)) {
-            setUserSelection([...userSelection, selectedCardId]);
-        } else {
-            setUserSelection(userSelection.filter(id => id !== selectedCardId));
-        }
-    }
-
     return (
         <div>
-            <BoardView cards={data.getGame.cards} handleCardSelect={handleCardSelect.bind(this)}/>
-
-            {userSelection.length ?
-                <Button>Submit for your team?</Button>:
-                <></>
-            }
+            <BoardView cards={data.getGame.cards}/>
         </div>
     );
 }
