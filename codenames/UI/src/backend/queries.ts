@@ -18,6 +18,15 @@ export const getGameById = gql`
     }
 `
 
+export const getAllGames = gql`
+    query getAllGames {
+        getAllGames {
+            id
+            ruleset
+        }
+    }
+`
+
 export const getOwnerInfo = gql`
     query ownerInfo($team: Team!) {
         ownerInfo(team: $team) {
@@ -73,5 +82,11 @@ export const updateCard = gql`
                 gameId
             }
         }
+    }
+`
+
+export const deleteGame = gql`
+    mutation deleteGame($id: ID!) {
+        deleteGame(id: $id)
     }
 `
