@@ -30,6 +30,12 @@ export const resolvers = {
             id: game._id.toString(),
         };
     },
+    getAllGames: async (_, __, { db }) => {
+      const games = await db.collection("games").find({}).toArray();
+      return games.map(game => ({
+        id: game._id.toString(),
+      }));
+    },
     ownerInfo: async (_, { team }, { db }) => {
       const cards = await db.collection("cards").find({ owner: team }).toArray();
 
@@ -79,6 +85,19 @@ export const resolvers = {
       return {
         id: game._id.toString(),
       };
+    },
+
+    deleteGame: async (_, { id }, { db }) => {
+      const gameObjectId = new ObjectId(id);
+
+      await db.collection("cards").deleteMany({ gameId: gameObjectId });
+      const result = await db.collection("games").deleteOne({ _id: gameObjectId });
+
+      if (result.deletedCount === 0) {
+        throw new Error(`Game with id ${id} not found`);
+      }
+
+      return true;
     },
   },
 

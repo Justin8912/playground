@@ -25,12 +25,14 @@ type OwnerInfo {
 
 type Query {
   getGame(id: ID!): Game!
+  getAllGames: [Game!]!
   ownerInfo(team: Team!): OwnerInfo!
 }
 
 type Mutation {
   createGame(ruleSet: Ruleset!): Game!
   updateCard(cardInput: CardInput!): Game!
+  deleteGame(id: ID!): Boolean!
 }
 
 enum Team {
