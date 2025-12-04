@@ -35,10 +35,6 @@ type Mutation {
   deleteGame(id: ID!): Boolean!
 }
 
-type Subscription {
-  gameUpdated(gameId: ID!): Game!
-}
-
 enum Team {
   Blue
   Red

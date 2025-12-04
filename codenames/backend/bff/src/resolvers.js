@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { initializeCardArray } from "./utility/deckGenerator.js";
-import { pubsub, EVENTS } from "./pubsub.js";
 
 const createCards = async (db, gameId) => {
     const arrayOfCards = initializeCardArray();
@@ -83,17 +82,9 @@ export const resolvers = {
       const gameId = sampleCard.gameId;
       const game = await db.collection("games").findOne({ _id: gameId });
 
-      const gameData = {
+      return {
         id: game._id.toString(),
       };
-
-      // Publish event for subscriptions
-      pubsub.publish(EVENTS.GAME_UPDATED, {
-        gameUpdated: gameData,
-        gameId: game._id.toString()
-      });
-
-      return gameData;
     },
 
     deleteGame: async (_, { id }, { db }) => {
@@ -134,20 +125,5 @@ export const resolvers = {
       const game = await db.collection("games").findOne({ _id: new ObjectId(parent.id) });
       return game.ruleset;
     }
-  },
-
-  Subscription: {
-    gameUpdated: {
-      subscribe: (_, { gameId }) => {
-        return pubsub.asyncIterator([EVENTS.GAME_UPDATED]);
-      },
-      resolve: (payload, { gameId }) => {
-        // Only send updates for the specific game being subscribed to
-        if (payload.gameId === gameId) {
-          return payload.gameUpdated;
-        }
-        return null;
-      },
-    },
   },
 };

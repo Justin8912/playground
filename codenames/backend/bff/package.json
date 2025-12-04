@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
+  "type":"module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
@@ -12,15 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@apollo/server": "^4.12.2",
-    "@graphql-tools/schema": "^10.0.26",
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "@apollo/server": "^5.0.0",
     "graphql": "^16.11.0",
-    "graphql-subscriptions": "^3.0.0",
-    "graphql-ws": "^6.0.6",
-    "mongodb": "^6.20.0",
-    "ws": "^8.18.3"
+    "mongodb": "^6.20.0"
   }
 }
