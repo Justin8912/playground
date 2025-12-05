@@ -1,6 +1,8 @@
 import {type Request} from 'express';
-import type {AppConfig} from "../config/AppConfig";
-import type {RateLimiterResponse} from "../model/RateLimiter";
+import type {AppConfig} from "../../config/AppConfig";
+import type {RateLimiterResponse} from "../../model/RateLimiter";
+
+// Set environment variable RATE_LIMITER to TOKEN_BUCKET to use this implementation
 
 export const tokenBucket = (req: Request, appConfig: AppConfig): RateLimiterResponse => {
     const time = Date.now();

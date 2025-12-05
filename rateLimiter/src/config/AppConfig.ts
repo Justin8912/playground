@@ -1,5 +1,5 @@
 import type {EnvironmentConfig} from "./EnvironmentConfig";
-import {tokenBucket} from "../middleware/tokenBucket";
+import {tokenBucket} from "../middleware/rateLimiter/tokenBucket";
 import type {Request} from "express";
 import type {RateLimiterResponse} from "../model/RateLimiter";
 
@@ -13,7 +13,7 @@ export class AppConfig {
     async initialize() {}
 
     getRateLimitingFunction(): (request: Request, appConfig: AppConfig) => RateLimiterResponse {
-        const rateLimitingAlgorithm = this.environmentConfig.getRateLimitingFunction();
+        const rateLimitingAlgorithm = this.environmentConfig.getRateLimiterAlgorithm();
         switch (rateLimitingAlgorithm) {
             case 'TOKEN_BUCKET':
                 return tokenBucket;

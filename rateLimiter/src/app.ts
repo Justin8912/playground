@@ -1,12 +1,11 @@
 import express, { type Express, type Request, type Response } from "express";
-import {tokenBucket} from "./middleware/tokenBucket";
 import {AppConfig} from "./config/AppConfig";
 import { EnvironmentConfig } from "./config/EnvironmentConfig";
 
 const app: Express = express();
 const PORT = 3000;
 
-const environmentConfig: EnvironmentConfig = new EnvironmentConfig("TOKEN_BUCKET");
+const environmentConfig: EnvironmentConfig = new EnvironmentConfig();
 const appConfig: AppConfig = new AppConfig(environmentConfig);
 
 const rateLimiter = (req: Request, res: Response, next: () => void) => {
