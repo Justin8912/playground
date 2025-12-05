@@ -17,7 +17,7 @@ const rateLimiter = (req: Request, res: Response, next: () => void) => {
     } else {
         res.status(429)
             .setHeader("x-Rate-Limited-Retry-After", String(rateLimiterResponse.waitTimeMs ?? 0)) // Probably dont want to leave this in ms since it isnt very human readable
-            .setHeader("x-Rate-Limited-Bucket-Capacity", appConfig.getTokenCapacity())
+            .setHeader("x-Rate-Limited-Bucket-Capacity", appConfig.getBucketCapacity())
             .setHeader("x-Rate-Limited-Refill-Rate", `${appConfig.getRefillRateMs() * 1000 * 60}/minute`)
             .send("Too Many Requests - Rate Limit Exceeded");
     }

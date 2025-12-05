@@ -1,21 +1,27 @@
-import {type Request} from "express";
-import type {AppConfig} from "./AppConfig";
-import type {RateLimiterResponse} from "../model/RateLimiter";
-import {tokenBucket} from "../middleware/tokenBucket";
+import configuration from "./configuration.json";
 
 export class EnvironmentConfig {
     private readonly rateLimitingAlgorithm: string;
+    private readonly configuration: any;
 
     constructor(rateLimitingAlgorithm: string) {
         this.rateLimitingAlgorithm = rateLimitingAlgorithm;
+        this.configuration = configuration;
     }
 
-    getRateLimitingFunction(): (request: Request, appConfig: AppConfig) => RateLimiterResponse {
-        switch (this.rateLimitingAlgorithm) {
-            case 'TOKEN_BUCKET':
-                return tokenBucket;
-            default:
-                throw new Error(`Unsupported rate limiting algorithm: ${this.rateLimitingAlgorithm}`);
-        }
+    getRateLimitingFunction(): string {
+        return this.rateLimitingAlgorithm;
+    }
+
+    getRefillIntervalMs(): number {
+        return this.configuration.refillIntervalMs;
+    }
+
+    getRefillAmount(): number {
+        return this.configuration.refillAmount;
+    }
+
+    getBucketCapacity(): number {
+        return this.configuration.bucketCapacity;
     }
 }

@@ -1,0 +1,5 @@
+{
+  "bucketCapacity": 5,
+  "refillAmount": 1,
+  "refillIntervalMs": 60000
+}

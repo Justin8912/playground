@@ -17,7 +17,7 @@ export const tokenBucket = (req: Request, appConfig: AppConfig): RateLimiterResp
         time,
         appConfig.getRefillAmount(),
         appConfig.getRefillIntervalMs(),
-        appConfig.getTokenCapacity()
+        appConfig.getBucketCapacity()
     );
 
     console.log(currentTokensForUser)
