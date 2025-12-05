@@ -1,26 +1,32 @@
 import {type Request} from 'express';
-import type {RateLimiter, RateLimiterResponse} from "../../model/RateLimiter";
+import type {RateLimiter, RateLimiterResponse} from "../../model/RateLimiter.js";
+import type {RedisClientType} from "redis";
 
 // Set environment variable RATE_LIMITER to TOKEN_BUCKET to use this implementation
 export class TokenBucket implements RateLimiter {
+    private readonly redisClient: RedisClientType;
     private readonly bucketCapacity: number;
     private readonly refillIntervalInMs: number;
     private readonly refillAmount: number;
 
-    constructor(bucketCapacity: number, refillIntervalInMs: number, refillAmount: number) {
+    constructor(redisClient: RedisClientType, bucketCapacity: number, refillIntervalInMs: number, refillAmount: number) {
+        this.redisClient = redisClient;
         this.bucketCapacity = bucketCapacity;
         this.refillIntervalInMs = refillIntervalInMs;
         this.refillAmount = refillAmount;
     }
 
-    shouldAllowRequest(req: Request): RateLimiterResponse {
+    async shouldAllowRequest(req: Request): Promise<RateLimiterResponse> {
         const time = Date.now();
-        const userId = req.headers?.Authorization;
+        console.log(req.headers)
+        const userId = req.headers.authorization as string;
+
+        if (!userId) {
+            throw new Error("User ID must be specified in the request");
+        }
 
         // Make the call to token bucket (redis) based on the userId
-
-        const lastAccessed = 1764894475090;
-        const currentTokens = 0;
+        const {lastAccessed, currentTokens} = await this.getCurrentTokensForUser(userId as string);
 
         const currentTokensForUser = this.calculateTokens(
             lastAccessed,
@@ -32,8 +38,7 @@ export class TokenBucket implements RateLimiter {
         );
 
         if (currentTokensForUser > 0) {
-            // store the number of tokens and the timestamp in redis
-            // storeTokens(userId, currentTokensForUser - 1, time);
+            await this.updateUserTokens(userId, currentTokensForUser - 1, time);
             return { isRequestAllowed: true }
         } else {
             return {
@@ -77,5 +82,33 @@ export class TokenBucket implements RateLimiter {
         refillIntervalInMs: number
     ): number {
         return ((refillIntervalInMs / refillAmount) - (currentTime - lastAccessed));
+    }
+
+    private async getCurrentTokensForUser(userId: string): Promise<{
+        lastAccessed: number,
+        currentTokens: number
+    }> {
+        type TokenBucketEntry = {
+            tokens: string,
+            lastAccessed: string
+        }
+        const entry = (await this.redisClient.hGetAll(userId)) as unknown as TokenBucketEntry;
+
+        if (!entry.lastAccessed) {
+            await this.redisClient.hSet(userId, { tokens: String(this.bucketCapacity), lastAccessed: String(Date.now()) });
+            return {
+                lastAccessed: Date.now(),
+                currentTokens: this.bucketCapacity
+            };
+        } else {
+            return {
+                lastAccessed: parseInt(entry.lastAccessed),
+                currentTokens: parseInt(entry.tokens)
+            }
+        }
+    }
+
+    private async updateUserTokens(userId: string, tokens: number, timestamp: number): Promise<void> {
+        await this.redisClient.hSet(userId, { tokens: String(tokens), lastAccessed: String(timestamp) });
     }
 }

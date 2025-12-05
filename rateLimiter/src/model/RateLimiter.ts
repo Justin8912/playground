@@ -6,6 +6,6 @@ export interface RateLimiterResponse {
 }
 
 export interface RateLimiter {
-    shouldAllowRequest(req: Request): RateLimiterResponse;
+    shouldAllowRequest(req: Request): Promise<RateLimiterResponse>;
     getConfigHeaders(): Map<string, string | number>
 }
