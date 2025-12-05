@@ -8,18 +8,6 @@ export class EnvironmentConfig {
         this.configuration = configuration;
     }
 
-    getRefillIntervalMs(): number {
-        return this.configuration.refillIntervalMs;
-    }
-
-    getRefillAmount(): number {
-        return this.configuration.refillAmount;
-    }
-
-    getBucketCapacity(): number {
-        return this.configuration.bucketCapacity;
-    }
-
     getRateLimiterAlgorithm(): string {
         return this.getEnvironmentVariable(RATE_LIMITER_ENVIRONMENT_VARIABLE);
     }
@@ -30,5 +18,22 @@ export class EnvironmentConfig {
             throw new Error(`Environment variable ${variableName} not set.`);
         }
         return envVar;
+    }
+
+    getRedisPort(): number {
+        return this.configuration.redisPort;
+    }
+
+    // Rate Limiting Algorithm Variables
+    getRefillIntervalMs(): number {
+        return this.configuration.refillIntervalMs;
+    }
+
+    getRefillAmount(): number {
+        return this.configuration.refillAmount;
+    }
+
+    getBucketCapacity(): number {
+        return this.configuration.bucketCapacity;
     }
 }

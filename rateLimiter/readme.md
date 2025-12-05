@@ -14,15 +14,14 @@ I will have a couple main goals for this project:
 5. Document the implementations and findings
 
 Token Bucket Algorithm
-==
+--
 Tokens are added to a bucket at a fixed rate x up to a maximum capacity of y tokens. Each request consumes one token
 from the bucket. If there are no tokens available, the request is denied. If there are tokens available, one token is
-remove from the bucket and the request is allowed.
+removed from the bucket and the request is allowed.
 
 <img src="https://bytebytego.com/images/courses/system-design-interview/design-a-rate-limiter/figure-4-5-FGZ35C5S.svg">
 
-Implementation
---
+### Implementation
 There are many ways to implement a token bucket rate limiter. You can have it on the client, server, or middleware. I
 think the middleware approach is (generally) the best, as you get separation of concerns and it is removed from the
 business logic, but for simplicity I will integrate it into the application.

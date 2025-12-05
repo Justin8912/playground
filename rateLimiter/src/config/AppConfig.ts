@@ -28,9 +28,4 @@ export class AppConfig {
             this.environmentConfig.getRefillAmount()
         );
     }
-
-    getRefillRateMs(): number {
-        // TODO: this will need to be refactored when non bucket based algorithms are supported
-        return this.environmentConfig.getRefillAmount() / this.environmentConfig.getRefillIntervalMs();
-    }
 }
