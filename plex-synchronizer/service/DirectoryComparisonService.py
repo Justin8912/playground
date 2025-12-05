@@ -18,41 +18,49 @@ def compare_arrays(local_episodes, remote_episodes):
 
 
 def compare_directory_structures(local, remote):
-    result = {
-        "local": {},
-        "remote": {}
-    }
-    shows_array = set(local.keys()) | set(remote.keys())
-    for show in shows_array:
+    def filter_empty(d):
+        # Remove seasons with empty episode lists, and shows with empty dicts
+        return {
+            show: {
+                season: episodes
+                for season, episodes in seasons.items() if episodes
+            }
+            for show, seasons in d.items() if any(episodes for episodes in seasons.values())
+        }
+
+    def get_season_diffs(local_seasons, remote_seasons):
+        seasons = set(local_seasons.keys()) | set(remote_seasons.keys())
+        local_diff, remote_diff = {}, {}
+        for season in seasons:
+            if season not in remote_seasons:
+                local_diff[season] = local_seasons[season]
+            elif season not in local_seasons:
+                remote_diff[season] = remote_seasons[season]
+            else:
+                comparison = compare_arrays(local_seasons[season], remote_seasons[season])
+                if comparison["local"]:
+                    local_diff[season] = comparison["local"]
+                if comparison["remote"]:
+                    remote_diff[season] = comparison["remote"]
+        return local_diff, remote_diff
+
+    result = {"local": {}, "remote": {}}
+    all_shows = set(local.keys()) | set(remote.keys())
+    for show in all_shows:
         if show not in remote:
             result["local"][show] = local[show]
         elif show not in local:
             result["remote"][show] = remote[show]
         else:
-            seasons_array = set(local[show].keys()) | set(remote[show].keys())
-            for season in seasons_array:
-                if season not in remote[show]:
-                    if show not in result["local"]:
-                        result["local"][show] = {}
-                    result["local"][show] = {**result["local"][show], season: local[show][season]}
-                elif season not in local[show]:
-                    if show not in result["remote"]:
-                        result["remote"][show] = {}
-                    result["remote"][show] = {**result["remote"][show], season: remote[show][season]}
-                else:
-                    local_episodes = copy.deepcopy(local[show][season])
-                    remote_episodes = copy.deepcopy(remote[show][season])
-                    comparison = compare_arrays(local_episodes, remote_episodes)
-                    if len(local_episodes):
-                        print(f'populating lopcal with {local_episodes}')
-                        if show not in result["local"]:
-                            result["local"][show] = {}
-                        result["local"][show] = {**result["local"][show], season: comparison["local"]}
-                    if len(remote_episodes):
-                        if show not in result["remote"]:
-                            result["remote"][show] = {}
-                        result["remote"][show] = {**result["remote"][show], season: comparison["remote"]}
+            local_seasons, remote_seasons = local[show], remote[show]
+            local_diff, remote_diff = get_season_diffs(local_seasons, remote_seasons)
+            if local_diff:
+                result["local"][show] = local_diff
+            if remote_diff:
+                result["remote"][show] = remote_diff
 
+    result["local"] = filter_empty(result["local"])
+    result["remote"] = filter_empty(result["remote"])
     return result
 
 
@@ -62,7 +70,7 @@ class DirectoryComparisonService:
 
     def display_directory_structure_differences(self):
         # TODO: implement this function to print the different between directories _better_
-        print(json.dumps(self.comparison_result, indent=2))
+        print(json.dumps(self.comparison_result["local"], indent=2))
 
     def compare_directory_structures(self, local, remote):
         self.comparison_result = compare_directory_structures(local, remote)

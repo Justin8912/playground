@@ -13,11 +13,11 @@ def get_server_client(ip, username="jnste"):
 class AppConfig:
     def __init__(self):
         self.server = {
-            "ip": "100.82.133.11",
+            "ip": "192.168.1.93",
             "username": "jnste"
         }
-        self.local_path = "./tv"
-        self.remote_path = "/home/jnste/test/plex-source-data/tv"
+        self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
+        self.remote_path = "/home/jnste/storage/media/tv"
         self.sshClient = get_server_client(**self.server)
         self.fileTransferService = FileTransferService(self)
         self.directoryComparisonService = DirectoryComparisonService()
