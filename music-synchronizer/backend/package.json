@@ -1,0 +1,31 @@
+{
+  "name": "music-synchronizer",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "handler.ts",
+  "scripts": {
+    "start": "tsx src/handler.ts",
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.24.0",
+    "@litehex/node-vault": "^1.0.4",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "googleapis": "^146.0.0"
+  }
+}

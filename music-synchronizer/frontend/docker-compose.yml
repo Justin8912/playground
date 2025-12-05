@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  music-synchronizer-frontend:
+    build: .
+    container_name: music-synchronizer-frontend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
