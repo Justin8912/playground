@@ -10,14 +10,13 @@ const appConfig: AppConfig = new AppConfig(environmentConfig);
 
 const rateLimiter = (req: Request, res: Response, next: () => void) => {
     console.log("Should I limit you?", req.headers?.authorization);
-    const rateLimiterResponse = appConfig.getRateLimitingFunction()(req, appConfig);
+    const rateLimiter = appConfig.getRateLimiter()
+    const rateLimiterResponse = rateLimiter.shouldAllowRequest(req);
     if (rateLimiterResponse.isRequestAllowed) {
         next();
     } else {
         res.status(429)
-            .setHeader("x-Rate-Limited-Retry-After", String(rateLimiterResponse.waitTimeMs ?? 0)) // Probably dont want to leave this in ms since it isnt very human readable
-            .setHeader("x-Rate-Limited-Bucket-Capacity", appConfig.getBucketCapacity())
-            .setHeader("x-Rate-Limited-Refill-Rate", `${appConfig.getRefillRateMs() * 1000 * 60}/minute`)
+            .setHeaders(rateLimiterResponse.responseHeaders ?? new Map<string, string | number>([]))
             .send("Too Many Requests - Rate Limit Exceeded");
     }
 }

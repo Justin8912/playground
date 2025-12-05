@@ -1,7 +1,6 @@
 import type {EnvironmentConfig} from "./EnvironmentConfig";
-import {tokenBucket} from "../middleware/rateLimiter/tokenBucket";
-import type {Request} from "express";
-import type {RateLimiterResponse} from "../model/RateLimiter";
+import {TokenBucket} from "../middleware/rateLimiter/tokenBucket";
+import type {RateLimiter} from "../model/RateLimiter";
 
 export class AppConfig {
     private readonly environmentConfig: EnvironmentConfig;
@@ -12,29 +11,26 @@ export class AppConfig {
 
     async initialize() {}
 
-    getRateLimitingFunction(): (request: Request, appConfig: AppConfig) => RateLimiterResponse {
+    getRateLimiter(): RateLimiter {
         const rateLimitingAlgorithm = this.environmentConfig.getRateLimiterAlgorithm();
         switch (rateLimitingAlgorithm) {
             case 'TOKEN_BUCKET':
-                return tokenBucket;
+                return this.getTokenBucketRateLimiter();
             default:
                 throw new Error(`Unsupported rate limiting algorithm: ${rateLimitingAlgorithm}`);
         }
     }
 
-    getBucketCapacity(): number {
-        return this.environmentConfig.getBucketCapacity();
-    }
-
-    getRefillAmount(): number {
-        return this.environmentConfig.getRefillAmount();
-    }
-
-    getRefillIntervalMs(): number {
-        return this.environmentConfig.getRefillIntervalMs();
+    getTokenBucketRateLimiter(): TokenBucket {
+        return new TokenBucket(
+            this.environmentConfig.getBucketCapacity(),
+            this.environmentConfig.getRefillIntervalMs(),
+            this.environmentConfig.getRefillAmount()
+        );
     }
 
     getRefillRateMs(): number {
-        return this.getRefillAmount() / this.getRefillIntervalMs();
+        // TODO: this will need to be refactored when non bucket based algorithms are supported
+        return this.environmentConfig.getRefillAmount() / this.environmentConfig.getRefillIntervalMs();
     }
 }
