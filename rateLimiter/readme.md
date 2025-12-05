@@ -8,8 +8,8 @@ algorithms:
 
 I will have a couple main goals for this project:
 1. Understand the algorithms and their tradeoffs
-2. Implement them in code
-3. Benchmark their performance
+2. Implement them in code for non-distributed and distributed systems
+3. Benchmark their performance by calculating the latency each middleware adds to a request
 4. Write tests to verify correctness
 5. Document the implementations and findings
 
@@ -24,7 +24,7 @@ removed from the bucket and the request is allowed.
 ### Implementation
 There are many ways to implement a token bucket rate limiter. You can have it on the client, server, or middleware. I
 think the middleware approach is (generally) the best, as you get separation of concerns and it is removed from the
-business logic, but for simplicity I will integrate it into the application.
+business logic, but for simplicity I will integrate it into the middleware of the application.
 
 I plan to implement the rate limiter as a middleware using nodejs express as my api. The rate limiter will be backed with
 redis.

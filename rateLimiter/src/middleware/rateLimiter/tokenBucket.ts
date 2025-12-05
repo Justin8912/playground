@@ -18,7 +18,6 @@ export class TokenBucket implements RateLimiter {
 
     async shouldAllowRequest(req: Request): Promise<RateLimiterResponse> {
         const time = Date.now();
-        console.log(req.headers)
         const userId = req.headers.authorization as string;
 
         if (!userId) {
