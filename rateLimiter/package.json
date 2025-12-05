@@ -2,9 +2,11 @@
   "name": "tokenbucket",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "RATE_LIMITER=TOKEN_BUCKET && npx tsx src/app.ts "
+    "start:redis": "docker compose up",
+    "start:api": "RATE_LIMITER=TOKEN_BUCKET npx tsx src/app.ts "
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "@types/redis": "^4.0.10",
+    "express": "^5.2.1",
+    "redis": "^5.10.0"
   }
 }
