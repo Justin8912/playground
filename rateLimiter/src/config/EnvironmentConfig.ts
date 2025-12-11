@@ -9,7 +9,7 @@ export class EnvironmentConfig {
     }
 
     getRateLimiterAlgorithm(): string {
-        return this.getEnvironmentVariable(RATE_LIMITER_ENVIRONMENT_VARIABLE);
+        return this.configuration.rateLimiterAlgorithm;
     }
 
     getEnvironmentVariable(variableName: string): string {

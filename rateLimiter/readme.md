@@ -13,6 +13,22 @@ I will have a couple main goals for this project:
 4. Write tests to verify correctness
 5. Document the implementations and findings
 
+Running
+--
+To run this application: 
+
+1. Run the docker compose file (this is for the redis container):
+```
+npm run start:redis
+```
+
+2. Go to the `src/config/configuration.json` file and update the parameters as needed (choose `TOKEN_BUCKET` for now)
+3. Run the application:
+
+``` 
+npm run start:api
+```
+
 Token Bucket Algorithm
 --
 Tokens are added to a bucket at a fixed rate x up to a maximum capacity of y tokens. Each request consumes one token
