@@ -9,7 +9,12 @@ export class TokenBucket implements RateLimiter {
     private readonly refillIntervalInMs: number;
     private readonly refillAmount: number;
 
-    constructor(redisClient: RedisClientType, bucketCapacity: number, refillIntervalInMs: number, refillAmount: number) {
+    constructor(
+        redisClient: RedisClientType,
+        bucketCapacity: number,
+        refillIntervalInMs: number,
+        refillAmount: number
+    ) {
         this.redisClient = redisClient;
         this.bucketCapacity = bucketCapacity;
         this.refillIntervalInMs = refillIntervalInMs;
@@ -91,10 +96,10 @@ export class TokenBucket implements RateLimiter {
             tokens: string,
             lastAccessed: string
         }
-        const entry = (await this.redisClient.hGetAll(userId)) as unknown as TokenBucketEntry;
+        const entry = (await this.redisClient.hGetAll(this.getRedisId(userId))) as unknown as TokenBucketEntry;
 
         if (!entry.lastAccessed) {
-            await this.redisClient.hSet(userId, { tokens: String(this.bucketCapacity), lastAccessed: String(Date.now()) });
+            await this.redisClient.hSet(this.getRedisId(userId), { tokens: String(this.bucketCapacity), lastAccessed: String(Date.now()) });
             return {
                 lastAccessed: Date.now(),
                 currentTokens: this.bucketCapacity
@@ -108,6 +113,10 @@ export class TokenBucket implements RateLimiter {
     }
 
     private async updateUserTokens(userId: string, tokens: number, timestamp: number): Promise<void> {
-        await this.redisClient.hSet(userId, { tokens: String(tokens), lastAccessed: String(timestamp) });
+        await this.redisClient.hSet(this.getRedisId(userId), { tokens: String(tokens), lastAccessed: String(timestamp) });
+    }
+
+    private getRedisId(userId: string): string {
+        return `${userId}:TOKEN_BUCKET`;
     }
 }
