@@ -9,12 +9,10 @@ algorithms:
 I will have a couple main goals for this project:
 1. Understand the algorithms and their tradeoffs
 2. Implement them in code for non-distributed and distributed systems
-3. Benchmark their performance by calculating the latency each middleware adds to a request
-4. Write tests to verify correctness
-5. Document the implementations and findings
 
 Running
 --
+### Non-distributed
 To run this application: 
 
 1. Run the docker compose file (this is for the redis container):
@@ -28,6 +26,16 @@ npm run start:redis
 ``` 
 npm run start:api
 ```
+
+### Distributed
+
+
+
+``` 
+npm run start:distributed
+```
+
+This will spin up 4 instances of the API fronted by a load balancer. The load balancer will connect to redis and handle
 
 General implementation
 --
@@ -66,3 +74,21 @@ about the leaky bucket to the user:
 1. x-Rate-Limited-Refill-Rate
 2. x-Rate-Limited-Bucket-Capacity
 3. x-Rate-Limiter-Retry-After
+
+Creating the distributed system
+--
+Going from the non-distributed to distributed system is a bit tricky since I have implemented the rate limiter with the 
+middleware embedded into the API. The plan will be to create a load balancer that will act as the rate limiter as well. 
+That way there is only one connection point to the redis store, and the load balancing logic can be completely separated 
+from the API.
+
+### Helpful Articles:
+- [Running Redis locally and making cli commands](https://medium.com/redis-with-raphael-de-lio/how-to-run-redis-locally-in-a-docker-container-and-manage-it-with-redis-insight-and-redis-cli-14b0af54e1d2)
+
+### Notes
+- I found that I can write lua script and then execute them against my docker container hosting Redis like this:
+
+```aiignore
+docker exec -i <container_id>  redis-cli EVAL "$(cat <PATH_TO_FILE>)" 0
+```
+

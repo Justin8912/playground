@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:redis": "docker compose up",
-    "start:api": "RATE_LIMITER=TOKEN_BUCKET npx tsx src/app.ts "
+    "start:api": "RATE_LIMITER=TOKEN_BUCKET npx tsx src/app.ts",
+    "test:lua": "docker exec -i ratelimiter-cache-1 redis-cli EVAL \"$(cat ./src/database/rateLimiter.lua)\" 0"
   },
   "keywords": [],
   "author": "",
