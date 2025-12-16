@@ -1,0 +1,43 @@
+type Game {
+  id: ID!
+  ruleset: Ruleset!
+  cards: [Card!]!
+}
+
+type Card {
+  id: ID!
+  word: String!
+  owner: Team!
+  lastSelectedBy: Team
+  gameId: ID!
+}
+
+input CardInput {
+  ids: [ID!]!
+  lastSelectedBy: Team!
+}
+
+type Query {
+  getGame(id: ID!): Game!
+  getAllGames: [Game!]!
+}
+
+type Mutation {
+  createGame(ruleSet: Ruleset!): Game!
+  updateCard(cardInput: CardInput!): Game!
+  deleteGame(id: ID!): Boolean!
+}
+
+enum Team {
+  Blue
+  Red
+  Green1
+  Green2
+  Black
+  None
+}
+
+enum Ruleset {
+  Duos
+  Multiplayer
+}
