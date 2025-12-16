@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { ResultOf, DocumentTypeDecoration, TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { FragmentDefinitionNode } from 'graphql';
+import { FragmentDefinitionNode } from 'src/gql/graphql';
 import { Incremental } from './graphql';
 
 
