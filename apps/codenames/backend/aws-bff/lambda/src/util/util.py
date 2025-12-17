@@ -1,3 +1,6 @@
+import random
+import json
+
 def get_intersection_and_format_input_arrays(arr1, arr2):
     intersection = []
     for i in arr1:

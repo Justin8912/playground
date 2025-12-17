@@ -52,9 +52,8 @@ def generateDuosCards(selected_words, config):
     random.shuffle(cards)
     return cards
 
-def handler(event):
-    arguments = event.get("arguments")
-    ruleset = arguments.get("ruleset")
+def handler(event, lambda_context):
+    ruleset = event.get("ruleset")
 
     selected_words = getSelectedWords()
     config = getConfig(ruleset)
