@@ -1,18 +1,22 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "outDir": "build",
+    "lib": [
+      "es2023",
+      "dom"
+    ],
+    "target": "es2022",
+    "module": "NodeNext",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force"
-  }
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "./test/**/*"
+  ]
 }
