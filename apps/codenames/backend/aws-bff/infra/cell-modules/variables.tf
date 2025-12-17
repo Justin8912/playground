@@ -1,3 +1,3 @@
-variable "table_name" {
+variable "stack_name" {
   type = string
 }

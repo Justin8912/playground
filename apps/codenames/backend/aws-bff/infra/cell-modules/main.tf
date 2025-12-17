@@ -1,11 +1,11 @@
 module "codenames_table" {
   source = "../modules/dynamo"
 
-  table_name = var.table_name
+  table_name = var.stack_name
 }
 
 module "deck_generator" {
   source = "../modules/lambda"
 
-  function_name = "codenames-deck-generator"
+  function_name = "${var.stack_name}-deck-generator"
 }
