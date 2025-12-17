@@ -3,3 +3,9 @@ module "codenames_table" {
 
   table_name = var.table_name
 }
+
+module "deck_generator" {
+  source = "../modules/lambda"
+
+  function_name = "codenames-deck-generator"
+}
