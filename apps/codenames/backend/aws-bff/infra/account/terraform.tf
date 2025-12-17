@@ -4,7 +4,7 @@ terraform {
     key          = "tfstate/codenames-backend-us-east-1.tfstate"
     region       = "us-east-1"
     // This may be necessary in the future, but since I am doing everything locally now I dont need to set it up yet.
-    # use_lockfile = false
+    use_lockfile = true
   }
 
   required_providers {
