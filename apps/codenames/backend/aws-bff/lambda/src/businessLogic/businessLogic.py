@@ -40,7 +40,7 @@ def generateDuosCards(selected_words, config):
         return selected_words
 
     selected_words = generateAndAssignCards(selected_words, config.get("teams")[0].get("startingCards"), config.get("teams")[1].get("startingCards"), "Clue")
-    selected_words = generateAndAssignCards(selected_words, assassinCards, config.get("assassinCards"), "Assassin")
+    selected_words = generateAndAssignCards(selected_words, config.get("assassinCards"), config.get("assassinCards"), "Assassin")
 
     for word in selected_words:
         cards.append(createCard(word, ["none"], "Bystander"))
