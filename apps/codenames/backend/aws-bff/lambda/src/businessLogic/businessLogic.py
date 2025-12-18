@@ -14,11 +14,11 @@ def generateMultiplayerCards(selected_words, config):
 
     for team in config["teams"]:
         for i in range(team.get("startingCards")):
-            cards.append(createCard(selected_words.pop(), [team.get("name")], "clue"))
+            cards.append(createCard(selected_words.pop(), [team.get("name")], "Clue"))
     for i in range(config["assassinCards"]):
-        cards.append(createCard(selected_words.pop(), ["blue", "red"], "assassin"))
+        cards.append(createCard(selected_words.pop(), ["blue", "red"], "Assassin"))
     while len(cards) < 25:
-        cards.append(createCard(selected_words.pop(), "none", "bystander"))
+        cards.append(createCard(selected_words.pop(), "none", "Bystander"))
     random.shuffle(cards)
 
     return cards
@@ -39,11 +39,11 @@ def generateDuosCards(selected_words, config):
         selected_words = remove_indexes(selected_words, list(intersection + uniqueGreen1 + uniqueGreen2))
         return selected_words
 
-    selected_words = generateAndAssignCards(selected_words, config.get("teams")[0].get("startingCards"), config.get("teams")[1].get("startingCards"), "clue")
-    selected_words = generateAndAssignCards(selected_words, assassinCards, config.get("assassinCards"), "assassin")
+    selected_words = generateAndAssignCards(selected_words, config.get("teams")[0].get("startingCards"), config.get("teams")[1].get("startingCards"), "Clue")
+    selected_words = generateAndAssignCards(selected_words, assassinCards, config.get("assassinCards"), "Assassin")
 
     for word in selected_words:
-        cards.append(createCard(word, ["none"], "bystander"))
+        cards.append(createCard(word, ["none"], "Bystander"))
 
     random.shuffle(cards)
     return cards
