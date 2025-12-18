@@ -2,9 +2,11 @@ import globals from "globals";
 import tslint from "typescript-eslint";
 import jslint from "@eslint/js";
 import unusedImports from "eslint-plugin-unused-imports";
+import appsync from "@aws-appsync/eslint-plugin"
 
 export default tslint.config(
     jslint.configs.recommended,
+    appsync.configs.base,
     ...tslint.configs.recommended,
     {
         languageOptions: {
@@ -15,7 +17,7 @@ export default tslint.config(
         plugins: {
             "unused-imports": unusedImports
         },
-        files: ["**/*.{js,mjs,cjs,ts}"],
+        files: ["**/*.{js,mjs,cjs,ts.ts}"],
         rules: {
             "@typescript-eslint/no-explicit-any": "off",
             "@typescript-eslint/no-empty-function":  "off",
