@@ -43,8 +43,8 @@ data "aws_iam_policy_document" "dynamo_permissions_policy" {
     ]
 
     resources = [
-      var.table_arn,
-      "${var.table_arn}/**"
+      var.table.arn,
+      "${var.table.arn}/**"
     ]
   }
 }

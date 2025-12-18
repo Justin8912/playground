@@ -9,8 +9,8 @@ resource "aws_lambda_function" "game_board_handler" {
 
     environment {
         variables = {
-            DYNAMODB_TABLE_NAME = var.table_name
-            DYNAMODB_GSI_NAME   = var.gsi_name
+            DYNAMODB_TABLE_NAME = var.table.name
+            DYNAMODB_GSI_NAME   = var.table.gsi_name
         }
     }
 

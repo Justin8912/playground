@@ -8,7 +8,13 @@ module "deck_generator" {
   source = "../modules/lambda"
 
   function_name = "${var.stack_name}-game-board-handler"
-  table_name    = module.codenames_table.table_name
-  table_arn     = module.codenames_table.table_arn
-  gsi_name      = module.codenames_table.gsi_name
+  table = module.codenames_table.table
+}
+
+module "appsync" {
+  source = "../modules/appsync"
+
+  stack_name                = var.stack_name
+  deck_manager_lambda_arn   = module.deck_generator.arn
+  table                     = module.codenames_table.table
 }
