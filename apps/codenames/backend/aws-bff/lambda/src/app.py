@@ -15,7 +15,7 @@ def handleDeleteGame(gameId):
     return deleteGameFromDynamo(dynamoService, gameId)
 
 def handler(event, lambda_context):
-    if event.get("type") == "create":
-        return handleCreateCards(event.get("ruleset"))
-    elif event.get("type") == "delete":
+    if event.get("type").lower() == "create":
+        return handleCreateCards(event.get("ruleset").lower())
+    elif event.get("type").lower() == "delete":
         return handleDeleteGame(event.get("gameId"))
