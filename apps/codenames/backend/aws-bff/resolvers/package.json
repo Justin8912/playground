@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild src/**/*.ts --bundle --outdir=build --sourcemap=inline --sources-content=false --target=esnext --platform=node --format=esm",
+    "build": "esbuild src/**/*.ts --bundle --outdir=build --sourcemap=inline --sources-content=false --target=esnext --platform=node --format=esm --external:@aws-appsync/utils",
     "lint": "npx eslint src"
   },
   "author": "Justin Stendara",
