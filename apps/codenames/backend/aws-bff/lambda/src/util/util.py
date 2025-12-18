@@ -24,7 +24,7 @@ def getConfig(ruleset):
 
 def getSelectedWords():
     total_words = []
-    with open('words.txt') as f:
+    with open('./words.txt') as f:
         words = [line.strip() for line in f]
         total_words.extend(words)
     return random.sample(total_words, 25)
