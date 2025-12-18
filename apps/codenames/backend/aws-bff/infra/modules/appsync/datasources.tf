@@ -1,6 +1,6 @@
 resource "aws_appsync_datasource" "deck_manager_lambda" {
   api_id           = aws_appsync_graphql_api.codenames_api.id
-  name             = "publish_notifications"
+  name             = "deck_manager_lambda"
   type             = "AWS_LAMBDA"
   service_role_arn = aws_iam_role.deck_manager_lambda.arn
 

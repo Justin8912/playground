@@ -3,8 +3,11 @@ import {Context} from "@aws-appsync/utils";
 export function request (ctx: Context) {
     const ruleset = ctx.arguments.ruleset;
     return {
-        type: "create",
-        ruleset
+        operation: "Invoke",
+        payload: {
+            type: "create",
+            ruleset
+        },
     }
 }
 

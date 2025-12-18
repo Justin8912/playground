@@ -3,15 +3,15 @@ resource "aws_iam_role" "lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-resource "aws_iam_policy" "dynamo_policy" {
+resource "aws_iam_policy" "lambda_policies" {
   name        = "${var.function_name}-lambda-permissions-policy"
   description = "IAM policy for ${var.function_name} Lambda function"
-  policy      = data.aws_iam_policy_document.dynamo_permissions_policy.json
+  policy      = data.aws_iam_policy_document.lambda_permissions.json
 }
 
 resource "aws_iam_role_policy_attachment" "dynamo_permission_attachment" {
   role = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.dynamo_policy.arn
+  policy_arn = aws_iam_policy.lambda_policies.arn
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-data "aws_iam_policy_document" "dynamo_permissions_policy" {
+data "aws_iam_policy_document" "lambda_permissions" {
   statement {
     effect = "Allow"
 
@@ -45,6 +45,21 @@ data "aws_iam_policy_document" "dynamo_permissions_policy" {
     resources = [
       var.table.arn,
       "${var.table.arn}/**"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = [
+      aws_cloudwatch_log_group.lambda_logs.arn,
+      "${aws_cloudwatch_log_group.lambda_logs.arn}:*"
     ]
   }
 }

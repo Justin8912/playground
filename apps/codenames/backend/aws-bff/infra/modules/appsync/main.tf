@@ -2,7 +2,7 @@ data "local_file" "schema" {
   filename = "${path.module}/resources/schema.graphql"
 }
 
-// Trigger rebuild for resolvers
+// Trigger rebuild for resolvers.tf
 data "external" "compile_resolvers" {
   working_dir = local.resolvers_path
   program     = ["bash", "-c", "npm run build --silent && echo '{\"status\":\"ok\"}'"]

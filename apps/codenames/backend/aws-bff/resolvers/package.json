@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json",
+    "build": "esbuild src/**/*.ts --bundle --outdir=build --sourcemap=inline --sources-content=false --target=esnext --platform=node --format=esm",
     "lint": "npx eslint src"
   },
   "author": "Justin Stendara",
@@ -20,6 +20,7 @@
     "vitest": "^4.0.16"
   },
   "dependencies": {
-    "@aws-appsync/utils": "^2.0.3"
+    "@aws-appsync/utils": "^2.0.3",
+    "esbuild": "^0.27.2"
   }
 }

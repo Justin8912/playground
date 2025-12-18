@@ -9,6 +9,7 @@ type Card {
   word: String!
   owner: Team!
   lastSelectedBy: Team
+  classification: Classification
   gameId: ID!
 }
 
@@ -22,10 +23,20 @@ type Query {
   getAllGames: [Game!]!
 }
 
+type CreateGameReturn {
+  status: String!
+  gameId: String
+}
+
+type DeleteGameReturn {
+  status: String!
+  message: String
+}
+
 type Mutation {
-  createGame(ruleSet: Ruleset!): Game!
+  createGame(ruleset: Ruleset!): CreateGameReturn!
   updateCard(cardInput: CardInput!): Game!
-  deleteGame(id: ID!): Boolean!
+  deleteGame(gameId: ID!): DeleteGameReturn!
 }
 
 enum Team {
@@ -33,11 +44,16 @@ enum Team {
   Red
   Green1
   Green2
-  Black
   None
 }
 
 enum Ruleset {
   Duos
   Multiplayer
+}
+
+enum Classification {
+ assassin,
+ bystander,
+ clue
 }
