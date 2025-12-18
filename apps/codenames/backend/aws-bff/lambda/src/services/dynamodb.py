@@ -17,7 +17,7 @@ class DynamoService:
                 'PutRequest': {
                     'Item': {
                         'PartitionKey': {'S': str(uuid.uuid4())},
-                        'SortKey': {'S': 'card'},
+                        'SortKey': {'S': 'Card'},
                         'GameId': {'S': gameId},
                         'Word': {'S': card['word']},
                         'Owner': {'SS': card['owner']},
@@ -57,7 +57,7 @@ class DynamoService:
             'KeyConditionExpression': f'GameId = :gameId AND SortKey = :sortKey',
             'ExpressionAttributeValues': {
                 ':gameId': {'S': gameId},
-                ':sortKey': {'S': 'card'}
+                ':sortKey': {'S': 'Card'}
             }
         }
         response = self.dynamoClient.query(**query_params)
@@ -72,7 +72,7 @@ class DynamoService:
                 'DeleteRequest': {
                     'Key': {
                         'PartitionKey': card['PartitionKey'],
-                        'SortKey': {'S': 'card'}
+                        'SortKey': {'S': 'Card'}
                     }
                 }
             })
