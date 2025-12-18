@@ -5,7 +5,7 @@ def createCard(word, owner, classification):
     return {
         "word": word,
         "owner": owner,
-        "lastSelectedBy": "none",
+        "lastSelectedBy": "None",
         "classification": classification
     }
 
@@ -16,9 +16,9 @@ def generateMultiplayerCards(selected_words, config):
         for i in range(team.get("startingCards")):
             cards.append(createCard(selected_words.pop(), [team.get("name")], "Clue"))
     for i in range(config["assassinCards"]):
-        cards.append(createCard(selected_words.pop(), ["blue", "red"], "Assassin"))
+        cards.append(createCard(selected_words.pop(), ["Blue", "Red"], "Assassin"))
     while len(cards) < 25:
-        cards.append(createCard(selected_words.pop(), "none", "Bystander"))
+        cards.append(createCard(selected_words.pop(), ['None'], "Bystander"))
     random.shuffle(cards)
 
     return cards
@@ -30,11 +30,11 @@ def generateDuosCards(selected_words, config):
         selectionForGreen2 = random.sample(range(len(selected_words)), startingCards2)
         intersection, uniqueGreen1, uniqueGreen2 = get_intersection_and_format_input_arrays(selectionForGreen1, selectionForGreen2)
         for index in intersection:
-            cards.append(createCard(selected_words[index], ["green1", "green2"], classification))
+            cards.append(createCard(selected_words[index], ["Green1", "Green2"], classification))
         for index in uniqueGreen1:
-            cards.append(createCard(selected_words[index], ["green1"], classification))
+            cards.append(createCard(selected_words[index], ["Green1"], classification))
         for index in uniqueGreen2:
-            cards.append(createCard(selected_words[index], ["green2"], classification))
+            cards.append(createCard(selected_words[index], ["Green2"], classification))
 
         selected_words = remove_indexes(selected_words, list(intersection + uniqueGreen1 + uniqueGreen2))
         return selected_words
@@ -43,7 +43,7 @@ def generateDuosCards(selected_words, config):
     selected_words = generateAndAssignCards(selected_words, config.get("assassinCards"), config.get("assassinCards"), "Assassin")
 
     for word in selected_words:
-        cards.append(createCard(word, ["none"], "Bystander"))
+        cards.append(createCard(word, ["None"], "Bystander"))
 
     random.shuffle(cards)
     return cards

@@ -2,11 +2,11 @@
   "multiplayer": {
     "teams": [
       {
-        "name": "red",
+        "name": "Red",
         "startingCards": 9
       },
       {
-        "name": "blue",
+        "name": "Blue",
         "startingCards": 8
       }
     ],
@@ -15,11 +15,11 @@
   "duos": {
     "teams": [
       {
-        "name": "green1",
+        "name": "Green1",
         "startingCards": 8
       },
       {
-          "name": "green2",
+          "name": "Green2",
           "startingCards": 8
       }
     ],
