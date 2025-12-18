@@ -13,4 +13,13 @@ resource "aws_appsync_graphql_api" "codenames_api" {
     authentication_type = "API_KEY"
     name                = "${var.stack_name}-api"
     schema              = data.local_file.schema.content
+    log_config {
+        field_log_level = "ALL"
+        cloudwatch_logs_role_arn = aws_iam_role.appsync_role.arn
+    }
+}
+
+resource "aws_cloudwatch_log_group" "appsync_log_group" {
+    name              = "/aws/appsync/apis/${aws_appsync_graphql_api.codenames_api.id}"
+    retention_in_days = 1
 }

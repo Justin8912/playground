@@ -1,3 +1,33 @@
+resource "aws_iam_role" "appsync_role" {
+    name               = "${var.stack_name}-appsync-role"
+    assume_role_policy = data.aws_iam_policy_document.assume_appsync_role.json
+}
+
+resource "aws_iam_policy_attachment" "appsync_policy_attachment" {
+  name       = "${var.stack_name}-appsync-policy-attachment"
+  roles      = [aws_iam_role.appsync_role.name]
+  policy_arn = aws_iam_policy.appsync_policy.arn
+}
+
+resource "aws_iam_policy" "appsync_policy" {
+  name   = "${var.stack_name}-appsync-policy"
+  policy = data.aws_iam_policy_document.appsync_policy_document.json
+}
+
+data "aws_iam_policy_document" "appsync_policy_document" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = ["*"]
+  }
+}
+
 resource "aws_iam_role" "deck_manager_lambda" {
     name               = "${var.stack_name}-appsync-lambda-role"
     assume_role_policy = data.aws_iam_policy_document.assume_appsync_role.json
@@ -47,7 +77,9 @@ data "aws_iam_policy_document" "table_role" {
     effect = "Allow"
 
     actions = [
-      "dynamo:getItem"
+      "dynamodb:getItem",
+      "dynamodb:Scan",
+      "dynamodb:Query",
     ]
 
     resources = [

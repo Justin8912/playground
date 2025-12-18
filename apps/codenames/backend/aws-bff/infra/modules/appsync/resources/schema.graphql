@@ -1,16 +1,16 @@
 type Game {
-  id: ID!
-  ruleset: Ruleset!
+  PartitionKey: ID!
+  Ruleset: Ruleset!
   cards: [Card!]!
 }
 
 type Card {
-  id: ID!
-  word: String!
-  owner: Team!
-  lastSelectedBy: Team
-  classification: Classification
-  gameId: ID!
+  PartitionKey: ID!
+  Word: String!
+  Owner: [Team!]
+  LastSelectedBy: Team
+  Classification: Classification
+  GameId: ID!
 }
 
 input CardInput {
@@ -19,7 +19,7 @@ input CardInput {
 }
 
 type Query {
-  getGame(id: ID!): Game!
+  getGame(gameId: ID!): Game!
   getAllGames: [Game!]!
 }
 
@@ -48,12 +48,12 @@ enum Team {
 }
 
 enum Ruleset {
-  Duos
-  Multiplayer
+  duos
+  multiplayer
 }
 
 enum Classification {
- assassin,
- bystander,
- clue
+ Assassin,
+ Bystander,
+ Clue
 }
