@@ -7,5 +7,8 @@ module "codenames_table" {
 module "deck_generator" {
   source = "../modules/lambda"
 
-  function_name = "${var.stack_name}-deck-generator"
+  function_name = "${var.stack_name}-game-board-handler"
+  table_name    = module.codenames_table.table_name
+  table_arn     = module.codenames_table.table_arn
+  gsi_name      = module.codenames_table.gsi_name
 }

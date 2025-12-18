@@ -1,4 +1,4 @@
-resource "aws_lambda_function" "deck_generator" {
+resource "aws_lambda_function" "game_board_handler" {
     function_name = var.function_name
     role          = aws_iam_role.lambda_role.arn
     handler       = "app.handler"
@@ -6,6 +6,13 @@ resource "aws_lambda_function" "deck_generator" {
     filename      = "${path.module}/resources/dummy.zip"
     timeout       = 10
     memory_size   = 512
+
+    environment {
+        variables = {
+            DYNAMODB_TABLE_NAME = var.table_name
+            DYNAMODB_GSI_NAME   = var.gsi_name
+        }
+    }
 
     tracing_config {
         mode = "Active"
