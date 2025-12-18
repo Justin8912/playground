@@ -83,3 +83,20 @@ resource "aws_appsync_resolver" "getGame_resolver" {
   }
   code = data.local_file.getGame_query.content
 }
+
+data "local_file" "updateCard_mutation" {
+  filename   = "${local.resolvers_path}/build/mutation/function.updateCard.js"
+  depends_on = [data.external.compile_resolvers]
+}
+
+resource "aws_appsync_resolver" "updateCard_mutation" {
+  api_id = aws_appsync_graphql_api.codenames_api.id
+  type   = "Mutation"
+  field  = "updateCard"
+  data_source = aws_appsync_datasource.table.name
+  runtime {
+    name = "APPSYNC_JS"
+    runtime_version = "1.0.0"
+  }
+  code = data.local_file.updateCard_mutation.content
+}

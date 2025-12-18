@@ -80,6 +80,7 @@ data "aws_iam_policy_document" "table_role" {
       "dynamodb:getItem",
       "dynamodb:Scan",
       "dynamodb:Query",
+      "dynamodb:UpdateItem"
     ]
 
     resources = [

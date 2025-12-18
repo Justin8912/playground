@@ -14,7 +14,7 @@ type Card {
 }
 
 input CardInput {
-  ids: [ID!]!
+  cardId: ID!
   lastSelectedBy: Team!
 }
 
@@ -35,7 +35,7 @@ type DeleteGameReturn {
 
 type Mutation {
   createGame(ruleset: Ruleset!): CreateGameReturn!
-  updateCard(cardInput: CardInput!): Game!
+  updateCard(cardInput: CardInput!): Boolean!
   deleteGame(gameId: ID!): DeleteGameReturn!
 }
 

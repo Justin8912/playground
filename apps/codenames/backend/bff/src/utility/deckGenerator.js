@@ -15,8 +15,7 @@ const generateCard = (word = "", owner = "Blue") => {
   return {
     word,
     owner,
-    lastSelectedBy: "None",
-    classification: "bystander"
+    lastSelectedBy: "None"
   };
 };
 
