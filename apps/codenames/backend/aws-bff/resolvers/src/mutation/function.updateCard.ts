@@ -19,6 +19,5 @@ export function response (ctx: Context) {
         console.log("here: ", ctx);
         return false;
     }
-
-    return true;
+    return ctx.result;
 }

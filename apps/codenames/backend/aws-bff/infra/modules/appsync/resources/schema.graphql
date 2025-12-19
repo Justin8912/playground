@@ -35,8 +35,13 @@ type DeleteGameReturn {
 
 type Mutation {
   createGame(ruleset: Ruleset!): CreateGameReturn!
-  updateCard(cardInput: CardInput!): Boolean!
+  updateCard(cardInput: CardInput!): Card!
   deleteGame(gameId: ID!): DeleteGameReturn!
+}
+
+type Subscription {
+  cardUpdated(GameId: ID!): Card
+  @aws_subscribe(mutations: ["updateCard"])
 }
 
 enum Team {
