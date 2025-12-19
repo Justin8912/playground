@@ -21,7 +21,8 @@
     "aws-amplify": "^6.15.9",
     "graphql": "^16.11.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "vitest": "^4.0.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

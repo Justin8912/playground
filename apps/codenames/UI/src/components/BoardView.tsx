@@ -62,7 +62,8 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
             id={"BoardView"}
             container 
             gap="15px"
-            flexDirection="column"
+            flexDirection="row"
+            maxWidth={"600px"}
         >
             { cards.map(card =>
                 <RenderCard
@@ -74,9 +75,7 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
                 />
             ) }
 
-            {selectedCards.length > 0 && (
-                <Button onClick={lockIn}>Lock in {selectedCards.length} card(s)</Button>
-            )}
+            <Button onClick={lockIn} style={{"display": `${(selectedCards.length > 0) ? "" : "none"}`}}>Lock in {selectedCards.length} card(s)</Button>
         </Grid>
     ) 
 }

@@ -38,6 +38,16 @@
     border: 1px solid darkgreen;
 }
 
+.bystander.green1 {
+    background-image: linear-gradient(to bottom, #004300 50%, gray 50%)
+    border: 1px solid #002700;
+}
+
+.bystander.green2 {
+    background-image: linear-gradient(to bottom, green 50%, gray 50%);
+    border: 1px solid darkgreen;
+}
+
 .revealed {
     background-color: purple;
     border: 1px solid #750075;
