@@ -11,7 +11,6 @@ interface RenderCardProps {
     isSelected: boolean
 }
 
-
 export const RenderCard: FC<RenderCardProps> = ({ card, cardSelectHandler, isSelected }) => {
     const { role, team } = useUser();
     const { ruleset } = useGame();

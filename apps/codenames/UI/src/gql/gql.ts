@@ -17,14 +17,14 @@ type Documents = {
     "\n    query getGame($id: ID!) {\n        getGame(gameId: $id) {\n            PartitionKey\n            Ruleset\n            cards {\n                Classification\n                GameId\n                LastSelectedBy\n                Owner\n                PartitionKey\n                Word\n            }\n        }\n    }\n": typeof types.GetGameDocument,
     "\n    query getAllGames {\n        getAllGames {\n            PartitionKey\n            Ruleset\n        }\n    }\n": typeof types.GetAllGamesDocument,
     "\n    mutation createGame($ruleSet: Ruleset!) {\n        createGame(ruleset: $ruleSet) {\n            gameId\n            status\n        }\n    }\n": typeof types.CreateGameDocument,
-    "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput)\n    }\n": typeof types.UpdateCardDocument,
+    "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput) {\n            Classification\n            GameId\n            LastSelectedBy\n            Owner\n            PartitionKey\n            Word\n        }\n    }\n": typeof types.UpdateCardDocument,
     "\n    mutation deleteGame($id: ID!) {\n        deleteGame(gameId: $id) {\n            status\n            message\n        }\n    }\n": typeof types.DeleteGameDocument,
 };
 const documents: Documents = {
     "\n    query getGame($id: ID!) {\n        getGame(gameId: $id) {\n            PartitionKey\n            Ruleset\n            cards {\n                Classification\n                GameId\n                LastSelectedBy\n                Owner\n                PartitionKey\n                Word\n            }\n        }\n    }\n": types.GetGameDocument,
     "\n    query getAllGames {\n        getAllGames {\n            PartitionKey\n            Ruleset\n        }\n    }\n": types.GetAllGamesDocument,
     "\n    mutation createGame($ruleSet: Ruleset!) {\n        createGame(ruleset: $ruleSet) {\n            gameId\n            status\n        }\n    }\n": types.CreateGameDocument,
-    "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput)\n    }\n": types.UpdateCardDocument,
+    "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput) {\n            Classification\n            GameId\n            LastSelectedBy\n            Owner\n            PartitionKey\n            Word\n        }\n    }\n": types.UpdateCardDocument,
     "\n    mutation deleteGame($id: ID!) {\n        deleteGame(gameId: $id) {\n            status\n            message\n        }\n    }\n": types.DeleteGameDocument,
 };
 
@@ -57,7 +57,7 @@ export function graphql(source: "\n    mutation createGame($ruleSet: Ruleset!) {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput)\n    }\n"): (typeof documents)["\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput)\n    }\n"];
+export function graphql(source: "\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput) {\n            Classification\n            GameId\n            LastSelectedBy\n            Owner\n            PartitionKey\n            Word\n        }\n    }\n"): (typeof documents)["\n    mutation updateCard($cardInput: CardInput!) {\n        updateCard(cardInput: $cardInput) {\n            Classification\n            GameId\n            LastSelectedBy\n            Owner\n            PartitionKey\n            Word\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

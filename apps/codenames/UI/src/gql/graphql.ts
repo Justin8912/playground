@@ -60,7 +60,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createGame: CreateGameReturn;
   deleteGame: DeleteGameReturn;
-  updateCard: Scalars['Boolean']['output'];
+  updateCard: Card;
 };
 
 
@@ -94,6 +94,16 @@ export enum Ruleset {
   Multiplayer = 'multiplayer'
 }
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  cardUpdated?: Maybe<Card>;
+};
+
+
+export type SubscriptionCardUpdatedArgs = {
+  GameId: Scalars['ID']['input'];
+};
+
 export enum Team {
   Blue = 'Blue',
   Green1 = 'Green1',
@@ -126,7 +136,7 @@ export type UpdateCardMutationVariables = Exact<{
 }>;
 
 
-export type UpdateCardMutation = { __typename?: 'Mutation', updateCard: boolean };
+export type UpdateCardMutation = { __typename?: 'Mutation', updateCard: { __typename?: 'Card', Classification?: Classification | null, GameId: string, LastSelectedBy?: Team | null, Owner?: Array<Team | null> | null, PartitionKey: string, Word: string } };
 
 export type DeleteGameMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -139,5 +149,5 @@ export type DeleteGameMutation = { __typename?: 'Mutation', deleteGame: { __type
 export const GetGameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getGame"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getGame"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gameId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"PartitionKey"}},{"kind":"Field","name":{"kind":"Name","value":"Ruleset"}},{"kind":"Field","name":{"kind":"Name","value":"cards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Classification"}},{"kind":"Field","name":{"kind":"Name","value":"GameId"}},{"kind":"Field","name":{"kind":"Name","value":"LastSelectedBy"}},{"kind":"Field","name":{"kind":"Name","value":"Owner"}},{"kind":"Field","name":{"kind":"Name","value":"PartitionKey"}},{"kind":"Field","name":{"kind":"Name","value":"Word"}}]}}]}}]}}]} as unknown as DocumentNode<GetGameQuery, GetGameQueryVariables>;
 export const GetAllGamesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getAllGames"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllGames"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"PartitionKey"}},{"kind":"Field","name":{"kind":"Name","value":"Ruleset"}}]}}]}}]} as unknown as DocumentNode<GetAllGamesQuery, GetAllGamesQueryVariables>;
 export const CreateGameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createGame"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ruleSet"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Ruleset"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createGame"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ruleset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ruleSet"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"gameId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<CreateGameMutation, CreateGameMutationVariables>;
-export const UpdateCardDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"updateCard"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"cardInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CardInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCard"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"cardInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"cardInput"}}}]}]}}]} as unknown as DocumentNode<UpdateCardMutation, UpdateCardMutationVariables>;
+export const UpdateCardDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"updateCard"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"cardInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CardInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCard"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"cardInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"cardInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Classification"}},{"kind":"Field","name":{"kind":"Name","value":"GameId"}},{"kind":"Field","name":{"kind":"Name","value":"LastSelectedBy"}},{"kind":"Field","name":{"kind":"Name","value":"Owner"}},{"kind":"Field","name":{"kind":"Name","value":"PartitionKey"}},{"kind":"Field","name":{"kind":"Name","value":"Word"}}]}}]}}]} as unknown as DocumentNode<UpdateCardMutation, UpdateCardMutationVariables>;
 export const DeleteGameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"deleteGame"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteGame"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"gameId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteGameMutation, DeleteGameMutationVariables>;

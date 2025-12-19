@@ -2,6 +2,7 @@ import React, {type FC, ReactElement, useState} from "react";
 import {GameInitializer} from "./GameInitializer";
 import {TeamSelector} from "./TeamSelector";
 import {LoadBoardView} from "./LoadBoardView";
+import { CardProvider } from "./Providers/providers";
 
 enum AppState {
     GAME_INIT,
@@ -30,7 +31,9 @@ export const Router: FC = (): ReactElement => {
                     <TeamSelector nextScreen={handleTeamSelected} />
                 )}
                 {appState === AppState.BOARD_VIEW && (
-                    <LoadBoardView />
+                    <CardProvider>
+                        <LoadBoardView />
+                    </CardProvider>
                 )}
             </>
         )

@@ -37,7 +37,14 @@ export const createGame = /* GraphQL */ `
 
 export const updateCard = /* GraphQL */ `
     mutation updateCard($cardInput: CardInput!) {
-        updateCard(cardInput: $cardInput)
+        updateCard(cardInput: $cardInput) {
+            Classification
+            GameId
+            LastSelectedBy
+            Owner
+            PartitionKey
+            Word
+        }
     }
 `;
 
@@ -46,6 +53,19 @@ export const deleteGame = /* GraphQL */ `
         deleteGame(gameId: $id) {
             status
             message
+        }
+    }
+`;
+
+export const subscribeUpdatedCard = /* GraphQL */ `
+    subscription updatedCard($id: ID!) {
+        cardUpdated(GameId: $id) {
+            Classification
+            GameId
+            LastSelectedBy
+            Owner
+            PartitionKey
+            Word
         }
     }
 `;

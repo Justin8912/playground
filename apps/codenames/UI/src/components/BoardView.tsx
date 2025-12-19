@@ -9,12 +9,11 @@ import { useAppsync } from './Providers/AppsyncProvider';
 import {V6Client} from "@aws-amplify/api-graphql";
 
 interface BoardViewProps {
-    cards: Card[][];
+    cards: Card[];
 }
 
 const updateCardMutation = async (client: V6Client, cardId, team) => {
-    console.log(cardId, team)
-    const res = await client.graphql({
+    await client.graphql({
         query: updateCard,
         variables: {
             cardInput: {
@@ -23,7 +22,6 @@ const updateCardMutation = async (client: V6Client, cardId, team) => {
             }
         }
     });
-    console.log(res);
 }
 
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
@@ -71,7 +69,6 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
                     key={card.PartitionKey}
                     cardSelectHandler={cardSelectHandler}
                     isSelected={selectedCards.includes(card.PartitionKey)}
-                    lastSelected
                 />
             ) }
 
