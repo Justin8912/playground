@@ -1,5 +1,6 @@
 import uuid
 import boto3
+from boto3.dynamodb.types import TypeSerializer
 
 class DynamoService:
     def __init__(self, tableName):
@@ -13,6 +14,7 @@ class DynamoService:
         writeRequests = []
 
         for card in cards:
+            print(card["owner"])
             writeRequests.append({
                 'PutRequest': {
                     'Item': {
@@ -20,7 +22,7 @@ class DynamoService:
                         'SortKey': {'S': 'Card'},
                         'GameId': {'S': gameId},
                         'Word': {'S': card['word']},
-                        'Owner': {'SS': card['owner']},
+                        'Owner': TypeSerializer().serialize(card['owner']),
                         'Classification': {'S': card['classification']},
                         'LastSelectedBy': {'S': card['lastSelectedBy']}
                     }

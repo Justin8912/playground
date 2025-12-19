@@ -7,7 +7,7 @@ type Game {
 type Card {
   PartitionKey: ID!
   Word: String!
-  Owner: [Team!]
+  Owner: [Team]
   LastSelectedBy: Team
   Classification: Classification
   GameId: ID!

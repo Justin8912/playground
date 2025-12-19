@@ -18,7 +18,7 @@ def generateMultiplayerCards(selected_words, config):
     for i in range(config["assassinCards"]):
         cards.append(createCard(selected_words.pop(), ["Blue", "Red"], "Assassin"))
     while len(cards) < 25:
-        cards.append(createCard(selected_words.pop(), ['None'], "Bystander"))
+        cards.append(createCard(selected_words.pop(), [], "Bystander"))
     random.shuffle(cards)
 
     return cards
@@ -43,7 +43,7 @@ def generateDuosCards(selected_words, config):
     selected_words = generateAndAssignCards(selected_words, config.get("assassinCards"), config.get("assassinCards"), "Assassin")
 
     for word in selected_words:
-        cards.append(createCard(word, ["None"], "Bystander"))
+        cards.append(createCard(word, [], "Bystander"))
 
     random.shuffle(cards)
     return cards

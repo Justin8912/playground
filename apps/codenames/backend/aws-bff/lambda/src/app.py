@@ -19,3 +19,5 @@ def handler(event, lambda_context):
         return handleCreateCards(event.get("ruleset").lower())
     elif event.get("type").lower() == "delete":
         return handleDeleteGame(event.get("gameId"))
+
+print(handler({"type": "create", "ruleset": "multiplayer"}, None))
