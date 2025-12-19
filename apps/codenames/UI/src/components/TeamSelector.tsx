@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import { Team } from '../gql/graphql';
 import { Role } from '../types/user';
-import { useUser } from './UserProvider';
+import { useUser } from './Providers/UserProvider';
 
 
 export const TeamSelector: FC<{nextScreen: Function}> = ({nextScreen}) => {

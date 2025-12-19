@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Ruleset } from '../gql/graphql';
+import { Ruleset } from '../../gql/graphql';
 
 interface GameContextType {
   gameId: string | null;

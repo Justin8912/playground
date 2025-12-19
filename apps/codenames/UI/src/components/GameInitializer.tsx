@@ -1,11 +1,12 @@
 // filepath: /Users/justin.stendara/Documents/Random/playground/codenames/UI/src/components/GameInitializer.tsx
-import React, { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client/react';
+import React, { useState, useEffect } from 'react';
 import { type FC } from 'react';
 import { Button, Box, Typography, CircularProgress, List, ListItem, ListItemText, Divider, Paper } from '@mui/material';
 import { createGame, getAllGames, deleteGame } from '../backend/queries';
-import { Ruleset, GetAllGamesQuery, CreateGameMutation, CreateGameMutationVariables, DeleteGameMutation, DeleteGameMutationVariables } from '../gql/graphql';
-import { useGame } from './GameProvider';
+import { Ruleset, GetAllGamesQuery, CreateGameMutation } from '../gql/graphql';
+import { useGame } from './Providers/GameProvider';
+import {useAppsync} from "./Providers/AppsyncProvider";
+import { GraphQLResult } from 'aws-amplify/api';
 
 export interface GameInitializerProps {
   onGameCreated: () => void;
@@ -14,13 +15,44 @@ export interface GameInitializerProps {
 export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => {
   const [selectedRuleset, setSelectedRuleset] = useState<Ruleset | null>(null);
   const { setGame } = useGame();
-  const [createGameMutation, { loading: createLoading, error: createError }] = useMutation<CreateGameMutation, CreateGameMutationVariables>(createGame, {
-    refetchQueries: [{ query: getAllGames }]
-  });
-  const [deleteGameMutation, { loading: deleteLoading }] = useMutation<DeleteGameMutation, DeleteGameMutationVariables>(deleteGame, {
-    refetchQueries: [{ query: getAllGames }]
-  });
-  const { data: gamesData, loading: gamesLoading, error: gamesError } = useQuery<GetAllGamesQuery>(getAllGames);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<Error | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [gamesData, setGamesData] = useState<GetAllGamesQuery | null>(null);
+  const [gamesLoading, setGamesLoading] = useState(false);
+  const [gamesError, setGamesError] = useState<Error | null>(null);
+
+  const client = (useAppsync()).client;
+  useEffect(() => {
+    const fetchGames = async () => {
+      setGamesLoading(true);
+      setGamesError(null);
+      try {
+        const result = await client.graphql({
+          query: getAllGames,
+        }) as GraphQLResult<any>;
+        setGamesData(result.data as GetAllGamesQuery);
+      } catch (err) {
+        console.log(err);
+        setGamesError(err instanceof Error ? err : new Error('Failed to fetch games'));
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, []);
+
+  const refetchGames = async () => {
+    try {
+      const result = await client.graphql({
+        query: getAllGames
+      });
+      setGamesData(result.data as GetAllGamesQuery);
+    } catch (err) {
+      console.error('Failed to refetch games:', err);
+    }
+  };
 
   const handleRulesetSelect = (ruleset: Ruleset) => {
     setSelectedRuleset(ruleset);
@@ -29,17 +61,25 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
   const handleStartGame = async () => {
     if (!selectedRuleset) return;
 
+    setCreateLoading(true);
+    setCreateError(null);
     try {
-      const { data } = await createGameMutation({
+      const result = await client.graphql({
+        query: createGame,
         variables: { ruleSet: selectedRuleset }
       });
 
+      const data = result.data as CreateGameMutation;
       if (data?.createGame) {
-        setGame(data.createGame.id, data.createGame.ruleset);
+        setGame(data.createGame.gameId, selectedRuleset);
+        await refetchGames();
         onGameCreated();
       }
     } catch (err) {
       console.error('Failed to create game:', err);
+      setCreateError(err instanceof Error ? err : new Error('Failed to create game'));
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -55,12 +95,17 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
       return;
     }
 
+    setDeleteLoading(true);
     try {
-      await deleteGameMutation({
+      await client.graphql({
+        query: deleteGame,
         variables: { id: gameId }
       });
+      await refetchGames();
     } catch (err) {
       console.error('Failed to delete game:', err);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -79,25 +124,25 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
           <Typography variant="h5" gutterBottom>Active Games</Typography>
           <List>
             {activeGames.map((game, index) => (
-              <React.Fragment key={game.id}>
+              <React.Fragment key={game.PartitionKey}>
                 {index > 0 && <Divider />}
                 <ListItem>
                   <ListItemText
-                    primary={`Game ${game.id.substring(0, 8)}...`}
-                    secondary={`Mode: ${game.ruleset}`}
+                    primary={`Game ${game.PartitionKey}...`}
+                    secondary={`Mode: ${game.Ruleset}`}
                   />
                   <Box display="flex" gap={1}>
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => handleJoinGame(game.id, game.ruleset)}
+                      onClick={() => handleJoinGame(game.PartitionKey, game.Ruleset)}
                     >
                       Join
                     </Button>
                     <Button
                       variant="outlined"
                       color="error"
-                      onClick={(e) => handleDeleteGame(game.id, e)}
+                      onClick={(e) => handleDeleteGame(game.PartitionKey, e)}
                     >
                       Delete
                     </Button>

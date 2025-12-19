@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Team } from '../gql/graphql';
-import { Role } from '../types/user';
+import { Team } from '../../gql/graphql';
+import { Role } from '../../types/user';
 
 interface UserContextType {
   team: Team | null;

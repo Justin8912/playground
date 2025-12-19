@@ -1,18 +1,40 @@
-import React from 'react';
-import { useQuery } from '@apollo/client/react';
+import React, { useEffect, useState } from 'react';
 import { type FC } from 'react';
 import { BoardView } from './BoardView';
 import { getGameById } from "../backend/queries";
-import { useGame } from './GameProvider';
+import { useGame } from './Providers/GameProvider';
 import { CircularProgress, Typography } from "@mui/material";
-import { GetGameQuery, GetGameQueryVariables } from '../gql/graphql';
+import { GetGameQuery } from '../gql/graphql';
+import { useAppsync } from './Providers/providers';
 
 export const LoadBoardView: FC = () => {
     const { gameId } = useGame();
-    const { error, data, loading } = useQuery<GetGameQuery, GetGameQueryVariables>(getGameById, {
-        variables: { id: gameId! },
-        skip: !gameId
-    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    const [data, setData] = useState<GetGameQuery | null>(null);
+    const client = (useAppsync()).client;
+
+    useEffect(() => {
+        if (!gameId) return;
+
+        const fetchGame = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const result = await client.graphql({
+                    query: getGameById,
+                    variables: { id: gameId }
+                });
+                setData(result.data as GetGameQuery);
+            } catch (err) {
+                setError(err instanceof Error ? err : new Error('Failed to fetch game'));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGame();
+    }, [gameId]);
 
     if (!gameId) return <Typography>No game selected</Typography>;
     if (loading) return <CircularProgress />;

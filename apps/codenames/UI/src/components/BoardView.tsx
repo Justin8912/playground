@@ -3,19 +3,33 @@ import {Button, Grid} from '@mui/material';
 import {type Card} from '../types';
 import "./BoardView.css";
 import {RenderCard} from "./CardView";
-import {useUser} from "./UserProvider";
-import {useMutation} from "@apollo/client/react";
+import {useUser} from "./Providers/UserProvider";
 import {updateCard} from "../backend/queries";
+import { useAppsync } from './Providers/AppsyncProvider';
+import {V6Client} from "@aws-amplify/api-graphql";
 
 interface BoardViewProps {
     cards: Card[][];
 }
 
+const updateCardMutation = async (client: V6Client, cardId, team) => {
+    console.log(cardId, team)
+    const res = await client.graphql({
+        query: updateCard,
+        variables: {
+            cardInput: {
+                cardId,
+                lastSelectedBy: team
+            }
+        }
+    });
+    console.log(res);
+}
+
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
     const [selectedCards, setSelectedCards] = useState<string[]>([]);
     const { team } = useUser();
-    const [updateCardMutation] = useMutation(updateCard);
-
+    const client = (useAppsync()).client;
     const lockIn = async () => {
         if (!team) {
             console.error('No team selected');
@@ -23,14 +37,9 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
         }
 
         try {
-            await updateCardMutation({
-                variables: {
-                    cardInput: {
-                        ids: selectedCards,
-                        lastSelectedBy: team
-                    }
-                }
-            });
+            for (const cardId of selectedCards) {
+                await updateCardMutation(client, cardId, team)
+            }
             // Clear selected cards after successful mutation
             setSelectedCards([]);
         } catch (error) {
@@ -48,21 +57,6 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
         }
     }
 
-    const RenderGrid: FC<{row: Card[]}> = ({ row }) => {
-        return (
-            <Grid container gap="15px">
-                {row.map(card =>
-                    <RenderCard
-                        card={card}
-                        key={card.id}
-                        cardSelectHandler={cardSelectHandler}
-                        isSelected={selectedCards.includes(card.id)}
-                    />
-                )}
-            </Grid>
-        );
-    }
-
     return (
         <Grid 
             id={"BoardView"}
@@ -70,9 +64,15 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
             gap="15px"
             flexDirection="column"
         >
-            { cards.map(row => (
-                <RenderGrid key={row.map(card=>card.id).join("")} row={row}/>
-            )) }
+            { cards.map(card =>
+                <RenderCard
+                    card={card}
+                    key={card.PartitionKey}
+                    cardSelectHandler={cardSelectHandler}
+                    isSelected={selectedCards.includes(card.PartitionKey)}
+                    lastSelected
+                />
+            ) }
 
             {selectedCards.length > 0 && (
                 <Button onClick={lockIn}>Lock in {selectedCards.length} card(s)</Button>

@@ -1,92 +1,52 @@
-import {gql} from "@apollo/client";
-
 // Queries
-export const getGameById = gql`
+export const getGameById = /* GraphQL */ `
     query getGame($id: ID!) {
-        getGame(id: $id) {
-            id
-            ruleset
+        getGame(gameId: $id) {
+            PartitionKey
+            Ruleset
             cards {
-                classification
-                id
-                owner
-                lastSelectedBy
-                word
-                gameId
+                Classification
+                GameId
+                LastSelectedBy
+                Owner
+                PartitionKey
+                Word
             }
         }
     }
-`
+`;
 
-export const getAllGames = gql`
+export const getAllGames = /* GraphQL */`
     query getAllGames {
         getAllGames {
-            id
-            ruleset
+            PartitionKey
+            Ruleset
         }
     }
-`
-
-export const getOwnerInfo = gql`
-    query ownerInfo($team: Team!) {
-        ownerInfo(team: $team) {
-            greenCards {
-                id
-                word
-                owner
-                classification
-                lastSelectedBy
-                gameId
-            }
-            blackCards {
-                id
-                word
-                owner
-                classification
-                lastSelectedBy
-                gameId
-            }
-        }
-    }
-`
+`;
 
 // Mutations
-export const createGame = gql`
+export const createGame = /* GraphQL */ `
     mutation createGame($ruleSet: Ruleset!) {
-        createGame(ruleSet: $ruleSet) {
-            id
-            ruleset 
-            cards {
-                classification 
-                id
-                owner 
-                lastSelectedBy
-                word
-                gameId
-            }
+        createGame(ruleset: $ruleSet) {
+            gameId
+            status
         }
     }
-`
+`;
 
-export const updateCard = gql`
+export const updateCard = /* GraphQL */ `
     mutation updateCard($cardInput: CardInput!) {
-        updateCard(cardInput: $cardInput) {
-            id
-            ruleset
-            cards {
-                classification
-                id
-                owner
-                lastSelectedBy
-                word
-                gameId
-            }
+        updateCard(cardInput: $cardInput)
+    }
+`;
+
+export const deleteGame = /* GraphQL */ `
+    mutation deleteGame($id: ID!) {
+        deleteGame(gameId: $id) {
+            status
+            message
         }
     }
-`
+`;
 
-export const deleteGame = gql`
-    mutation deleteGame($id: ID!) {
-        deleteGame(id: $id)
-    }
-`
