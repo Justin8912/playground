@@ -70,6 +70,7 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
       });
 
       const data = result.data as CreateGameMutation;
+      console.log(data)
       if (data?.createGame) {
         setGame(data.createGame.gameId, selectedRuleset);
         await refetchGames();
