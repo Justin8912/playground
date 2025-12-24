@@ -7,6 +7,7 @@ import {useUser} from "./Providers/UserProvider";
 import {updateCard} from "../backend/queries";
 import { useAppsync } from './Providers/AppsyncProvider';
 import {V6Client} from "@aws-amplify/api-graphql";
+import {useGame} from "./Providers/GameProvider";
 
 interface BoardViewProps {
     cards: Card[];
@@ -25,8 +26,9 @@ const updateCardMutation = async (client: V6Client, cardId, team) => {
 }
 
 export const BoardView: FC<BoardViewProps> = ({cards}) => {
-    const [selectedCards, setSelectedCards] = useState<string[]>([]);
-    const { team } = useUser();
+    const [selectedCard, setSelectedCard] = useState<string | null>(null);
+    const { role, team } = useUser();
+    const { ruleset } = useGame();
     const client = (useAppsync()).client;
     const lockIn = async () => {
         if (!team) {
@@ -35,23 +37,30 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
         }
 
         try {
-            for (const cardId of selectedCards) {
-                await updateCardMutation(client, cardId, team)
-            }
+            await updateCardMutation(client, selectedCard, team);
             // Clear selected cards after successful mutation
-            setSelectedCards([]);
+            setSelectedCard(null);
         } catch (error) {
             console.error('Error updating cards:', error);
         }
     };
 
     const cardSelectHandler = (e: React.MouseEvent<HTMLElement>) => {
+        if (role !== "player" && ruleset === "multiplayer" ) {
+            return;
+        }
+
         const target = e.target as HTMLElement;
         const cardId = target.id;
-        if (!selectedCards.includes(cardId)) {
-            setSelectedCards([...selectedCards, cardId]);
+        const currentCard = cards.filter(card => card.PartitionKey === cardId)[0];
+        if (currentCard.LastSelectedBy !== "None") {
+            return;
+        }
+
+        if (selectedCard === cardId) {
+            setSelectedCard(null);
         } else {
-            setSelectedCards(selectedCards.filter(id => id !== cardId))
+            setSelectedCard(cardId);
         }
     }
 
@@ -68,11 +77,17 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
                     card={card}
                     key={card.PartitionKey}
                     cardSelectHandler={cardSelectHandler}
-                    isSelected={selectedCards.includes(card.PartitionKey)}
+                    isSelected={selectedCard === card.PartitionKey}
                 />
             ) }
 
-            <Button onClick={lockIn} style={{"display": `${(selectedCards.length > 0) ? "" : "none"}`}}>Lock in {selectedCards.length} card(s)</Button>
+            <Button
+                onClick={lockIn}
+                style={{"visibility": `${(selectedCard !== null) ? "" : "hidden"}`, height: "40px"}}
+                id={"submit-selection"}
+            >
+                Lock in
+            </Button>
         </Grid>
     ) 
 }

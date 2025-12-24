@@ -1,3 +1,10 @@
 #BoardView {
     justify-content: center;
 }
+
+#submit-selection {
+    background-color: green;
+    border-radius: 5px;
+    color: white;
+    width: 100%;
+}
