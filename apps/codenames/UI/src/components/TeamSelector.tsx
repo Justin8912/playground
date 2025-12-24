@@ -1,10 +1,10 @@
-import React, {FC} from 'react';
+import React, {FC, MouseEventHandler} from 'react';
 import { Team } from '../gql/graphql';
 import { Role } from '../types/user';
 import { useUser } from './Providers/UserProvider';
 
 
-export const TeamSelector: FC<{nextScreen: Function}> = ({nextScreen}) => {
+export const TeamSelector: FC<{nextScreen: MouseEventHandler<HTMLButtonElement>}> = ({nextScreen}) => {
   const { team, role, setTeam, setRole } = useUser();
 
   const teams = [Team.Blue, Team.Red, Team.Green1, Team.Green2];

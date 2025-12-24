@@ -1,4 +1,3 @@
-// filepath: /Users/justin.stendara/Documents/Random/playground/codenames/UI/src/components/GameInitializer.tsx
 import React, { useState, useEffect } from 'react';
 import { type FC } from 'react';
 import { Button, Box, Typography, CircularProgress, List, ListItem, ListItemText, Divider, Paper } from '@mui/material';
@@ -48,7 +47,8 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
       const result = await client.graphql({
         query: getAllGames
       });
-      setGamesData(result.data as GetAllGamesQuery);
+      // @ts-ignore
+      setGamesData(result.data as unknown as GetAllGamesQuery);
     } catch (err) {
       console.error('Failed to refetch games:', err);
     }
@@ -69,7 +69,8 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
         variables: { ruleSet: selectedRuleset }
       });
 
-      const data = result.data as CreateGameMutation;
+      // @ts-ignore
+      const data = result?.data as unknown as CreateGameMutation;
       if (data?.createGame) {
         setGame(data.createGame.gameId, selectedRuleset);
         await refetchGames();

@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowJs": true,
@@ -9,8 +11,9 @@
       "dom",
       "es2017"
     ],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "module": "esnext",
+    "noEmit": true,
     "target": "es2017",
     "noUnusedLocals": true,
     "noUnusedParameters": true,

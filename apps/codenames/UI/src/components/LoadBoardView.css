@@ -1,0 +1,6 @@
+.view-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}

@@ -1,9 +1,5 @@
 import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { generateClient } from 'aws-amplify/api';
-import { Amplify } from 'aws-amplify';
-import config from '../../security/aws-exports.js';
-import type {V6Client} from "@aws-amplify/api-graphql";
-import {Card, GetGameQuery} from '../../gql/graphql.js';
+import {Card} from '../../gql/graphql.js';
 import { useGame } from './GameProvider.js';
 import {getGameById, subscribeUpdatedCard} from "../../backend/queries";
 import {useAppsync} from "./AppsyncProvider";
@@ -35,8 +31,8 @@ export const CardProvider = ({ children }: CardProviderProps) => {
                     query: getGameById,
                     variables: { id: gameId }
                 });
-                setCards(result.data.getGame.cards as GetGameQuery);
-                console.log("Gettign the card data: ", result.data.getGame.cards)
+                // @ts-ignore
+                setCards(result?.data?.getGame?.cards as unknown as Card[]);
             } catch (err) {
                 setError(err instanceof Error ? err : new Error('Failed to fetch game'));
             } finally {
@@ -44,12 +40,13 @@ export const CardProvider = ({ children }: CardProviderProps) => {
             }
         };
 
-        const setupSubscription = () => {
-            const subscription = client.graphql({
+        const setupSubscription = async () => {
+            const subscription = await client.graphql({
                 query: subscribeUpdatedCard,
                 variables: { id: gameId! },
             }).subscribe({
                 next: (data) => {
+                    console.log("Incoming subscription data: ", data)
                     if (!data || !data?.data?.cardUpdated) {
                         return;
                     }

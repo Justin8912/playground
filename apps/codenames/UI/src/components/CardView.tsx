@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, MouseEventHandler} from "react";
 import type {Card} from "../types";
 import {useUser} from "./Providers/UserProvider";
 import "./CardView.css"
@@ -7,7 +7,7 @@ import {getElementClassesForRuleset} from "../util/cardDisplayBusinessRules";
 
 interface RenderCardProps {
     card: Card
-    cardSelectHandler: Function,
+    cardSelectHandler: MouseEventHandler<HTMLDivElement>
     isSelected: boolean
 }
 

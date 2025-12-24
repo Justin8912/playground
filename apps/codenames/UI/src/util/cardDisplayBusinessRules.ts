@@ -2,7 +2,7 @@ import { Role } from "../components";
 import {Card, Team} from "../gql/graphql";
 // TODO: Clean up these business rules
 const getRelevantMultiplayerClass = (card: Card) => {
-    if (card.Owner.length === 1 || card.LastSelectedBy !== "None") {
+    if (card.Owner.length === 1) {
         return card.Owner[0].toLowerCase()
     } else {
         return card.Classification.toLowerCase();
@@ -38,6 +38,7 @@ export const getElementClassesForRuleset = (card: Card, ruleset, role, team: Tea
         classes += (role === Role.Owner) ? ` ${getRelevantMultiplayerClass(card)}` : ""
         // If a player selects a card, it should show their team color
         classes += ((role === Role.Player) && isSelected) ? ` ${team.toLowerCase()}` : ""
+        classes += (card.LastSelectedBy !== "None") ? ` ${getRelevantMultiplayerClass(card)}` : "";
         return classes;
     } else {
         return`card ${getRelevantDuosClass(card, team, isSelected)}`;
