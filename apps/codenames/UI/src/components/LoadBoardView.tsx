@@ -6,19 +6,27 @@ import "./LoadBoardView.css"
 
 export const LoadBoardView: FC = () => {
     const {cards} = useCardProvider()
-    const { setRole, role } = useUser();
-    const {ruleset} = useGame()
+    const { setRole, role, clearUser } = useUser();
+    const {ruleset, clearGame} = useGame()
 
+    if (!role) {
+        return <div>Refresh</div>
+    }
     return (
         <div>
+            <div className={"view-selector"}>
             {
                 ((role === "owner" || role === "playerview") && (ruleset.toLowerCase() === "multiplayer")) &&
-                    <div className={"view-selector"}>
+                    <>
                         <button onClick={() => {setRole(Role.Owner)}}>Owner View</button>
                         <button onClick={() => {setRole(Role.PlayerView)}}>Player View</button>
-                    </div>
+                    </>
             }
-            <BoardView cards={cards}/>
+                <button onClick={() => {clearUser(); clearGame();}}>Leave Game</button>
+            </div>
+            {
+                cards?.length > 0 && <BoardView cards={cards}/>
+            }
         </div>
     );
 }

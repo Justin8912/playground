@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Team } from '../../gql/graphql';
 import { Role } from '../../types/user';
+import {useCookies} from "./CookieProvider";
 
 interface UserContextType {
   team: Team | null;
@@ -20,33 +21,42 @@ interface UserProviderProps {
 }
 
 export const UserProvider = ({ children }: UserProviderProps) => {
-  const [team, setTeamState] = useState<Team | null>(null);
-  const [role, setRoleState] = useState<Role | null>(null);
+  const cookies = useCookies();
+  const [team, setTeamState] = useState<Team | null>(cookies.team);
+  const [role, setRoleState] = useState<Role | null>(cookies.role);
 
   const setTeam = (newTeam: Team) => {
     setTeamState(newTeam);
+    cookies.setTeam(newTeam);
   };
 
   const setRole = (newRole: Role) => {
     setRoleState(newRole);
+    cookies.setRole(newRole);
   };
 
   const setUser = (newTeam: Team, newRole: Role) => {
     setTeamState(newTeam);
+    cookies.setTeam(newTeam);
     setRoleState(newRole);
+    cookies.setRole(newRole);
   };
 
   const clearTeam = () => {
     setTeamState(null);
+    cookies.clearTeam();
   };
 
   const clearRole = () => {
     setRoleState(null);
+    cookies.clearRole();
   };
 
   const clearUser = () => {
     setTeamState(null);
+    cookies.clearTeam();
     setRoleState(null);
+    cookies.clearRole();
   };
 
   return (

@@ -2,7 +2,7 @@ import React, {type FC, ReactElement, useState} from "react";
 import {GameInitializer} from "./GameInitializer";
 import {TeamSelector} from "./TeamSelector";
 import {LoadBoardView} from "./LoadBoardView";
-import { CardProvider } from "./Providers/providers";
+import {CardProvider, useGame, useUser} from "./Providers/providers";
 
 enum AppState {
     GAME_INIT,
@@ -10,8 +10,20 @@ enum AppState {
     BOARD_VIEW
 }
 
+const getAppState = (gameId, role): AppState => {
+    if (gameId && role) {
+        return AppState.BOARD_VIEW;
+    } else if (gameId && !role) {
+        return AppState.TEAM_SELECT;
+    } else {
+        return AppState.GAME_INIT;
+    }
+}
+
 export const Router: FC = (): ReactElement => {
     const [appState, setAppState] = useState<AppState>(AppState.GAME_INIT);
+    const {gameId} = useGame();
+    const {role, team} = useUser();
 
     const handleGameCreated = () => {
         setAppState(AppState.TEAM_SELECT);
@@ -24,13 +36,13 @@ export const Router: FC = (): ReactElement => {
     const CurrentView = () => {
         return (
             <>
-                {appState === AppState.GAME_INIT && (
+                {(getAppState(gameId, role) === AppState.GAME_INIT) && (
                     <GameInitializer onGameCreated={handleGameCreated} />
                 )}
-                {appState === AppState.TEAM_SELECT && (
+                {(getAppState(gameId, role) === AppState.TEAM_SELECT) && (
                     <TeamSelector nextScreen={handleTeamSelected} />
                 )}
-                {appState === AppState.BOARD_VIEW && (
+                {(getAppState(gameId, role) === AppState.BOARD_VIEW) && (
                     <CardProvider>
                         <LoadBoardView />
                     </CardProvider>

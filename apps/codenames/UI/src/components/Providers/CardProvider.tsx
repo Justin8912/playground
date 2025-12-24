@@ -4,6 +4,7 @@ import { useGame } from './GameProvider.js';
 import {getGameById, subscribeUpdatedCard} from "../../backend/queries";
 import {useAppsync} from "./AppsyncProvider";
 import {CircularProgress, Typography} from "@mui/material";
+import {useCookies} from "./CookieProvider";
 
 interface CardProviderContextType {
     cards: Card[]
@@ -21,6 +22,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [cards, setCards] = useState<Card[] | null>(null);
+    const { clearAllCookies } = useCookies()
 
     useEffect(() => {
         const fetchGame = async () => {
@@ -53,7 +55,10 @@ export const CardProvider = ({ children }: CardProviderProps) => {
                     const cardUpdated = data.data.cardUpdated;
                     setCards(prevCards => prevCards?.map(card => card.PartitionKey === cardUpdated.PartitionKey ? cardUpdated : card ) ?? [] );
                 },
-                error: (error) => console.warn(error),
+                error: (error) => {
+                    console.warn("Is is possible that the game has been deleted." , error);
+                    clearAllCookies();
+                },
             });
             return () => subscription.unsubscribe();
         }
