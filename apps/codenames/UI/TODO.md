@@ -1,7 +1,5 @@
-- Setup cookies so that users can join games if they accidentally leave
 - Fix game initialization so that duos users can only choose from two teams
 - Write test for card display business rules
   - Fix the bystander issue where a bystander for one duos player is displayed for both if one player selects it
-- Toggleable views for clue givers in multiplayer so they can see the state of the board
 - Change colors of cards 
 - Refactor the way words are stored and accessed from the words text file; this way we can manage words from the UI.
