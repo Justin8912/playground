@@ -13,7 +13,7 @@ resource "aws_cognito_user_pool" "codenames" {
   }
   
   password_policy {
-    minimum_length = 4
+    minimum_length = 6
     require_lowercase = false
     require_numbers = false
     require_symbols = false
