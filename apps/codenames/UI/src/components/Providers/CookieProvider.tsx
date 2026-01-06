@@ -39,10 +39,10 @@ const removeCookie = (key: string) => {
 }
 
 export const CookieProvider = ({ children }: CookieProviderProps) => {
-    const team = getCookie('team');
-    const role = getCookie('role');
+    const team = getCookie('team') as Team | null;
+    const role = getCookie('role') as Role | null;
     const gameId = getCookie('gameId');
-    const ruleset = getCookie('ruleset');
+    const ruleset = getCookie('ruleset') as Ruleset | null;
 
     const setTeam = (newTeam: Team) => {
         setCookie('team', newTeam);

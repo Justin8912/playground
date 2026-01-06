@@ -83,7 +83,7 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
 
             <Button
                 onClick={lockIn}
-                style={{"visibility": `${(selectedCard !== null) ? "" : "hidden"}`, height: "40px"}}
+                style={{"visibility": (selectedCard !== null) ? "visible" : "hidden", height: "40px"}}
                 id={"submit-selection"}
             >
                 Lock in

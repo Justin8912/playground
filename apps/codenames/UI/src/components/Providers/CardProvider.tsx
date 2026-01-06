@@ -46,7 +46,9 @@ export const CardProvider = ({ children }: CardProviderProps) => {
             const subscription = await client.graphql({
                 query: subscribeUpdatedCard,
                 variables: { id: gameId! },
-            }).subscribe({
+            })
+                // @ts-ignore
+                .subscribe({
                 next: (data) => {
                     console.log("Incoming subscription data: ", data)
                     if (!data || !data?.data?.cardUpdated) {

@@ -15,8 +15,8 @@ interface AppsyncProviderProps {
 }
 
 export const AppsyncProvider = ({ children }: AppsyncProviderProps) => {
-    Amplify.configure({Auth: config.Auth})
-    const client = generateClient(config.API.GraphQL);
+    Amplify.configure({Auth: config.Auth} as any)
+    const client = generateClient(config.API.GraphQL as any);
 
     return (
         <AppsyncContext.Provider value={{ client }}>

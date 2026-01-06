@@ -1,9 +1,9 @@
-import React, {FC, MouseEventHandler, useState} from 'react';
+import React, {FC, useState} from 'react';
 import { Team } from '../gql/graphql';
 import { Role } from '../types/user';
 import { useUser } from './Providers/UserProvider';
 import {Typography} from "@mui/material";
-import {Ruleset} from "../backend/amplify";
+import {Ruleset} from "../gql/graphql";
 
 type TeamSelectorProps = {
     ruleset: Ruleset
