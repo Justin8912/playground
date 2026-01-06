@@ -14,7 +14,6 @@ class DynamoService:
         writeRequests = []
 
         for card in cards:
-            print(card["owner"])
             writeRequests.append({
                 'PutRequest': {
                     'Item': {
