@@ -12,3 +12,17 @@ variable "table" {
     arn  = string
   })
 }
+
+variable "use_cognito_auth" {
+  type = bool
+  default = false
+}
+
+variable "region" {
+  type = string
+}
+
+variable user_pool_id {
+  type = string
+  default = ""
+}
