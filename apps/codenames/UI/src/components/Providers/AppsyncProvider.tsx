@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { Amplify } from 'aws-amplify';
-import config from '../../security/aws-exports.js';
+import {config} from '../../security/cognito_auth'
 import type {V6Client} from "@aws-amplify/api-graphql";
 
 interface GameContextType {
@@ -14,13 +14,9 @@ interface AppsyncProviderProps {
     children: ReactNode;
 }
 
-export function buildAmplifyClient(config: any): V6Client<never, any> {
-    Amplify.configure(config);
-    return generateClient();
-}
-
 export const AppsyncProvider = ({ children }: AppsyncProviderProps) => {
-    const client = buildAmplifyClient(config);
+    Amplify.configure({Auth: config.Auth})
+    const client = generateClient(config.API.GraphQL);
 
     return (
         <AppsyncContext.Provider value={{ client }}>

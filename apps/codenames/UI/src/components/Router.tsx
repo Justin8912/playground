@@ -1,8 +1,19 @@
-import React, {type FC, ReactElement, useState} from "react";
+import React, {type FC, ReactElement, useEffect, useState} from "react";
 import {GameInitializer} from "./GameInitializer";
 import {TeamSelector} from "./TeamSelector";
 import {LoadBoardView} from "./LoadBoardView";
 import {CardProvider, useGame, useUser} from "./Providers/providers";
+import { signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { fetchAuthSession } from "aws-amplify/auth";
+
+function login() {
+    signInWithRedirect();
+}
+
+function logout() {
+    signOut();
+}
+
 
 enum AppState {
     GAME_INIT,
@@ -32,6 +43,17 @@ export const Router: FC = (): ReactElement => {
     const handleTeamSelected = () => {
         setAppState(AppState.BOARD_VIEW);
     };
+
+    useEffect(() => {
+        const handleLogin = async () => {
+            const session = await fetchAuthSession()
+            if (!session.tokens) {
+                login();
+            }
+        }
+
+        handleLogin();
+    }, [])
 
     const CurrentView = () => {
         return (
