@@ -3,17 +3,12 @@ import {GameInitializer} from "./GameInitializer";
 import {TeamSelector} from "./TeamSelector";
 import {LoadBoardView} from "./LoadBoardView";
 import {CardProvider, useGame, useUser} from "./Providers/providers";
-import { signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { signInWithRedirect } from 'aws-amplify/auth';
 import { fetchAuthSession } from "aws-amplify/auth";
 
 function login() {
     signInWithRedirect();
 }
-
-function logout() {
-    signOut();
-}
-
 
 enum AppState {
     GAME_INIT,
@@ -32,7 +27,7 @@ const getAppState = (gameId, role): AppState => {
 }
 
 export const Router: FC = (): ReactElement => {
-    const {gameId} = useGame();
+    const {gameId, ruleset} = useGame();
     const {role} = useUser();
 
     useEffect(() => {
@@ -50,24 +45,15 @@ export const Router: FC = (): ReactElement => {
         return (
             <>
                 {(getAppState(gameId, role) === AppState.GAME_INIT) && (
-                    <>
-                        <button onClick={() => logout()}>Log out</button>
-                        <GameInitializer />
-                    </>
+                    <GameInitializer />
                 )}
                 {(getAppState(gameId, role) === AppState.TEAM_SELECT) && (
-                    <>
-                        <button onClick={() => logout()}>Log out</button>
-                        <TeamSelector />
-                    </>
+                    <TeamSelector ruleset={ruleset} />
                 )}
                 {(getAppState(gameId, role) === AppState.BOARD_VIEW) && (
-                    <>
-                        <button onClick={() => logout()}>Log out</button>
-                        <CardProvider>
-                            <LoadBoardView />
-                        </CardProvider>
-                    </>
+                    <CardProvider>
+                        <LoadBoardView />
+                    </CardProvider>
                 )}
             </>
         )

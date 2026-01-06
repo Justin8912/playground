@@ -6,6 +6,7 @@ import { Ruleset, GetAllGamesQuery, CreateGameMutation } from '../gql/graphql';
 import { useGame } from './Providers/GameProvider';
 import {useAppsync} from "./Providers/AppsyncProvider";
 import { GraphQLResult } from 'aws-amplify/api';
+import { LogoutButton } from './LogoutButton';
 
 
 export const GameInitializer: FC = () => {
@@ -113,6 +114,7 @@ export const GameInitializer: FC = () => {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" gap={4} p={4} maxWidth={800} margin="0 auto">
+      <LogoutButton/>
       <Typography variant="h3">Codenames</Typography>
 
       {activeGames.length > 0 && (

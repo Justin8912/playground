@@ -3,6 +3,7 @@ import {BoardView} from './BoardView';
 import {useCardProvider, useGame, useUser} from './Providers/providers';
 import {Role} from "../types/user";
 import "./LoadBoardView.css"
+import {LogoutButton} from "./LogoutButton";
 
 export const LoadBoardView: FC = () => {
     const {cards} = useCardProvider()
@@ -23,6 +24,7 @@ export const LoadBoardView: FC = () => {
                     </>
             }
                 <button onClick={() => {clearUser(); clearGame();}}>Leave Game</button>
+                <LogoutButton/>
             </div>
             {
                 cards?.length > 0 && <BoardView cards={cards}/>
