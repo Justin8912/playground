@@ -20,7 +20,7 @@ module "appsync" {
   region                    = var.region
 }
 
-module "appsync_iam_auth" {
+module "appsync_cognito_auth" {
   source = "../modules/appsync"
 
   stack_name                = "${var.stack_name}-cognito-auth"
@@ -37,7 +37,7 @@ module "alarms" {
     stack_name    = var.stack_name
     enable_texts  = true
     phone_number  = "+15612718136"
-    appsync_api_id  = module.appsync.api.id
+    appsync_api_id  = module.appsync_cognito_auth.api.id
 }
 
 module "authentication" {
