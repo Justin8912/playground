@@ -1,4 +1,4 @@
-import React, {type FC, ReactElement, useEffect, useState} from "react";
+import React, {type FC, ReactElement, useEffect} from "react";
 import {GameInitializer} from "./GameInitializer";
 import {TeamSelector} from "./TeamSelector";
 import {LoadBoardView} from "./LoadBoardView";
@@ -32,17 +32,8 @@ const getAppState = (gameId, role): AppState => {
 }
 
 export const Router: FC = (): ReactElement => {
-    const [appState, setAppState] = useState<AppState>(AppState.GAME_INIT);
     const {gameId} = useGame();
-    const {role, team} = useUser();
-
-    const handleGameCreated = () => {
-        setAppState(AppState.TEAM_SELECT);
-    };
-
-    const handleTeamSelected = () => {
-        setAppState(AppState.BOARD_VIEW);
-    };
+    const {role} = useUser();
 
     useEffect(() => {
         const handleLogin = async () => {
@@ -59,15 +50,24 @@ export const Router: FC = (): ReactElement => {
         return (
             <>
                 {(getAppState(gameId, role) === AppState.GAME_INIT) && (
-                    <GameInitializer onGameCreated={handleGameCreated} />
+                    <>
+                        <button onClick={() => logout()}>Log out</button>
+                        <GameInitializer />
+                    </>
                 )}
                 {(getAppState(gameId, role) === AppState.TEAM_SELECT) && (
-                    <TeamSelector nextScreen={handleTeamSelected} />
+                    <>
+                        <button onClick={() => logout()}>Log out</button>
+                        <TeamSelector />
+                    </>
                 )}
                 {(getAppState(gameId, role) === AppState.BOARD_VIEW) && (
-                    <CardProvider>
-                        <LoadBoardView />
-                    </CardProvider>
+                    <>
+                        <button onClick={() => logout()}>Log out</button>
+                        <CardProvider>
+                            <LoadBoardView />
+                        </CardProvider>
+                    </>
                 )}
             </>
         )

@@ -7,11 +7,8 @@ import { useGame } from './Providers/GameProvider';
 import {useAppsync} from "./Providers/AppsyncProvider";
 import { GraphQLResult } from 'aws-amplify/api';
 
-export interface GameInitializerProps {
-  onGameCreated: () => void;
-}
 
-export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => {
+export const GameInitializer: FC = () => {
   const [selectedRuleset, setSelectedRuleset] = useState<Ruleset | null>(null);
   const { setGame } = useGame();
   const [createLoading, setCreateLoading] = useState(false);
@@ -74,7 +71,6 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
       if (data?.createGame) {
         setGame(data.createGame.gameId, selectedRuleset);
         await refetchGames();
-        onGameCreated();
       }
     } catch (err) {
       console.error('Failed to create game:', err);
@@ -86,7 +82,6 @@ export const GameInitializer: FC<GameInitializerProps> = ({ onGameCreated }) => 
 
   const handleJoinGame = (gameId: string, ruleset: Ruleset) => {
     setGame(gameId, ruleset);
-    onGameCreated();
   };
 
   const handleDeleteGame = async (gameId: string, event: React.MouseEvent) => {

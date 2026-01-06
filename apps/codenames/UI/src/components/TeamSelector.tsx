@@ -5,7 +5,7 @@ import { useUser } from './Providers/UserProvider';
 import {Typography} from "@mui/material";
 
 
-export const TeamSelector: FC<{nextScreen: MouseEventHandler<HTMLButtonElement>}> = ({nextScreen}) => {
+export const TeamSelector: FC = () => {
   const { team, role, setTeam, setRole } = useUser();
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(team);
   const [selectedRole, setSelectedRole] = useState<Role | null>(role);
@@ -18,7 +18,6 @@ export const TeamSelector: FC<{nextScreen: MouseEventHandler<HTMLButtonElement>}
     if (selectedTeam && selectedRole) {
         setTeam(selectedTeam);
         setRole(selectedRole);
-        nextScreen();
     } else {
         setError("Must select both team and role to proceed.");
     }
