@@ -1,24 +1,27 @@
 {
   "name": "codenames",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "engine": {
+    "node": "^20.19.3",
+    "npm": "^10.8.2"
+  },
   "scripts": {
     "start": "vite --port 3000 --host 0.0.0.0",
     "build": "tsc -b && vite build",
+    "serve": "node server.js",
     "lint": "eslint ",
     "preview": "vite preview",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
-    "@aws-amplify/cli": "^14.2.3",
-    "@aws-amplify/ui-react": "^6.13.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@graphql-codegen/cli": "^6.0.1",
-    "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "aws-amplify": "^6.15.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "graphql": "^16.11.0",
     "js-cookie": "^3.0.5",
     "oidc-client-ts": "^3.4.1",
