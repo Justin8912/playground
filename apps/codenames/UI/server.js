@@ -30,8 +30,8 @@ try {
     httpsOptions.ca = fs.readFileSync(SSL_CA_PATH);
   }
   
-  https.createServer(httpsOptions, app).listen(PORT, HOST, () => {
-    console.log(`✓ HTTPS Server is running on https://${HOST}:${PORT}`);
+  https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`✓ HTTPS Server is running on https://mainframe.iguanodon-matrix.ts.net:${PORT}`);
   });
 } catch (error) {
   console.error('Failed to start HTTPS server:', error.message);
