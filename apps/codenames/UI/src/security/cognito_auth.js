@@ -7,8 +7,8 @@ export const config = {
                 oauth: {
                     domain: "codenames-auth.auth.us-east-1.amazoncognito.com",
                     scopes: ["openid", "email", "profile"],
-                    redirectSignIn: ["http://localhost:3000", "https://mainframe.iguanodon-matrix.ts.net"],
-                    redirectSignOut: ["http://localhost:3000", "https://mainframe.iguanodon-matrix.ts.net"],
+                    redirectSignIn: ["http://localhost:3000", "https://mainframe.iguanodon-matrix.ts.net:3000"],
+                    redirectSignOut: ["http://localhost:3000", "https://mainframe.iguanodon-matrix.ts.net:3000"],
                     responseType: "code"
                 }
             }
