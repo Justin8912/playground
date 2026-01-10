@@ -5,6 +5,7 @@ import React from "react";
 import {createGame} from "../../backend/queries";
 import {useAppsync} from "../Providers/AppsyncProvider";
 import {useGame} from "../Providers/GameProvider";
+import {GraphQLResult} from "aws-amplify/api";
 
 type CreateGameDisplayProps = {
     setCreateLoading: Dispatch<SetStateAction<boolean>>
@@ -30,12 +31,11 @@ export const CreateGameDisplay: FC<CreateGameDisplayProps> = ({setCreateLoading,
             const result = await client.graphql({
                 query: createGame,
                 variables: { ruleSet: selectedRuleset }
-            });
+            }) as GraphQLResult<CreateGameMutation>;
 
-            // @ts-ignore
-            const data = result?.data as unknown as CreateGameMutation;
-            if (data?.createGame) {
-                setGame(data.createGame.gameId, selectedRuleset);
+            const response = result?.data.createGame;
+            if (response) {
+                setGame(response.gameId, selectedRuleset);
                 await refetchGames();
             }
         } catch (err) {

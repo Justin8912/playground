@@ -9,13 +9,14 @@ import { GraphQLResult } from 'aws-amplify/api';
 import { LogoutButton } from './functionalComponents/LogoutButton';
 import {CreateGameDisplay} from "./functionalComponents/CreateGameDisplay";
 import {ListActiveGames} from "./functionalComponents/ListActiveGames";
+import {Game} from "../gql/graphql"
 
 export const GameInitializer: FC = () => {
   const { setGame } = useGame();
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<Error | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [gamesData, setGamesData] = useState<GetAllGamesQuery | null>(null);
+  const [gamesData, setGamesData] = useState<Game[] | null>(null);
   const [gamesLoading, setGamesLoading] = useState(false);
   const [gamesError, setGamesError] = useState<Error | null>(null);
 
@@ -27,8 +28,8 @@ export const GameInitializer: FC = () => {
       try {
         const result = await client.graphql({
           query: getAllGames,
-        }) as GraphQLResult<any>;
-        setGamesData(result.data as GetAllGamesQuery);
+        }) as GraphQLResult<GetAllGamesQuery>;
+        setGamesData(result.data.getAllGames as Game[]);
       } catch (err) {
         console.log(err);
         setGamesError(err instanceof Error ? err : new Error('Failed to fetch games'));
@@ -44,9 +45,8 @@ export const GameInitializer: FC = () => {
     try {
       const result = await client.graphql({
         query: getAllGames
-      });
-      // @ts-ignore
-      setGamesData(result.data as unknown as GetAllGamesQuery);
+      }) as GraphQLResult<GetAllGamesQuery>;
+      setGamesData(result.data.getAllGames as Game[]);
     } catch (err) {
       console.error('Failed to refetch games:', err);
     }
@@ -80,8 +80,7 @@ export const GameInitializer: FC = () => {
   if (createLoading || gamesLoading || deleteLoading) return <CircularProgress />;
   if (createError) return <Typography color="error">Error: {createError.message}</Typography>;
   if (gamesError) return <Typography color="error">Error: {gamesError.message}</Typography>;
-
-  const activeGames = gamesData?.getAllGames || [];
+  const activeGames = gamesData || [];
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" gap={4} p={4} maxWidth={800} margin="0 auto">

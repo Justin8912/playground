@@ -38,7 +38,6 @@ export const BoardView: FC<BoardViewProps> = ({cards}) => {
 
         try {
             await updateCardMutation(client, selectedCard, team);
-            // Clear selected cards after successful mutation
             setSelectedCard(null);
         } catch (error) {
             console.error('Error updating cards:', error);

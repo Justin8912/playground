@@ -1,6 +1,7 @@
 import {Box, Button, Divider, List, ListItem, ListItemText, Paper, Typography} from "@mui/material";
 import React, {FC} from "react";
 import {GetAllGamesQuery} from "../../gql/graphql";
+import { defaultColors } from "../../util/constants";
 
 type ListActiveGamesProps = {
     activeGames: GetAllGamesQuery['getAllGames'],
@@ -25,15 +26,15 @@ export const ListActiveGames: FC<ListActiveGamesProps> =({activeGames, handleJoi
                                 <Box display="flex" gap={1}>
                                     <Button
                                         variant="contained"
-                                        color="primary"
                                         onClick={() => handleJoinGame(game.PartitionKey, game.Ruleset)}
+                                        sx={{backgroundColor: defaultColors.blue}}
                                     >
                                         Join
                                     </Button>
                                     <Button
                                         variant="outlined"
-                                        color="error"
                                         onClick={(e) => handleDeleteGame(game.PartitionKey, e)}
+                                        sx={{color: defaultColors.red, borderColor: defaultColors.red}}
                                     >
                                         Delete
                                     </Button>

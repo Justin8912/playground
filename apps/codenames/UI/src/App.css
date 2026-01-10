@@ -1,3 +1,15 @@
+:root {
+  --default-blue: #1e88e5;
+  --default-dark-blue: #0d47a1;
+  --default-red: #f44336;
+  --default-dark-red: #b71c1c;
+  --default-green-1: #1b5e20;
+  --default-dark-green-1: #134314;
+  --default-green-2: #4caf50;
+  --default-dark-green-2: #2e6a30;
+  --default-gold: #ffb300;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;

@@ -14,13 +14,13 @@
 }
 
 .red {
-    background-color: red !important;
-    border: 1px solid darkred;
+    background-color: var(--default-red) !important;
+    border: 1px solid var(--default-dark-red);
 }
 
 .blue {
-    background-color: blue;
-    border: 1px solid darkblue;
+    background-color: var(--default-blue);
+    border: 1px solid var(--default-dark-blue);
 }
 
 .assassin {
@@ -29,13 +29,13 @@
 }
 
 .green1 {
-    background-color: #004300;
-    border: 1px solid #002700;
+    background-color: var(--default-green-1);
+    border: 1px solid var(--default-dark-green-1);
 }
 
 .green2 {
-    background-color: green;
-    border: 1px solid darkgreen;
+    background-color: var(--default-green-2);
+    border: 1px solid var(--default-dark-green-2);
 }
 
 .bystander {
@@ -44,13 +44,13 @@
 }
 
 .bystander.green1 {
-    background-image: linear-gradient(to bottom, #004300 50%, gray 50%);
+    background-image: linear-gradient(to bottom, var(--default-green-1) 50%, gray 50%);
     border: 1px solid #002700;
 }
 
 .bystander.green2 {
-    background-image: linear-gradient(to bottom, green 50%, gray 50%);
-    border: 1px solid darkgreen;
+    background-image: linear-gradient(to bottom, var(--default-green-2) 50%, gray 50%);
+    border: 1px solid var(--default-dark-green-2);
 }
 
 .revealed {

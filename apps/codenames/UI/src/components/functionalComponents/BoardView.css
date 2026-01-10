@@ -3,7 +3,7 @@
 }
 
 #submit-selection {
-    background-color: green;
+    background-color: var(--default-gold);
     border-radius: 5px;
     color: white;
     width: 100%;

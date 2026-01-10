@@ -2,12 +2,28 @@ import React, {FC, useState} from 'react';
 import { Team } from '../gql/graphql';
 import { Role } from '../types/user';
 import { useUser } from './Providers/UserProvider';
-import {Typography} from "@mui/material";
+import {Box, Button, colors, Typography} from "@mui/material";
 import {Ruleset} from "../gql/graphql";
+import { defaultColors } from '../util/constants';
 
 type TeamSelectorProps = {
     ruleset: Ruleset
 };
+
+const selectedTeamToColor = (team: Team) => {
+    switch(team) {
+        case Team.Blue:
+            return defaultColors.blue;
+        case Team.Red:
+            return defaultColors.red;
+        case Team.Green1:
+            return defaultColors.green1;
+        case Team.Green2:
+            return defaultColors.green2;
+        default:
+            return colors.grey[500];
+    }
+}
 
 export const TeamSelector: FC<TeamSelectorProps> = ({ruleset}) => {
   const { team, role, setTeam, setRole } = useUser();
@@ -28,58 +44,47 @@ export const TeamSelector: FC<TeamSelectorProps> = ({ruleset}) => {
   }
 
   return (
-    <div>
+    <Box>
       <Typography color={'red'}>{error}</Typography>
       <h3>Select Your Team</h3>
-      <div>
+      <Box sx={{display: 'flex', justifyContent: 'center', gap: 1}}>
         {teams.map((t) => (
-          <button
+          <Button
             key={t}
             onClick={() => setSelectedTeam(t)}
             style={{
-              margin: '5px',
-              padding: '10px 20px',
-              backgroundColor: selectedTeam === t ? t : '#f0f0f0',
-              color: selectedTeam === t ? 'white' : 'black',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
+              backgroundColor: selectedTeam === t ? selectedTeamToColor(selectedTeam) : '#f0f0f0',
+              color: selectedTeam === t ? 'white' : 'black'
             }}
+            sx={{textTransform: 'capitalize'}}
           >
             {t}
-          </button>
+          </Button>
         ))}
-      </div>
+      </Box>
 
       <h3>Select Your Role</h3>
-      <div>
+      <Box sx={{display: 'flex', justifyContent: 'center', gap: 1}}>
         {roles.map((r) => (
-          <button
+          <Button
             key={r}
             onClick={() => setSelectedRole(r)}
             style={{
-              margin: '5px',
-              padding: '10px 20px',
-              backgroundColor: selectedRole === r ? selectedTeam : '#f0f0f0',
+              backgroundColor: selectedRole === r ? selectedTeamToColor(selectedTeam) : '#f0f0f0',
               color: selectedRole === r ? 'white' : 'black',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
             }}
+            sx={{textTransform: 'capitalize'}}
           >
             {r}
-          </button>
+          </Button>
         ))}
-      </div>
+      </Box>
 
-      {(team || role) && (
-        <div style={{ marginTop: '20px' }}>
-          {team && <p>Current Team: {team}</p>}
-          {role && <p>Current Role: {role}</p>}
-        </div>
-      )}
-
-    <button onClick={nextButton}>View Board</button>
-    </div>
+    <Button
+        variant='contained'
+        onClick={nextButton}
+        sx={{marginTop: 2}}
+    >View Board</Button>
+    </Box>
   );
 };
