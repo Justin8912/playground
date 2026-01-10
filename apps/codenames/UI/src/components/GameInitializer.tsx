@@ -6,7 +6,7 @@ import { Ruleset, GetAllGamesQuery } from '../gql/graphql';
 import { useGame } from './Providers/GameProvider';
 import {useAppsync} from "./Providers/AppsyncProvider";
 import { GraphQLResult } from 'aws-amplify/api';
-import { LogoutButton } from './LogoutButton';
+import { LogoutButton } from './functionalComponents/LogoutButton';
 import {CreateGameDisplay} from "./functionalComponents/CreateGameDisplay";
 import {ListActiveGames} from "./functionalComponents/ListActiveGames";
 

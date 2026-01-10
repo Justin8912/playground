@@ -1,9 +1,9 @@
 import React, {type FC} from 'react';
-import {BoardView} from './BoardView';
+import {BoardView} from './functionalComponents/BoardView';
 import {useCardProvider, useGame, useUser} from './Providers/providers';
 import {Role} from "../types/user";
 import "./LoadBoardView.css"
-import {LogoutButton} from "./LogoutButton";
+import {LogoutButton} from "./functionalComponents/LogoutButton";
 
 export const LoadBoardView: FC = () => {
     const {cards} = useCardProvider()

@@ -1,9 +1,9 @@
 import React, {FC, MouseEventHandler} from "react";
-import type {Card} from "../types";
-import {useUser} from "./Providers/UserProvider";
+import type {Card} from "../../types";
+import {useUser} from "../Providers/UserProvider";
 import "./CardView.css"
-import {useGame} from "./Providers/GameProvider";
-import {getElementClassesForRuleset} from "../util/cardDisplayBusinessRules";
+import {useGame} from "../Providers/GameProvider";
+import {getElementClassesForRuleset} from "../../util/cardDisplayBusinessRules";
 
 interface RenderCardProps {
     card: Card

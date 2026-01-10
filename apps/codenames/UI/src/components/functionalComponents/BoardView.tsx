@@ -1,13 +1,13 @@
 import React, {type FC, useState} from 'react';
 import {Button, Grid} from '@mui/material';
-import {type Card} from '../types';
+import {type Card} from '../../types';
 import "./BoardView.css";
 import {RenderCard} from "./CardView";
-import {useUser} from "./Providers/UserProvider";
-import {updateCard} from "../backend/queries";
-import { useAppsync } from './Providers/AppsyncProvider';
+import {useUser} from "../Providers/UserProvider";
+import {updateCard} from "../../backend/queries";
+import { useAppsync } from '../Providers/AppsyncProvider';
 import {V6Client} from "@aws-amplify/api-graphql";
-import {useGame} from "./Providers/GameProvider";
+import {useGame} from "../Providers/GameProvider";
 
 interface BoardViewProps {
     cards: Card[];
