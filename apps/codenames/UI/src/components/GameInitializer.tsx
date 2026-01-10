@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { type FC } from 'react';
-import { Button, Box, Typography, CircularProgress, List, ListItem, ListItemText, Divider, Paper } from '@mui/material';
-import { createGame, getAllGames, deleteGame } from '../backend/queries';
-import { Ruleset, GetAllGamesQuery, CreateGameMutation } from '../gql/graphql';
+import { Box, Typography, CircularProgress, Divider } from '@mui/material';
+import { getAllGames, deleteGame } from '../backend/queries';
+import { Ruleset, GetAllGamesQuery } from '../gql/graphql';
 import { useGame } from './Providers/GameProvider';
 import {useAppsync} from "./Providers/AppsyncProvider";
 import { GraphQLResult } from 'aws-amplify/api';
 import { LogoutButton } from './LogoutButton';
-
+import {CreateGameDisplay} from "./functionalComponents/CreateGameDisplay";
+import {ListActiveGames} from "./functionalComponents/ListActiveGames";
 
 export const GameInitializer: FC = () => {
-  const [selectedRuleset, setSelectedRuleset] = useState<Ruleset | null>(null);
   const { setGame } = useGame();
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<Error | null>(null);
@@ -52,35 +52,6 @@ export const GameInitializer: FC = () => {
     }
   };
 
-  const handleRulesetSelect = (ruleset: Ruleset) => {
-    setSelectedRuleset(ruleset);
-  };
-
-  const handleStartGame = async () => {
-    if (!selectedRuleset) return;
-
-    setCreateLoading(true);
-    setCreateError(null);
-    try {
-      const result = await client.graphql({
-        query: createGame,
-        variables: { ruleSet: selectedRuleset }
-      });
-
-      // @ts-ignore
-      const data = result?.data as unknown as CreateGameMutation;
-      if (data?.createGame) {
-        setGame(data.createGame.gameId, selectedRuleset);
-        await refetchGames();
-      }
-    } catch (err) {
-      console.error('Failed to create game:', err);
-      setCreateError(err instanceof Error ? err : new Error('Failed to create game'));
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
   const handleJoinGame = (gameId: string, ruleset: Ruleset) => {
     setGame(gameId, ruleset);
   };
@@ -117,73 +88,19 @@ export const GameInitializer: FC = () => {
       <LogoutButton/>
       <Typography variant="h3">Codenames</Typography>
 
-      {activeGames.length > 0 && (
-        <Paper elevation={3} sx={{ width: '100%', p: 2 }}>
-          <Typography variant="h5" gutterBottom>Active Games</Typography>
-          <List>
-            {activeGames.map((game, index) => (
-              <React.Fragment key={game.PartitionKey}>
-                {index > 0 && <Divider />}
-                <ListItem>
-                  <ListItemText
-                    primary={`Game ${game.PartitionKey}...`}
-                    secondary={`Mode: ${game.Ruleset}`}
-                  />
-                  <Box display="flex" gap={1}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleJoinGame(game.PartitionKey, game.Ruleset)}
-                    >
-                      Join
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={(e) => handleDeleteGame(game.PartitionKey, e)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                </ListItem>
-              </React.Fragment>
-            ))}
-          </List>
-        </Paper>
-      )}
+      <ListActiveGames
+        activeGames={activeGames}
+        handleJoinGame={handleJoinGame}
+        handleDeleteGame={handleDeleteGame}
+      />
 
       <Divider sx={{ width: '100%' }}>OR</Divider>
 
-      <Box display="flex" flexDirection="column" alignItems="center" gap={2} width="100%">
-        <Typography variant="h5">Create New Game</Typography>
-
-        <Box display="flex" gap={2}>
-          <Button
-            variant={selectedRuleset === Ruleset.Multiplayer ? 'contained' : 'outlined'}
-            onClick={() => handleRulesetSelect(Ruleset.Multiplayer)}
-            size="large"
-          >
-            Multiplayer
-          </Button>
-          <Button
-            variant={selectedRuleset === Ruleset.Duos ? 'contained' : 'outlined'}
-            onClick={() => handleRulesetSelect(Ruleset.Duos)}
-            size="large"
-          >
-            Duos
-          </Button>
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleStartGame}
-          disabled={!selectedRuleset}
-          size="large"
-        >
-          Start New Game
-        </Button>
-      </Box>
+      <CreateGameDisplay
+        setCreateLoading={setCreateLoading}
+        setCreateError={setCreateError}
+        refetchGames={refetchGames}
+      />
     </Box>
   );
 };
