@@ -7,6 +7,11 @@ def directory_parser(path:str):
     result = {}
     for show in shows:
         seasons_obj = {}
+        try:
+            if (not os.path.isdir(f'{path}/{show}')): continue
+        except Exception as e:
+            print(f"Error checking directory {path}/{show}: {e}")
+            continue
         seasons = os.listdir(f'{path}/{show}')
         for season in seasons:
             if (not os.path.isdir(f'{path}/{show}/{season}')): continue
