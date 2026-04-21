@@ -16,8 +16,7 @@ class AppConfig:
             "ip": "192.168.1.93",
             "username": "jnste"
         }
-        # self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
-        self.local_path = "D:\\tv"
+        self.local_path = ""
         self.remote_path = "/home/jnste/storage/media/tv"
         self.sshClient = get_server_client(**self.server)
         self.fileTransferService = FileTransferService(self)

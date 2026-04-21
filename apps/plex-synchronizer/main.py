@@ -3,7 +3,6 @@ from appConfig.AppConfig import AppConfig
 import json
 import psutil
 
-
 def transfer_and_execute_script(sshClient, transfer_file_to_remote, path: str):
     transfer_file_to_remote("util/directory_parser.py", f'{path}/../directory_parser.py')
     command = f'python3 {path}/../directory_parser.py {path}'
