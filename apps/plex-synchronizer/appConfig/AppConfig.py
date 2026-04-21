@@ -16,7 +16,8 @@ class AppConfig:
             "ip": "192.168.1.93",
             "username": "jnste"
         }
-        self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
+        # self.local_path = "C:\\Users\\jnste\\OneDrive\\Pictures\\tv"
+        self.local_path = "D:\\tv"
         self.remote_path = "/home/jnste/storage/media/tv"
         self.sshClient = get_server_client(**self.server)
         self.fileTransferService = FileTransferService(self)
@@ -42,3 +43,10 @@ class AppConfig:
 
     def get_directory_comparison_service(self):
         return self.directoryComparisonService
+    
+    def get_partition_directory_path(self, partition):
+        return {
+            "C": "C:\\Users\\jnste\\OneDrive\\Pictures\\tv\\",
+            "D": "D:\\tv\\",
+            "E": "E:\\tv\\",
+        }.get(partition, None)

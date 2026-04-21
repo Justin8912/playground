@@ -1,6 +1,7 @@
 from util.directory_parser import directory_parser
 from appConfig.AppConfig import AppConfig
 import json
+import psutil
 
 
 def transfer_and_execute_script(sshClient, transfer_file_to_remote, path: str):
@@ -21,10 +22,25 @@ def transfer_and_execute_script(sshClient, transfer_file_to_remote, path: str):
 
     return json.loads(result)
 
+def device_selector(devices):
+    devices = list(map(lambda device: device.replace(":\\", ""), devices))
+    device = input(f"From the list of devices ({devices}), please choose which one you would like: ")
+    
+    while device not in devices:
+        print("Invalid device selected: " + device)
+        device = input("Device: ")
+
+    return device
+
 
 def main():
     config = AppConfig()
+    partitions = psutil.disk_partitions()
 
+    devices = list(map(lambda partition: partition.device.replace(":\\", ""), partitions))
+    selected_device = device_selector(devices)
+
+    config.set_local_path(config.get_partition_directory_path(selected_device))
     local_directory_structure = directory_parser(config.get_local_path())
     remote_directory_structure = transfer_and_execute_script(
         config.get_ssh_client(),
