@@ -4,4 +4,10 @@ export const HOME_SERVER = {
     directory: "/home/jnste/storage/media/movies"
 }
 
-export const BASE_MOVIE_DIRECTORY_PATH = "C:\\Users\\jnste\\OneDrive\\Pictures\\Movies\\"
+const DRIVE_TO_DIRECTORY_MAP = {
+    "C": "C:\\Users\\jnste\\OneDrive\\Pictures\\Movies\\"
+};
+
+export const getBaseDirectoryPath = (driveLetter) => {
+    return DRIVE_TO_DIRECTORY_MAP[driveLetter.toUpperCase()] || `${driveLetter}:\\movies\\`;
+}
