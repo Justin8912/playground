@@ -1,0 +1,28 @@
+{
+  "multiplayer": {
+    "teams": [
+      {
+        "name": "Red",
+        "startingCards": 9
+      },
+      {
+        "name": "Blue",
+        "startingCards": 8
+      }
+    ],
+    "assassinCards": 1
+  },
+  "duos": {
+    "teams": [
+      {
+        "name": "Green1",
+        "startingCards": 8
+      },
+      {
+          "name": "Green2",
+          "startingCards": 8
+      }
+    ],
+    "assassinCards": 3
+  }
+}

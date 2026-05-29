@@ -1,0 +1,64 @@
+type Game {
+  PartitionKey: ID!
+  Ruleset: Ruleset!
+  cards: [Card!]!
+}
+
+type Card {
+  PartitionKey: ID!
+  Word: String!
+  Owner: [Team]
+  LastSelectedBy: Team
+  Classification: Classification
+  GameId: ID!
+}
+
+input CardInput {
+  cardId: ID!
+  lastSelectedBy: Team!
+}
+
+type Query {
+  getGame(gameId: ID!): Game!
+  getAllGames: [Game!]!
+}
+
+type CreateGameReturn {
+  status: String!
+  gameId: String
+}
+
+type DeleteGameReturn {
+  status: String!
+  message: String
+}
+
+type Mutation {
+  createGame(ruleset: Ruleset!): CreateGameReturn!
+  updateCard(cardInput: CardInput!): Card!
+  deleteGame(gameId: ID!): DeleteGameReturn!
+}
+
+type Subscription {
+  cardUpdated(GameId: ID!): Card
+  @aws_subscribe(mutations: ["updateCard"])
+}
+
+enum Team {
+  Blue
+  Red
+  Green1
+  Green2
+  None
+}
+
+enum Ruleset {
+  duos
+  multiplayer
+}
+
+enum Classification {
+ Assassin,
+ Bystander,
+ Clue
+}

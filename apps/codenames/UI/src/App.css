@@ -1,0 +1,50 @@
+:root {
+  --default-blue: #1e88e5;
+  --default-dark-blue: #0d47a1;
+  --default-red: #f44336;
+  --default-dark-red: #b71c1c;
+  --default-green-1: #1b5e20;
+  --default-dark-green-1: #134314;
+  --default-green-2: #4caf50;
+  --default-dark-green-2: #2e6a30;
+  --default-gold: #ffb300;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.read-the-docs {
+  color: #888;
+}
