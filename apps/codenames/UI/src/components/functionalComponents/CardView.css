@@ -1,0 +1,60 @@
+.card {
+    flex: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    border: 1px solid #ccb20a;
+    padding: 0;
+    text-align: center;
+    aspect-ratio: 2.5 / 1;
+    width: 100px;
+    border-radius: 5px;
+    background-color: #ccba45;
+    text-transform: capitalize;
+}
+
+.red {
+    background-color: var(--default-red) !important;
+    border: 1px solid var(--default-dark-red);
+}
+
+.blue {
+    background-color: var(--default-blue);
+    border: 1px solid var(--default-dark-blue);
+}
+
+.assassin {
+    background-color: #232323;
+    border: 1px solid #121212;
+}
+
+.green1 {
+    background-color: var(--default-green-1);
+    border: 1px solid var(--default-dark-green-1);
+}
+
+.green2 {
+    background-color: var(--default-green-2);
+    border: 1px solid var(--default-dark-green-2);
+}
+
+.bystander {
+    background-color: gray;
+    border: 1px solid darkgray;
+}
+
+.bystander.green1 {
+    background-image: linear-gradient(to bottom, var(--default-green-1) 50%, gray 50%);
+    border: 1px solid #002700;
+}
+
+.bystander.green2 {
+    background-image: linear-gradient(to bottom, var(--default-green-2) 50%, gray 50%);
+    border: 1px solid var(--default-dark-green-2);
+}
+
+.revealed {
+    background-color: purple;
+    border: 1px solid #750075;
+}
+

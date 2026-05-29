@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "build",
+    "lib": [
+      "es2023",
+      "dom"
+    ],
+    "target": "es2022",
+    "module": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "./test/**/*"
+  ]
+}
