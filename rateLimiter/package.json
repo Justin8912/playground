@@ -1,0 +1,29 @@
+{
+  "name": "tokenbucket",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:redis": "docker compose up",
+    "start:api": "RATE_LIMITER=TOKEN_BUCKET npx tsx src/app.ts",
+    "test:lua": "docker exec -i ratelimiter-cache-1 redis-cli EVAL \"$(cat ./src/database/rateLimiter.lua)\" 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@types/redis": "^4.0.10",
+    "express": "^5.2.1",
+    "redis": "^5.10.0"
+  }
+}

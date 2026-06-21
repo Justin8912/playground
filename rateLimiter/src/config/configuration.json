@@ -1,0 +1,7 @@
+{
+  "rateLimiterAlgorithm": "LEAKY_BUCKET",
+  "redisPort": 6379,
+  "bucketCapacity": 5,
+  "refillAmount": 1,
+  "refillIntervalMs": 60000
+}
